@@ -14,6 +14,10 @@
 	\author J. Anton
 	\date Tue Aug 22 21:22:34 2006
 	\version 1.1.0
+	
+	\section dl_list Double linked list.
+	These lists have a head node and a tail node. Each node is linked to the
+	next node and to the previous node. \n Functions: \b dl_list_*
 */
 
 #ifndef KU__LIST_H__
@@ -45,13 +49,6 @@ struct STRUCT_LIST
 		*head,		//!< Head node.
 		*tail;		//!< Tail node.
 }	list_t;
-
-/*!
-	\defgroup dl_list Double linked list.
-	These lists have a head node and a tail node. Each node is linked to the
-	next node and to the previous node.
-	\{
-*/
 
 //! Create a double linked list instance.
 /*!
@@ -268,10 +265,6 @@ kucode_t dl_list_move_last( list_t *list );
 	\note It may be deleted less than \a cnt elements if end of list is found.
 */
 kucode_t dl_list_delete_n( list_t *list, uint cnt, ku_act_f freef );
-
-/*!
-	\}
-*/
 
 #ifdef __cplusplus
 }

@@ -20,11 +20,11 @@
 extern "C" {
 #endif
 
-#include <linux/types.h>
+#include <sys/types.h>
 
 //! 32 bit flags.
 typedef
-uint32_t ku_flag32_t;
+u_int32_t ku_flag32_t;
 
 //! Comparing function.
 /*!

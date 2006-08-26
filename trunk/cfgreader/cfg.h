@@ -6,6 +6,16 @@
  *  kane@mail.berlios.de
  ****************************************************************************/
 
+/*!
+	\file
+	\brief Config file reader.
+	
+	The realization of config file reader.
+	\author J. Anton
+	\date Sat Aug 26 21:04:19 2006
+	\version 1.1.0
+*/
+
 #ifndef KU__CFG_H__
 #define KU__CFG_H__
 #ifdef __cplusplus
@@ -13,55 +23,85 @@ extern "C" {
 #endif
 
 #include "ku2/ecode.h"
+#include "ku2/types.h"
 
+//! Line buffer, maximum line length, can be read.
 #define CFG_BUFFER 2048
 
-/*
-	Один запрос
-*/
-typedef
-struct
+//! Flags for cfg_process().
+enum CFG_FLAGS
 {
-	char *id;
-	char *fmt;
-	void **ptr;
+	CFG_ZFL = 0,	//!< Zero flag.
+	CFG_STRICT = 1	//!< Config file cannot content labels, which are not queried.
+};
+
+//! Query.
+typedef
+struct CFG_QUERY_STRUCT
+{
+	char *id;		//!< Config label.
+	char *fmt;		//!< Data format.
+	void **ptr;		//!< Data.
 }	cfg_query_t;
 
-/*
-	секущая строчка
-*/
+//! Current line in config file.
 extern int cfg_line;
 
-/*
-	Открыть файл
+//! Open a config file.
+/*!
+	Opens a config file and creates a query tree.
+	\param file Config file.
+	\retval KE_NONE No error.
+	\retval KE_DOUBLE Config file is already openned.
+	\retval KE_IO Failed to open a file.
+	\retval KE_* abtree_create() errors.
+	\sa cfg_close().
 */
-kucode_t cfg_open( char *file );
+kucode_t cfg_open( const char *file );
 
-/*
-	Закрыть файл
+//! Close a config file.
+/*!
+	Closed a config file.
+	\retval KE_NONE No error.
+	\retval KE_EMPTY No config file were openned by cfg_open().
+	\sa cfg_open().
 */
 kucode_t cfg_close( void );
 
-/*
-	Добавить запрос
-	Формат:
-		i: int
-		f: double
-		s: char* (string)
-		b: int (boolean 1/0)
-	... указываются указатели на переменные, этот
-	модуль переменные не создаёт, а работает с существующими
+//! Add a config query.
+/*!
+	Adds a config query to the tree.
+	\param id Config label.
+	\param fmt Data format. \n
+	\b 'i' stands for \e int, \n
+	\b 'f' stands for \e double, \n
+	\b 's' stands for \e char* (string), \n
+	\b 'b' stands for \e boolean \e int (0/1).
+	\param ... Pointers to the variables, where data will be written.
+	\retval KE_NONE No error.
+	\retval KE_MEMORY Memory allocation error.
+	\retval KE_* abtree_ins() errors.
+	\sa cfg_process().
 */
-kucode_t cfg_query( char *id, char *fmt, ... );
+kucode_t cfg_query( const char *id, const char *fmt, ... );
 
-/*
-	Выполнить запросы
-	ВНИМАНИЕ!!
-		при чтении запроса, в котором есть строки,
-		НЕ проверяется размер строки назначения, но известно,
-		что эта строка не может быть больше CFG_BUFFER символов
+//! Read a config file and get data.
+/*!
+	Reads a config file and get data, according to the queries.
+	\param flags Flags (\ref CFG_FLAGS).
+	\retval KE_NONE No error.
+	\retval KE_SYNTAX Syntax error.
+	\retval KE_NOTFOUND Label in the file does not match any query.
+	\warning Function does not allocate memory for the variables, it supposes
+	that memory pointed to by a query is already allocated. Function does not
+	check the extern buffer size for a string, but it is known that output
+	string cannot be larger than \ref CFG_BUFFER bytes.
+	\note \ref cfg_line is set to the last line read (error line).
+	\sa cfg_query().
 */
-kucode_t cfg_process( void );
+kucode_t cfg_process( ku_flag32_t flags );
 
-#include "errors/close_code.h"
+#ifdef __cplusplus
+}
+#endif
 #endif
