@@ -1,0 +1,50 @@
+#
+#	SConstruct file for Kane Utilities 2
+#
+#	Fri Apr  7 17:16:57 2006
+#		J. Anton, Copyright 2006
+#
+
+baseenv=Environment(CPPPATH=".")
+env=baseenv.Copy(
+	CCFLAGS="-Wall"
+	)
+
+mode=ARGUMENTS.get("mode","debug")
+if mode=="debug":
+	env.Append(CCFLAGS=" -g -DDEBUG")
+	debug=ARGUMENTS.get("debug","memory,func,log")
+	if "memory" in debug:
+		env.Append(CCFLAGS=" -DDEBUG_MEMORY")
+	if "func" in debug:
+		env.Append(CCFLAGS=" -DDEBUG_FUNC")
+	if "log" in debug:
+		env.Append(CCFLAGS=" -DDEBUG_LOG")
+elif mode=="release":
+	env.Append(CCFLAGS=" -O3 -march=pentium4")
+	env.Append(LINKFLAGS=" -s")
+	debug=""
+else:
+	print "Invalid mode ( debug|release )"
+	sys.exit()
+
+use=ARGUMENTS.get("use","gettext")
+if "gettext" in use:
+	env.Append(CCFLAGS=" -DUSE_GETTEXT")
+
+sources = Split("""
+	ku2/ku2.c
+	log/log.c
+	other/other.c
+	list/dl_list.c
+	abtree/abtree.c
+	cfgreader/cfg.c
+	""")
+#	dialogue/dialogue.c
+#	cfgreader/tree_cfg.c
+#	resmanager/res.c
+#	resmanager/tree_name_res.c
+#	resmanager/tree_id_res.c
+#	""")
+
+Default(env.Library("ku2", sources))
