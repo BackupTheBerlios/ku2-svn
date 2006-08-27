@@ -5,32 +5,52 @@
 #		J. Anton, Copyright 2006
 #
 
-baseenv=Environment(CPPPATH=".")
-env=baseenv.Copy(
-	CCFLAGS="-Wall"
-	)
+env = Environment(CPPPATH=".", CCFLAGS="-Wall")
 
-mode=ARGUMENTS.get("mode","debug")
-if mode=="debug":
-	env.Append(CCFLAGS=" -g -DDEBUG")
-	debug=ARGUMENTS.get("debug","memory,func,log")
+conf = Configure(env)
+if not conf.CheckCHeader("ctype.h"):
+	sys.exit()	
+if not conf.CheckCHeader("dirent.h"):
+	sys.exit()
+if not conf.CheckCHeader("errno.h"):
+	sys.exit()
+if not conf.CheckCHeader("libintl.h"):
+	env.Append(CPPDEFINES = ["NO_GETTEXT"])
+if not conf.CheckCHeader("stdarg.h"):
+	sys.exit()
+if not conf.CheckCHeader("stdint.h"):
+	sys.exit()
+if not conf.CheckCHeader("stdio.h"):
+	sys.exit()
+if not conf.CheckCHeader("stdlib.h"):
+	sys.exit()
+if not conf.CheckCHeader("string.h"):
+	sys.exit()
+if not conf.CheckCHeader("time.h"):
+	sys.exit()
+env = conf.Finish()
+
+mode = ARGUMENTS.get("mode", "debug")
+if mode == "debug":
+	env.Append(CCFLAGS = " -g", CPPDEFINES = ["DEBUG"])
+	debug = ARGUMENTS.get("debug", "memory,func,log")
 	if "memory" in debug:
-		env.Append(CCFLAGS=" -DDEBUG_MEMORY")
+		env.Append(CPPDEFINES = ["DEBUG_MEMORY"])
 	if "func" in debug:
-		env.Append(CCFLAGS=" -DDEBUG_FUNC")
+		env.Append(CPPDEFINES = ["DEBUG_FUNC"])
 	if "log" in debug:
-		env.Append(CCFLAGS=" -DDEBUG_LOG")
-elif mode=="release":
-	env.Append(CCFLAGS=" -O3 -march=pentium4")
-	env.Append(LINKFLAGS=" -s")
-	debug=""
+		env.Append(CPPDEFINES = ["DEBUG_LOG"])
+elif mode == "release":
+	env.Append(CCFLAGS = " -O3 -march=pentium4")
+	env.Append(LINKFLAGS = " -s")
+	debug = ""
 else:
 	print "Invalid mode ( debug|release )"
-	sys.exit()
+	Exit()
 
-use=ARGUMENTS.get("use","gettext")
+use = ARGUMENTS.get("use", "gettext")
 if "gettext" in use:
-	env.Append(CCFLAGS=" -DUSE_GETTEXT")
+	env.Append(CPPDEFINES = ["USE_GETTEXT"])
 
 sources = Split("""
 	ku2/ku2.c
@@ -47,4 +67,6 @@ sources = Split("""
 #	resmanager/tree_id_res.c
 #	""")
 
-Default(env.Library("ku2", sources))
+ku2lib = env.Library("ku2", sources)
+
+Default(ku2lib)

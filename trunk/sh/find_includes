@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for ff in `find . -name "*.h"` `find . -name "*.c"`; \
+	do cat $ff | grep '#include <' >> includes; done \
+	&& sort includes | uniq | sed s/"#include <"// | sed s/">"// \
+	&& rm  includes

@@ -20,11 +20,15 @@
 extern "C" {
 #endif
 
-#include <sys/types.h>
+#include <stdint.h>
+
+//! Unsigned integer.
+typedef
+unsigned int uint;
 
 //! 32 bit flags.
 typedef
-u_int32_t ku_flag32_t;
+uint32_t ku_flag32_t;
 
 //! Comparing function.
 /*!
