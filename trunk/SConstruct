@@ -5,34 +5,48 @@
 #		J. Anton, Copyright 2006
 #
 
-env = Environment(CPPPATH=".", CCFLAGS="-Wall")
+env = Environment(CPPPATH=".")
+
+if env["PLATFORM"] == "win32":
+	env.Append(CCFLAGS = ["/W3", "/MD", "/Wp64"], CPPDEFINES = ["_CRT_SECURE_NO_DEPRECATE", "WIN32"])
+	debug_ccflags = ["/ZI"]
+	release_ccflags = ["/O2"]
+	release_linkflags = [""]
+elif env["PLATFORM"] == "posix":
+	env.Allend(CCFLAGS = ["-Wall"])
+	debug_ccflags = ["-g"]
+	release_ccflags = ["-O2"]
+	release_linkflags = ["-s"]
+else:
+	print "Unsupported platform: " + env["PLATFORM"]
+	Exit()
 
 conf = Configure(env)
 if not conf.CheckCHeader("ctype.h"):
-	sys.exit()	
-if not conf.CheckCHeader("dirent.h"):
-	sys.exit()
+	Exit()	
 if not conf.CheckCHeader("errno.h"):
-	sys.exit()
+	Exit()
 if not conf.CheckCHeader("libintl.h"):
-	env.Append(CPPDEFINES = ["NO_GETTEXT"])
+	env.Append(CPPDEFINES = ["NO_LIBINTL_H"])
 if not conf.CheckCHeader("stdarg.h"):
-	sys.exit()
+	Exit()
 if not conf.CheckCHeader("stdint.h"):
-	sys.exit()
+	env.Append(CPPDEFINES = ["NO_STDINT_H"])
+	if not conf.CheckCHeader("inttypes.h"):
+		env.Append(CPPDEFINES = ["NO_INTTYPES_H"])
 if not conf.CheckCHeader("stdio.h"):
-	sys.exit()
+	Exit()
 if not conf.CheckCHeader("stdlib.h"):
-	sys.exit()
+	Exit()
 if not conf.CheckCHeader("string.h"):
-	sys.exit()
+	Exit()
 if not conf.CheckCHeader("time.h"):
-	sys.exit()
+	Exit()
 env = conf.Finish()
 
 mode = ARGUMENTS.get("mode", "debug")
 if mode == "debug":
-	env.Append(CCFLAGS = " -g", CPPDEFINES = ["DEBUG"])
+	env.Append(CCFLAGS = debug_ccflags, CPPDEFINES = ["DEBUG"])
 	debug = ARGUMENTS.get("debug", "memory,func,log")
 	if "memory" in debug:
 		env.Append(CPPDEFINES = ["DEBUG_MEMORY"])
@@ -41,8 +55,8 @@ if mode == "debug":
 	if "log" in debug:
 		env.Append(CPPDEFINES = ["DEBUG_LOG"])
 elif mode == "release":
-	env.Append(CCFLAGS = " -O3 -march=pentium4")
-	env.Append(LINKFLAGS = " -s")
+	env.Append(CCFLAGS = release_ccflags)
+	env.Append(LINKFLAGS = release_linkflags)
 	debug = ""
 else:
 	print "Invalid mode ( debug|release )"
@@ -60,12 +74,6 @@ sources = Split("""
 	abtree/abtree.c
 	cfgreader/cfg.c
 	""")
-#	dialogue/dialogue.c
-#	cfgreader/tree_cfg.c
-#	resmanager/res.c
-#	resmanager/tree_name_res.c
-#	resmanager/tree_id_res.c
-#	""")
 
 ku2lib = env.Library("ku2", sources)
 

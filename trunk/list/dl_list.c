@@ -8,6 +8,7 @@
 
 #include "list.h"
 #include "ku2/debug.h"
+#include "ku2/memory.h"
 #include "ku2/ecode.h"
 
 list_t *dl_list_create( ku_comp_f func, ku_flag32_t flags )

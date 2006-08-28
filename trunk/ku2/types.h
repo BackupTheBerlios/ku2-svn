@@ -20,7 +20,35 @@
 extern "C" {
 #endif
 
+#if !defined(NO_STDINT_H)
 #include <stdint.h>
+
+#elif !defined(NO_INTTYPES_H)
+#include <inttypes.h>
+
+#else	// No integer types
+#ifdef WIN32
+//! Integer type definitions for VC++.
+/*!
+	Integer types for VC++.
+	\{
+*/
+typedef __int8 int8_t;
+typedef __int16 int16_t;
+typedef __int32 int32_t;
+typedef __int64 int64_t;
+typedef unsigned __int8 uint8_t;
+typedef unsigned __int16 uint16_t;
+typedef unsigned __int32 uint32_t;
+typedef unsigned __int64 uint64_t;
+/*!
+	\}
+*/
+#else	// WIN32
+	#error No integer types was found.
+#endif	// WIN32
+
+#endif	// No integer types
 
 //! Unsigned integer.
 typedef

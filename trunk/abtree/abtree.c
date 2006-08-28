@@ -8,6 +8,7 @@
 
 #include "abtree.h"
 #include "ku2/debug.h"
+#include "ku2/memory.h"
 #include "ku2/ecode.h"
 #include "other/other.h"
 

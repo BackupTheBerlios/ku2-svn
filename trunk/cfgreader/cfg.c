@@ -15,6 +15,7 @@
 #include "cfg.h"
 #include "ku2/ecode.h"
 #include "ku2/debug.h"
+#include "ku2/memory.h"
 #include "abtree/abtree.h"
 
 FILE *cfgf = NULL;

@@ -9,13 +9,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <libintl.h>
 #include <time.h>
 #include <stdarg.h>
 
 #include "log.h"
 #include "ku2/ecode.h"
 #include "ku2/debug.h"
+#include "ku2/gettext.h"
 
 FILE *logstream;
 

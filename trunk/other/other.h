@@ -73,11 +73,6 @@ char *vstr( const char *fmt, ... );
 */
 void qdir( char *path );
 
-/*
-	qdir + проверка существования директории
-*/
-int qdir2( char *path );
-
 #ifdef __cplusplus
 }
 #endif
