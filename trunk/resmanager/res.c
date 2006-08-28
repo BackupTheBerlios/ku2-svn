@@ -48,12 +48,12 @@ static res_t *res_search( const char *name )
 
 static int res_cmpf( void *res1, void *res2 )
 {
-	return 0;
+	return strcmp(((res_t*)res1)->name, ((res_t*)res2)->name);
 }
 
 static int res_type_cmpf( void *rtype1, void *rtype2 )
 {
-	return 0;
+	return ((restype_t*)rtype1)->type-((restype_t*)rtype2)->type;
 }
 
 static int res_freef( void *res )
