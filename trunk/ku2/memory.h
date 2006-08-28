@@ -24,7 +24,7 @@ extern "C" {
 
 #ifdef DEBUG
 
-void *malloc_debug( int size );
+void *malloc_debug( size_t size );
 void free_debug( void *__ptr );
 
 #define pdebug( m, ... ) \

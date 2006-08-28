@@ -37,7 +37,7 @@ enum CFG_FLAGS
 
 //! Query.
 typedef
-struct CFG_QUERY_STRUCT
+struct STRUCT_CFG_QUERY
 {
 	char *id;		//!< Config label.
 	char *fmt;		//!< Data format.

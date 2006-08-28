@@ -73,6 +73,7 @@ sources = Split("""
 	list/dl_list.c
 	abtree/abtree.c
 	cfgreader/cfg.c
+	resmanager/res.c
 	""")
 
 ku2lib = env.Library("ku2", sources)

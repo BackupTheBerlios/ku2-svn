@@ -66,6 +66,7 @@ uint32_t ku_flag32_t;
 	\retval >0 First data are more than the second ones.
 	\retval 0 Data are equal.
 	\retval <0 First data are less than the second ones.
+	\note \ref kucode should not be changed.
 */
 typedef
 int (*ku_comp_f)( void *a, void *b );
@@ -75,6 +76,7 @@ int (*ku_comp_f)( void *a, void *b );
 	This function type is used to perform some action on \e data.
 	\param data Data pointer.
 	\return Depends on the context.
+	\note \ref kucode should not be changed.
 */
 typedef
 int (*ku_act_f)( void *data );

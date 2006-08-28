@@ -37,7 +37,8 @@ enum
 	KE_DOUBLE,		//!< Data already exists.
 	KE_IO,			//!< Input/Output error.
 	KE_SYNTAX,		//!< Syntax error.
-	KE_EXTERNAL		//!< External error.
+	KE_EXTERNAL,	//!< External error.
+	KE_INVALID		//!< Invalid data.
 }	kucode_t;
 
 //! Contains code of the last error.
