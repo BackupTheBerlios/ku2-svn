@@ -62,7 +62,6 @@ enum
 	*/
 	GFX_IMG_PIECE,
 	
-	
 	//! Image mode.
 	/*!
 		Selected area of the source image will be drawn
@@ -142,14 +141,16 @@ kucode_t gfx_create_window( int width, int height, int bpp, int fullscreen, \
 kucode_t gfx_draw( const SDL_Surface *src, SDL_Surface *dst, gfx_imgmode_t mode, \
 				  int x, int y, int _x, int _y, int _w, int _h );
 
-/*
-	1.	Создать изображение с надписью
-	2.	text - текст
-		font - шрифт
-		style - стиль шрифта
-		colour - цвет шрифта
-	3.	Холст с изображением или NULL в случае ошибки
-	4.	E_SDL - ошибка функций SDL
+//! Render the text.
+/*!
+	Renders the text.
+	\param text Text to be rendered.
+	\param font Font to render with.
+	\param style Font style (see SDL_ttf.h).
+	\param colour Text colour.
+	\return Rendered surface, or \e NULL if there was an error and
+	\ref kucode is set to the valid value: \n
+	\a KE_EXTERNAL: \b TTF_RenderUTF8_Blended() has failed.
 */
 SDL_Surface *gfx_txtrender ( const char *text, const TTF_Font *font, gfx_txtstyle_t style, SDL_Color colour );
 

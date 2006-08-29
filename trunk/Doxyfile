@@ -1,4 +1,4 @@
-# Doxyfile 1.4.6
+k# Doxyfile 1.4.6
 
 # This file describes the settings to be used by the documentation system
 # doxygen (www.doxygen.org) for a project
@@ -459,7 +459,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = ku2 log other list abtree cfgreader resmanager gui/gfx
+INPUT                  = ku2 log other list abtree cfgreader resmanager mm/gfx
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 

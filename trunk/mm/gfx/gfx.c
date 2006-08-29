@@ -169,17 +169,17 @@ kucode_t gfx_draw( const SDL_Surface *src, SDL_Surface *dst, gfx_imgmode_t mode,
 	return KE_NONE;
 }
 
-#if 0
 SDL_Surface *gfx_txtrender ( const char *text, const TTF_Font *font, gfx_txtstyle_t style, SDL_Color colour )
 {
 	SDL_Surface *txtface;
 	pstart();
 	
-	TTF_SetFontStyle((TTF_Font*)font,style);
-	txtface=TTF_RenderUTF8_Blended((TTF_Font*)font,text,colour);
-	if ( txtface==NULL )
+	TTF_SetFontStyle((TTF_Font*)font, style);
+	txtface = TTF_RenderUTF8_Blended((TTF_Font*)font, text, colour);
+	if ( txtface == NULL )
 	{
-		SET_ERROR(E_SDL,vstr(gettext("Error while rendering text: %s"),TTF_GetError()));
+		plog(gettext("Error while rendering text: %s\n"), TTF_GetError());
+		kucode = KE_EXTERNAL;
 		return NULL;
 	}
 	
@@ -187,6 +187,7 @@ SDL_Surface *gfx_txtrender ( const char *text, const TTF_Font *font, gfx_txtstyl
 	return txtface;
 }
 
+#if 0
 ecode_t gfx_print( const char *text, const TTF_Font *font, SDL_Surface *dst, gfx_txtstyle_t style, \
 		SDL_Color colour, int x, int y, int _x, int _y, int _w, int _h )
 {

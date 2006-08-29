@@ -97,23 +97,23 @@ sources = Split("""
 ku2lib = env.Library("ku2", sources)
 
 ###
-#	Kane Utilities 2 SDL GUI
+#	Kane Utilities 2 SDL GUI and multimedia
 ###	
-gui_sources = Split("""
-	gui/gfx/gfx.c
+mm_sources = Split("""
+	mm/gfx/gfx.c
 	""")
 
-env4gui = env.Copy()
-env4gui.Append(CPPPATH = sdl_includes)
+env4mm = env.Copy()
+env4mm.Append(CPPPATH = sdl_includes)
 
-ku2gui = env4gui.Library("ku2gui", gui_sources)
+ku2mm = env4mm.Library("ku2mm", mm_sources)
 
 ###
 #	Getting list of modules to build
 ###
-build = ARGUMENTS.get("build", "core,gui")
+build = ARGUMENTS.get("build", "core,mm")
 notbuild = ARGUMENTS.get("notbuild", "")
 if "core" in build and not "core" in notbuild:
 	Default(ku2lib)
-if "gui" in build and not "gui" in notbuild:
-	Default(ku2gui)
+if "mm" in build and not "mm" in notbuild:
+	Default(ku2mm)
