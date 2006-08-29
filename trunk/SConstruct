@@ -5,22 +5,30 @@
 #		J. Anton, Copyright 2006
 #
 
-env = Environment(CPPPATH=".")
+env = Environment(CPPPATH = ["."])
 
+###
+#	Platform depended variables and actions
+###
 if env["PLATFORM"] == "win32":
 	env.Append(CCFLAGS = ["/W3", "/MD", "/Wp64"], CPPDEFINES = ["_CRT_SECURE_NO_DEPRECATE", "WIN32"])
 	debug_ccflags = ["/ZI"]
 	release_ccflags = ["/O2"]
 	release_linkflags = [""]
+	sdl_includes = ["D:\devel\Microsoft Visual Studio 8\VC\include\SDL"]
 elif env["PLATFORM"] == "posix":
-	env.Allend(CCFLAGS = ["-Wall"])
+	env.Append(CCFLAGS = ["-Wall"])
 	debug_ccflags = ["-g"]
 	release_ccflags = ["-O2"]
 	release_linkflags = ["-s"]
+	sdl_includes = ["/usr/include/SDL"]
 else:
 	print "Unsupported platform: " + env["PLATFORM"]
 	Exit()
 
+###
+#	Checking header files
+###
 conf = Configure(env)
 if not conf.CheckCHeader("ctype.h"):
 	Exit()	
@@ -44,6 +52,9 @@ if not conf.CheckCHeader("time.h"):
 	Exit()
 env = conf.Finish()
 
+###
+#	Getting building mode
+###
 mode = ARGUMENTS.get("mode", "debug")
 if mode == "debug":
 	env.Append(CCFLAGS = debug_ccflags, CPPDEFINES = ["DEBUG"])
@@ -62,10 +73,17 @@ else:
 	print "Invalid mode ( debug|release )"
 	Exit()
 
+###
+#	Getting list of add-ons to build with.
+###
 use = ARGUMENTS.get("use", "gettext")
-if "gettext" in use:
+notuse = ARGUMENTS.get("notuse", "")
+if "gettext" in use and not "gettext" in notuse:
 	env.Append(CPPDEFINES = ["USE_GETTEXT"])
 
+###
+#	Kane Utilities 2
+###
 sources = Split("""
 	ku2/ku2.c
 	log/log.c
@@ -78,4 +96,24 @@ sources = Split("""
 
 ku2lib = env.Library("ku2", sources)
 
-Default(ku2lib)
+###
+#	Kane Utilities 2 SDL GUI
+###	
+gui_sources = Split("""
+	gui/gfx/gfx.c
+	""")
+
+env4gui = env.Copy()
+env4gui.Append(CPPPATH = sdl_includes)
+
+ku2gui = env4gui.Library("ku2gui", gui_sources)
+
+###
+#	Getting list of modules to build
+###
+build = ARGUMENTS.get("build", "core,gui")
+notbuild = ARGUMENTS.get("notbuild", "")
+if "core" in build and not "core" in notbuild:
+	Default(ku2lib)
+if "gui" in build and not "gui" in notbuild:
+	Default(ku2gui)

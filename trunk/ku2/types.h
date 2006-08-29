@@ -26,7 +26,7 @@ extern "C" {
 #elif !defined(NO_INTTYPES_H)
 #include <inttypes.h>
 
-#else	// No integer types
+#elif !defined(DO_NOT_NEED_INTTYPES)
 #ifdef WIN32
 //! Integer type definitions for VC++.
 /*!

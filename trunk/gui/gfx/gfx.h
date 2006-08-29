@@ -6,125 +6,141 @@
  *  kane@mail.berlios.de
  ****************************************************************************/
 
-#ifndef __GFX_H__
-#define __GFX_H__
+/*!
+	\file
+	\brief SDL multimedia routines.
+	
+	Functions for basic multimedia operations.
+	\author J. Anton
+	\date Mon Aug 28 16:15:28 2006
+	\version 1.1.0
+*/
+
+#ifndef KU__GFX_H__
+#define KU__GFX_H__
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "SDL.h"
 #include "SDL_ttf.h"
-#include "errors.h"
-#include "ku2/resmanager/res.h"
 
-/*
-	Режим экрана
-*/
+#include "ku2/ecode.h"
+#include "resmanager/res.h"
+
+//! Screen mode.
 typedef
 enum
 {
-	GFX_SOFTWARE,
-	GFX_HARDWARE
+	GFX_SOFTWARE,	//!< Software screen.
+	GFX_HARDWARE	//!< Hardware screen.
 }	gfx_mode_t;
 
-/*
-	Выравнивание текста
-*/
+//! Text alligment.
 typedef
 enum
 {
-	GFX_ALLIG_LEFT,
+	GFX_ALLIG_LEFT,	//!< By left side.
 	GFX_ALLIG_MIDDLE,
-	GFX_ALLIG_RIGHT
+					//!< By middle.
+	GFX_ALLIG_RIGHT	//!< By right side.
 }	gfx_txtallig_t;
 
-/*typedef
-enum
-{
-	GFX_TEXT_ONELINE,
-	GFX_TEXT_MULTILINE
-}	gfx_txtmode_t;*/
-
-/*
-	Стиль текста, B.U.I.
-*/
+//! Text style (bold, underlined or italics).
 typedef
 int gfx_txtstyle_t;
 
-/*
-	Режим рисования
-*/
+//! Drawing mode.
 typedef
 enum
 {
-	/*
-		указанный кусок будет выводиться в
-		указанных координатах (для спрайтов)
+	//! Sprite mode.
+	/*!
+		Selected area of the source image will be drawn
+		at \a x and \a y coordinates in the destination
+		image.
 	*/
 	GFX_IMG_PIECE,
 	
-	/*
-		будет выводиться часть изображения в том
-		месте, где бы оно было при выводе всего
-		изображения
+	
+	//! Image mode.
+	/*!
+		Selected area of the source image will be drawn
+		there, where it were if the whole source image
+		was drawn at \a x and \a y coordinates in the
+		destination image.
 	*/
 	GFX_IMG_REAL
 }	gfx_imgmode_t;
 
-/*
-	Наиболее близкий стандартный режим
-*/
+//! The most similar standart video mode.
 typedef
 enum
 {
-	GFX_RES_640,
-	GFX_RES_800
+	GFX_RES_640,	//!< Video mode 640x480
+	GFX_RES_800		//!< Video mode 800x600
 }	gfx_resolution_t;
 
-//	Экран
+//! Screen surface.
 extern SDL_Surface *screen;
 
-//	Нужно ли обновлять экран
-extern int gfx_updated;
-
-//	Наиболее близкий стандартный режим
+//! The most similar standart mode.
 extern gfx_resolution_t gfx_resolution;
 
-/*
-	1.	Создание видео режима
-	2.	width - ширина экрана
-		height - высота экрана
-		bpp - режим цвета
-		fullscreen - устонавливать ли полноэкранный режим
-		mode - режим видео устройства
-	3.	---
-	4.	E_INVALID - невозможно подобрать стандартный режим
-		E_SDL - ошибка функций SDL
+//! Image control function.
+/*!
+	Image control function for Resource manager.
+	\note Parameter \a data is not used.
+	\sa rescontrol_f() and gfx_fnt_control().
 */
-ecode_t gfx_create_window( int width, int height, int bpp, int fullscreen, gfx_mode_t mode );
+void *gfx_img_control( const char *path, rescontrol_t action, void *data );
 
-/*
-	1.	Функции контроля для менеджера ресурсов
-	2.	path - путь к файлу
-		mode - тип действия (загрузить/выгрузить)
-		data - выгружаемый объект или параметр загрузки объекта
-	3.	a) загруженый объект или NULL в случае ошибки
-		b) NULL, если объект удалось выгрузить
-	4.	E_SDL - ошибка функций SDL
+//! Font control function.
+/*!
+	Font control function for Resource manager.
+	\note Parameter \a (\a int\a )data is loading font size.
+	\sa rescontrol_f() and gfx_img_control().
 */
-void *gfx_img_control( const char *path, rescontrol_t mode, void *data );
-void *gfx_fnt_control( const char *path, rescontrol_t mode, void *data );
-void *gfx_snd_control( const char *path, rescontrol_t mode, void *data );
+void *gfx_fnt_control( const char *path, rescontrol_t action, void *data );
 
-/*
-	1.	Нарисовать одно изображение на другом
-	2.	src - исходное изображение
-		dst - назначение
-		mode - режим рисования
-		x, y - координаты назначения
-		_x, _y, _w, _h - участок исходного объекта
-	3.	---
-	4.	E_SDL - ошибка функций SDL
+//! Set a video mode and create a window.
+/*!
+	Sets a video mode and, if needed, creates a window.
+	\param width Screen width.
+	\param height Screen height.
+	\param bpp Bits per pixel (colour mode).
+	\param fullscreen Fulscreen mode.
+	\param mode Video adapter mode.
+	\param caption Caption of the window.
+	\param bar_caption Caption of the window in window list.
+	\retval KE_NONE No error.
+	\retval KE_INVALID Invalid resolution.
+	\retval KE_EXTERNAL \b SDL_SetVideoMode() has failed.
+	\note Window will be doestroyed only after \b SDL_Quit() call.
 */
-ecode_t gfx_draw( const SDL_Surface *src, SDL_Surface *dst, gfx_imgmode_t mode, \
-		int x, int y, int _x, int _y, int _w, int _h );
+kucode_t gfx_create_window( int width, int height, int bpp, int fullscreen, \
+						   gfx_mode_t mode, const char *caption, const char *bar_caption );
+
+//! Draw an image.
+/*!
+	Draws and image \a src on \a dst.
+	\param src Source image.
+	\param dst Image, where to draw the source image.
+	\param mode Drawing mode.
+	\param x Destination \a x.
+	\param y Destination \a y.
+	\param _x Source \a x.
+	\param _y Source \a y.
+	\param _w Source image width.
+	\param _h Source image height.
+	\retval KE_NONE No error.
+	\retval KE_EXTERNAL \b SDL_BlitSurface() has failed.
+	\note If \a _w is zero then the while width is copied. \n
+	If \a _h is zero then the whole height is copied. \n
+	if \a dst is \e NULL then the source image is copied on the screen.
+*/
+kucode_t gfx_draw( const SDL_Surface *src, SDL_Surface *dst, gfx_imgmode_t mode, \
+				  int x, int y, int _x, int _y, int _w, int _h );
 
 /*
 	1.	Создать изображение с надписью
@@ -149,13 +165,16 @@ SDL_Surface *gfx_txtrender ( const char *text, const TTF_Font *font, gfx_txtstyl
 	3.	---
 	4.	ошибки gfx_txtrender и gfx_draw
 */
-ecode_t gfx_print( const char *text, const TTF_Font *font, SDL_Surface *dst, gfx_txtstyle_t style, \
+kucode_t gfx_print( const char *text, const TTF_Font *font, SDL_Surface *dst, gfx_txtstyle_t style, \
 		SDL_Color colour, int x, int y, int _x, int _y, int _w, int _h );
 
 /*
 	NOT IMPLEMENTED
 */
-ecode_t gfx_printf( const char *text, const TTF_Font *font, SDL_Surface *dst, gfx_txtstyle_t style, \
+kucode_t gfx_printf( const char *text, const TTF_Font *font, SDL_Surface *dst, gfx_txtstyle_t style, \
 		SDL_Color colour, int x, int y, int w, int h, gfx_txtallig_t allig );
 
+#ifdef __cplusplus
+}
+#endif
 #endif
