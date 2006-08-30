@@ -187,28 +187,29 @@ SDL_Surface *gfx_txtrender ( const char *text, const TTF_Font *font, gfx_txtstyl
 	return txtface;
 }
 
-#if 0
-ecode_t gfx_print( const char *text, const TTF_Font *font, SDL_Surface *dst, gfx_txtstyle_t style, \
-		SDL_Color colour, int x, int y, int _x, int _y, int _w, int _h )
+kucode_t gfx_print( const char *text, const TTF_Font *font, SDL_Surface *dst, \
+				   gfx_txtstyle_t style, SDL_Color colour, int x, int y, \
+				   int _x, int _y, int _w, int _h )
 {
 	SDL_Surface *txtface;
 	pstart();
 	
-	txtface=gfx_txtrender(text,font,style,colour);
-	if ( txtface==NULL )
-		return ecode;
+	txtface = gfx_txtrender(text, font, style, colour);
+	if ( txtface == NULL )
+		return kucode;
 	
-	if ( gfx_draw(txtface,dst,GFX_IMG_PIECE,x,y,_x,_y,_w,_h)!=E_NONE )
+	if ( gfx_draw(txtface, dst, GFX_IMG_PIECE, x, y, _x, _y, _w, _h) != KE_NONE )
 	{
 		SDL_FreeSurface(txtface);
-		return ecode;
+		return kucode;
 	}
 	SDL_FreeSurface(txtface);
 	
 	pstop();
-	return E_NONE;
+	return KE_NONE;
 }
 
+#if 0
 ecode_t gfx_printf( const char *text, const TTF_Font *font, SDL_Surface *dst, gfx_txtstyle_t style, \
 		SDL_Color colour, int x, int y, int w, int h, gfx_txtallig_t allig )
 {

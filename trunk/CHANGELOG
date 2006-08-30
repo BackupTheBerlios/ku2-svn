@@ -30,3 +30,6 @@
 
 2006-08-28	J. Anton <kane@mail.berlios.de>
 Обновлён resource manager.
+
+2006-08-30	J. Anton <kane@mail.berlios.de>
+Добавлена функция flushlog() в модуль журналирования.

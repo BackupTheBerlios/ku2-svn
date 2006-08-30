@@ -134,7 +134,7 @@ kucode_t gfx_create_window( int width, int height, int bpp, int fullscreen, \
 	\param _h Source image height.
 	\retval KE_NONE No error.
 	\retval KE_EXTERNAL \b SDL_BlitSurface() has failed.
-	\note If \a _w is zero then the while width is copied. \n
+	\note If \a _w is zero then the whole width is copied. \n
 	If \a _h is zero then the whole height is copied. \n
 	if \a dst is \e NULL then the source image is copied on the screen.
 */
@@ -166,14 +166,38 @@ SDL_Surface *gfx_txtrender ( const char *text, const TTF_Font *font, gfx_txtstyl
 	3.	---
 	4.	ошибки gfx_txtrender и gfx_draw
 */
-kucode_t gfx_print( const char *text, const TTF_Font *font, SDL_Surface *dst, gfx_txtstyle_t style, \
-		SDL_Color colour, int x, int y, int _x, int _y, int _w, int _h );
+//! Render the text on the destination surface.
+/*!
+	Renders the text on the destination surface.
+	\param text Text to be rendered.
+	\param font Font to render with.
+	\param dst Destination surface, where to render the text.
+	\param style Font style (see SDL_ttf.h).
+	\param colour Text colour.
+	\param x Destination \a x.
+	\param y Destination \a y.
+	\param _x Source \a x.
+	\param _y Source \a y.
+	\param _w Source text width.
+	\param _h Source text height.
+	\retval KE_NONE No error.
+	\retval KE_* gfx_txtrender() errors.
+	\retval KE_* gfx_draw() errors.
+	\note If \a _w is zero then the whole text width is rendered. \n
+	If \a _h is zero then the whole text height is rendered. \n
+	if \a dst is \e NULL then the text is rendered on the screen.
+*/
+kucode_t gfx_print( const char *text, const TTF_Font *font, SDL_Surface *dst, \
+				   gfx_txtstyle_t style, SDL_Color colour, int x, int y, \
+				   int _x, int _y, int _w, int _h );
 
+#if 0
 /*
 	NOT IMPLEMENTED
 */
 kucode_t gfx_printf( const char *text, const TTF_Font *font, SDL_Surface *dst, gfx_txtstyle_t style, \
 		SDL_Color colour, int x, int y, int w, int h, gfx_txtallig_t allig );
+#endif
 
 #ifdef __cplusplus
 }

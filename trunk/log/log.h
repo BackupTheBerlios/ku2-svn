@@ -12,8 +12,8 @@
 	
 	This file contains functions for logging messages.
 	\author J. Anton
-	\date Mon Aug 21 22:04:12 2006
-	\version 1.1.0
+	\date Wed Aug 30 11:58:42 2006
+	\version 1.2.0
 */
 
 #ifndef KU__LOG_H__
@@ -30,7 +30,7 @@ extern "C" {
 	\param file A log filename.
 	\retval KE_NONE No error.
 	\retval KE_IO Cannot open a file.
-	\sa closelog() and plog().
+	\sa closelog(), flushlog() and plog().
 */
 kucode_t openlog( const char *file );
 
@@ -39,16 +39,23 @@ kucode_t openlog( const char *file );
 	Closes the log file. Stops the logging session.
 	\retval KE_NONE No error.
 	\retval KE_IO Cannot close a file.
-	\sa openlog() and plog().
+	\sa openlog(), flushlog() and plog().
 */
 kucode_t closelog( void );
+
+//! Flush the log file.
+/*!
+	Writes all buffered data to the disk.
+	\sa openlog(), closelog() and plog().
+*/
+void flushlog( void );
 
 //! Print a log message.
 /*!
 	Prints to a file a formated log message. Before the message date and time
 	are printed.
 	\note No newline symbol at the end of the message is added.
-	\sa openlog() and closelog().
+	\sa openlog(), closelog() and flushlog().
 */
 void plog( const char *fmt, ... );
 

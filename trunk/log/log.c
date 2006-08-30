@@ -52,6 +52,11 @@ kucode_t closelog( void )
 	return KE_NONE;
 }
 
+void flushlog( void )
+{
+	fflush(logstream);
+}
+
 void plog( const char *fmt, ... )
 {
 	va_list ap;

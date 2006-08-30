@@ -101,6 +101,7 @@ ku2lib = env.Library("ku2", sources)
 ###	
 mm_sources = Split("""
 	mm/gfx/gfx.c
+	mm/gui/gui.c
 	""")
 
 env4mm = env.Copy()
