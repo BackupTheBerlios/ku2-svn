@@ -78,6 +78,14 @@ enum
 	GUI_HIDDEN		//!< Objects is hidden (conseq. diabled).
 }	gui_status_t;
 
+//! Flags for GUI object and gui_obj_create().
+enum GUI_FLAGS
+{
+	GUI_ZFL = 0,	//!< Zero flag.
+	GUI_KEEPCHILDEN = 1
+					//!< Do not delete a children list even if it becomes empty.
+};
+
 //! GUI object.
 struct STRUCT_GUI_OBJ
 {
@@ -87,6 +95,8 @@ struct STRUCT_GUI_OBJ
 		*children;	//!< Children list.
 	gui_status_t
 		status;		//!< Object status.
+	ku_flag32_t
+		flags;		//!< Object flags.
 
 	int x,			//!< Relative object left side \a x.
 		y,			//!< Relative object top size \a y.
@@ -143,18 +153,25 @@ kucode_t gui_halt( void );
 	Creates a GUI object (widget).
 	\param loadf Widget loaging function.
 	\param widget_sz Widget related information size.
+	\param flags Creation flags (see \ref GUI_FLAGS).
 	\return Created object, or \e NULL if there were an error and \ref
 	kucode is set to the valid value: \n
 	\a KE_MEMORY: Memory allocation has failed. \n
 	gui_load_f() and abtree_ins() errors.
 */
-gui_obj_t *gui_obj_create( gui_load_f loadf, uint widget_sz );
+gui_obj_t *gui_obj_create( gui_load_f loadf, uint widget_sz, ku_flag32_t flags );
 
 #if 0
 gui_obj_t *gui_obj_clone( gui_obj_t *obj );
 #endif
 
 //! Delete a GUI object.
+/*!
+	Deletes a GUI object (widget) and its children, excluding it from the
+	parent`s children list.
+	\param obj Object to be deleted.
+	\return Always \a KE_NONE.
+*/
 kucode_t gui_obj_delete( gui_obj_t *obj );
 
 #ifdef __cplusplus
