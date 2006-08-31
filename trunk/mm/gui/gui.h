@@ -54,7 +54,7 @@ kucode_t (*gui_status_f)( gui_obj_t *obj );
 
 //! Object dimension function.
 typedef
-kucode_t (*gui_dim_f)( gui_obj_t *obj, int x, int y, int w, int h );
+kucode_t (*gui_dim_f)( gui_obj_t *obj );
 
 //! Set/Get function.
 /*!
@@ -67,6 +67,10 @@ kucode_t (*gui_dim_f)( gui_obj_t *obj, int x, int y, int w, int h );
 */
 typedef
 kucode_t (*gui_sg_f)( gui_obj_t *obj, int param, void *data );
+
+//! Drawing function.
+typedef
+kucode_t (*gui_draw_f)( gui_obj_t *obj, int x, int y, int w, int h );
 
 //! GUI object status.
 typedef
@@ -82,13 +86,15 @@ enum
 enum GUI_FLAGS
 {
 	GUI_ZFL = 0,	//!< Zero flag.
-	GUI_KEEPCHILDEN = 1
+	GUI_KEEPCHILDREN = 1
 					//!< Do not delete a children list even if it becomes empty.
 };
 
 //! GUI object.
 struct STRUCT_GUI_OBJ
 {
+	uint id;		//!< Object ID.
+
 	gui_obj_t
 		*parent;	//!< Parent object.
 	list_t
@@ -112,7 +118,6 @@ struct STRUCT_GUI_OBJ
 		uload,		//!< Unload a widget.
 		enable,		//!< Enable a widget.
 		disable,	//!< Disable a widget.
-		show,		//!< Show a widget.
 		hide;		//!< Hide a widget.
 
 	gui_dim_f
@@ -123,8 +128,12 @@ struct STRUCT_GUI_OBJ
 		get;		//!< Get the attribute of a widget.
 
 	gui_load_f
+		initf,		//!< Function for initializing a widget.
 		loadf,		//!< Function for loading a widget.
 		uloadf;		//!< Function for unloading a widget.
+
+	gui_draw_f
+		draw;		//!< Draw a widget.
 
 	void *widget;	//!< Widget related information.
 };
@@ -151,7 +160,7 @@ kucode_t gui_halt( void );
 //! Create a GUI object.
 /*!
 	Creates a GUI object (widget).
-	\param loadf Widget loaging function.
+	\param initf Widget initialization function.
 	\param widget_sz Widget related information size.
 	\param flags Creation flags (see \ref GUI_FLAGS).
 	\return Created object, or \e NULL if there were an error and \ref
@@ -159,7 +168,7 @@ kucode_t gui_halt( void );
 	\a KE_MEMORY: Memory allocation has failed. \n
 	gui_load_f() and abtree_ins() errors.
 */
-gui_obj_t *gui_obj_create( gui_load_f loadf, uint widget_sz, ku_flag32_t flags );
+gui_obj_t *gui_obj_create( gui_load_f initf, uint widget_sz, ku_flag32_t flags );
 
 #if 0
 gui_obj_t *gui_obj_clone( gui_obj_t *obj );
@@ -173,6 +182,48 @@ gui_obj_t *gui_obj_clone( gui_obj_t *obj );
 	\return Always \a KE_NONE.
 */
 kucode_t gui_obj_delete( gui_obj_t *obj );
+
+//! Move and place an object to the different place.
+/*!
+	Moves an objects to the different place (maybe as a child of other object)
+	and resizes it.
+	\param obj Object to be moved.
+	\param host Host object where object \a obj will be placed.
+	\param x Object left size \a x.
+	\param y Object top side \a y.
+	\param w Object width.
+	\param h Object height.
+	\retval KE_NONE No error.
+	\retval KE_* dl_list_create() and dl_list_ins() errors.
+	\note If \a w and \a h are zeros then the object is not resized. \n
+	If \a host is NULL then the object becomes a root object.
+*/
+kucode_t gui_move( gui_obj_t *obj, gui_obj_t *host, int x, int y, int w, int h );
+
+//! Set the widget attribute.
+/*!
+	Sets the widget attribute.
+	\sa gui_sg_f() and gui_get().
+*/
+kucode_t gui_set( gui_obj_t *obj, int param, void *data );
+
+//! Get the widget attribute.
+/*!
+	Gets the widhet attribute.
+	\sa gui_sg_f() and gui_set().
+*/
+kucode_t gui_get( gui_obj_t *obj, int param, void *data );
+
+//! Change the object status.
+/*!
+	Changes the object status. Switching from \a GUI_NOTLOADED status couses
+	object to be loaded. Conseq., switching to \a GUI_NOTLOADED status
+	couses object to be unloaded.
+	\sa gui_status_f() and gui_status_t.
+*/
+kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status );
+
+kucode_t gui_draw( gui_obj_t *obj, int x, int y, int w, int h );
 
 #ifdef __cplusplus
 }

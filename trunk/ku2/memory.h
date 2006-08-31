@@ -26,6 +26,7 @@ extern "C" {
 
 void *malloc_debug( size_t size );
 void free_debug( void *__ptr );
+void memory_stat( void );
 
 #define pdebug( m, ... ) \
 printf_debug(__FILE__,__FUNCTION__,__LINE__,m,##__VA_ARGS__)
@@ -35,6 +36,9 @@ malloc_debug(size)
 
 #define dfree( ptr ) \
 free_debug(ptr)
+
+#define dlogmemstat() \
+memory_stat()
 
 #else	//	DEBUG
 #include <stdlib.h>
@@ -46,7 +50,7 @@ free_debug(ptr)
 	\note If \b DEBUG is defined then the function will count the amount of
 	allocations and the total memory has been allocated. If \b DEBUG_MEMORY
 	is defined then debug information will be written to the \e stdout.
-	\sa dfree().
+	\sa dfree() and dlogmemstat().
 */
 #define dmalloc( size ) malloc(size)
 
@@ -57,9 +61,17 @@ free_debug(ptr)
 	\note If \b DEBUG is defined then the function will count the amount of
 	allocations and the total memory has been allocated. If \b DEBUG_MEMORY
 	is defined then debug information will be written to the \e stdout.
-	\sa dmalloc().
+	\sa dmalloc() and dlogmemstat().
 */
 #define dfree( ptr ) free(ptr)
+
+//! Logs a memory status.
+/*!
+	Logs currently allocation statistics (\b DEBUG mode): bytes and blocks allocated.
+	\note openlog() should be called before this function.
+	\sa dmalloc() and dfree().
+*/
+#define dlogmemstat()
 
 #endif	//	DEBUG
 

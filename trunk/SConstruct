@@ -102,10 +102,11 @@ ku2lib = env.Library("ku2", sources)
 mm_sources = Split("""
 	mm/gfx/gfx.c
 	mm/gui/gui.c
+	mm/widgets/frame.c
 	""")
 
 env4mm = env.Copy()
-env4mm.Append(CPPPATH = sdl_includes)
+env4mm.Append(CPPPATH = sdl_includes+["mm"])
 
 ku2mm = env4mm.Library("ku2mm", mm_sources)
 

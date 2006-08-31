@@ -6,14 +6,18 @@
  *  kane@mail.berlios.de
  ****************************************************************************/
 
-#include "ku2/ecode.h"
-#include "ku2/debug.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
 
+#include "ku2/ecode.h"
+#include "ku2/debug.h"
+#include "ku2/types.h"
+#include "ku2/gettext.h"
+#include "log/log.h"
+
 kucode_t kucode;
-unsigned int mallocs = 0;
+uint mallocs = 0;
 size_t sizes = 0;
 
 void printf_debug( const char *file, const char *func, int line, char *fmt, ... )
@@ -46,4 +50,11 @@ void free_debug( void *__ptr )
 	#ifdef DEBUG_MEMORY
 	printf("FREE  : %p (total left %d)\n", __ptr, mallocs);
 	#endif
+}
+
+void memory_stat( void )
+{
+	plog(gettext("Memory status:\n" \
+		"\tbytes allocated: %d\n" \
+		"\tblocks: %u.\n"), sizes, mallocs);
 }
