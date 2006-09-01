@@ -5,6 +5,8 @@
  *  Copyright  2006  J. Anton
  *  kane@mail.berlios.de
  ****************************************************************************/
+ 
+#include <string.h>
 
 #include "frame.h"
 #include "ku2/ecode.h"

@@ -72,6 +72,14 @@ kucode_t (*gui_sg_f)( gui_obj_t *obj, int param, void *data );
 typedef
 kucode_t (*gui_draw_f)( gui_obj_t *obj, int x, int y, int w, int h );
 
+//! Mouse event function.
+typedef
+kucode_t (*gui_mouse_f)( gui_obj_t *obj, int x, int y, int z );
+
+//! Keyboard event function.
+typedef
+kucode_t (*gui_keyb_f)( gui_obj_t *obj, char ch );
+
 //! GUI object status.
 typedef
 enum
@@ -131,6 +139,16 @@ struct STRUCT_GUI_OBJ
 		initf,		//!< Function for initializing a widget.
 		loadf,		//!< Function for loading a widget.
 		uloadf;		//!< Function for unloading a widget.
+
+	gui_mouse_f
+		mon,		//!< Mouse move event handler.
+		moff,		//!< Mouse off widget handler.
+		mdown,		//!< Mouse button press handler.
+		mup;		//!< Mouse button release handler.
+	
+	gui_keyb_f
+		kdown,		//!< Key press handler.
+		kup;		//!< Key release handler.
 
 	gui_draw_f
 		draw;		//!< Draw a widget.
