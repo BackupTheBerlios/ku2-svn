@@ -6,53 +6,84 @@
  *  kane@mail.berlios.de
  ****************************************************************************/
 
+/*!
+	\file
+	\brief Console dialogue.
+	
+	User <-> programme console dialogue realization.
+	\author J. Anton
+	\date Sat Sep  2 20:59:03 2006
+	\version 1.2.0
+*/
+
 #ifndef KU__DIALOGUE_H__
 #define KU__DIALOGUE_H__
-#include "errors/open_code.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "errors/ecode.h"
+#include "ku2/ecode.h"
 #include <stdio.h>
 
+//! Input buffer size.
+/*!
+	This is en input buffer size.
+	Input buffer is used to store user input data and answer data.
+*/
 #define DLGUE_STRSIZE 256
-#define DLGUE_USE_GETTEXT
 
+//! Question type.
 typedef
 enum
 {
-	DLGUE_BOOL=1,
-	DLGUE_INT=2,
-	DLGUE_STRING=3,
-	DLGUE_FLOAT=4,
-	DLGUE_CANCEL=8,
-	DLGUE_DEFAULT=16
+	DLGUE_BOOL = 1,	//!< Boolean (y/n).
+	DLGUE_INT = 2,	//!< Signed integer.
+	DLGUE_STRING = 3,
+					//!< Character string.
+	DLGUE_FLOAT = 4,
+					//!< Floating point value.
+	DLGUE_CANCEL = 8,
+					//!< Allow cancel.
+	DLGUE_DEFAULT = 24
+					//!< Allow default value.
 }	dlgue_t;
 
-/*
-	1.	Перенаправление потока ввода/вывода,
-		!по умолчанию NULL!
-	2.	in, out - потоки ввода/вывода
-	3.	---
-	4.	---
+//! Redirect the input/output streams.
+/*!
+	Redirects the input and output streams.
+	\param in Input stream.
+	\param out Outout stream.
+	\note By default, streams are not defined.
 */
 void dlgue_stream( FILE *in, FILE *out );
 
-/*
-	1.	Задавание вопроса, функция "засыпает" до получения ответа
-	2.	question - вопрос
-		answer - указатель на переменную, куда запишется ответ
-		type - тип предпологаемого ответа
-	3.	Код ошибки
-	4.	ntni
+//! Ask for an input.
+/*!
+	Asks for an input from the user.
+	\param question Question text.
+	\param answer Pointer, where the reply are be saved.
+	\param type Input data type.
+	\retval KE_NONE No error.
+	\retval KE_IO Failed to read from the input stream.
+	\retval KE_SYNTAX Input does not fit the buffer size (DLGUE_STRSIZE).
+	\retval KE_EMPTY Default value or operation is canceled (empty string).
+	\sa dlgue_claim().
+	\note Possible \a answer types are \b int*, \b char**, \b double*.
+	Answer will be pointed to the existing memory and no allocations
+	and frees are needed.
 */
-kucode_t dlgue_ask( char *question, void *answer, dlgue_t type );
+kucode_t dlgue_ask( const char *question, void *answer, dlgue_t type );
 
-/*
-	1.	Вывод сообщения на экран
-	2.	text - текст сообщения
-	3.	---
-	4.	---
+//! Output a text.
+/*!
+	Writes text to the output.
+	\param text Formatted text to write out.
+	\note Function does not add new line at the end.
+	\sa dlgue_ask().
 */
-void dlgue_claim( char *text );
+void dlgue_claim( const char *text, ... );
 
-#include "errors/close_code.h"
+#ifdef __cplusplus
+}
+#endif
 #endif

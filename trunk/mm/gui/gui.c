@@ -52,7 +52,7 @@ static kucode_t gui_ins_to_children( gui_obj_t *parent, gui_obj_t *child )
 		if ( parent->children == NULL )
 			return kucode;
 	}
-	if ( dl_list_ins(parent->children, child) != KE_NONE )
+	if ( dl_list_ins_last(parent->children, child) != KE_NONE )
 		return kucode;
 
 	return KE_NONE;
@@ -62,6 +62,7 @@ static tree_t *gui_objects;
 static uint gui_lastid = 0;
 
 static gui_obj_t *obj_root;
+static gui_obj_t *obj_mon;
 
 kucode_t gui_init( void )
 {
@@ -71,6 +72,9 @@ kucode_t gui_init( void )
 	if ( gui_objects == NULL )
 		return kucode;
 
+	obj_root = NULL;
+	obj_mon = NULL;
+	
 	plog(gettext("GUI engine has been initialized.\n"));
 	pstop();
 	return KE_NONE;
@@ -307,4 +311,68 @@ kucode_t gui_draw( gui_obj_t *obj, int x, int y, int w, int h )
 
 	pstop();
 	return KE_NONE;
+}
+
+static gui_obj_t *gui_search_by_coord( int x, int y )
+{
+	gui_obj_t *obj = obj_root;
+	
+	if ( (!obj) || (obj->rx > x) || (obj->rx+obj->width < x) || \
+		(obj->ry > y) || (obj->ry+obj->height < y ) )
+		return NULL;
+	
+	while ( obj->children && (obj->children->size > 0) )
+	{
+		dl_list_last(obj->children);
+		for (;;)
+		{
+			gui_obj_t *nobj = dl_list_prev(obj->children);
+			if ( (nobj->rx <= x) && (nobj->rx+nobj->width >= x) && \
+				(nobj->ry <=y ) && (nobj->ry+nobj->height >= y) )
+			{
+				obj = nobj;
+				break;
+			}
+			if  ( dl_list_isfirst(obj->children) )
+				return obj;
+		}
+	}
+	
+	return obj;
+}
+
+gui_event_st gui_process( SDL_Event *event )
+{
+	gui_obj_t *obj;
+	gui_event_st status = GUIE_LEAVE;
+	pstart();
+	
+	switch ( event->type )
+	{
+		case SDL_MOUSEMOTION:
+		{
+			obj = gui_search_by_coord(event->motion.x, event->motion.y);
+			if ( obj != obj_mon )
+			{
+				// сменился фокус мышки
+				if ( obj_mon )
+				{
+					if ( obj_mon->moff(obj_mon, 0, 0, 0) == GUIE_CRITICAL )
+						return GUIE_CRITICAL;
+				}
+				obj_mon = obj;
+			}
+			if ( obj )
+			{
+				if ( obj->mon(obj, event->motion.x-obj->rx, \
+					event->motion.y-obj->ry, 0) == GUIE_CRITICAL )
+					return GUIE_CRITICAL;
+				status = GUIE_EAT;
+			}
+			break;
+		}
+	}
+	
+	pstop();
+	return status;
 }

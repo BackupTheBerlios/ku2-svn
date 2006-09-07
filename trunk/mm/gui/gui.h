@@ -22,6 +22,8 @@
 extern "C" {
 #endif
 
+#include "SDL.h"
+
 #include "ku2/ecode.h"
 #include "ku2/types.h"
 #include "list/list.h"
@@ -72,13 +74,23 @@ kucode_t (*gui_sg_f)( gui_obj_t *obj, int param, void *data );
 typedef
 kucode_t (*gui_draw_f)( gui_obj_t *obj, int x, int y, int w, int h );
 
+//! GUI event status.
+typedef
+enum
+{
+	GUIE_ERROR,		//!< A minor error has accured (event stays unmanaged).
+	GUIE_CRITICAL,	//!< A major error has accured. Break the procession.
+	GUIE_EAT,		//!< "Eat" an event (event is managed).
+	GUIE_LEAVE		//!< Leave an event (event is unmanaged).
+}	gui_event_st;
+
 //! Mouse event function.
 typedef
-kucode_t (*gui_mouse_f)( gui_obj_t *obj, int x, int y, int z );
+gui_event_st (*gui_mouse_f)( gui_obj_t *obj, int x, int y, int z );
 
 //! Keyboard event function.
 typedef
-kucode_t (*gui_keyb_f)( gui_obj_t *obj, char ch );
+gui_event_st (*gui_keyb_f)( gui_obj_t *obj, char ch );
 
 //! GUI object status.
 typedef
@@ -241,7 +253,21 @@ kucode_t gui_get( gui_obj_t *obj, int param, void *data );
 */
 kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status );
 
+//! Draw the object.
+/*!
+	Draws an object and its subobjects.
+	\sa gui_draw_f().
+*/
 kucode_t gui_draw( gui_obj_t *obj, int x, int y, int w, int h );
+
+//! Process an event.
+/*!
+	GUI loop. Processes an event on the GUI. This function makes all objects to "live".
+	\param event Current SDL event.
+	\retval GUIE_EAT Event was handled by the GUI.
+	\retval GUIE_LEAVE Event was not handled by the GUI.
+*/
+gui_event_st gui_process( SDL_Event *event );
 
 #ifdef __cplusplus
 }

@@ -33,3 +33,7 @@
 
 2006-08-30	J. Anton <kane@mail.berlios.de>
 Добавлена функция flushlog() в модуль журналирования.
+Версия 1.2.0
+
+2006-09-04  J. Anton <kane@mail.berlios.de>
+Обновлён модуль диалога.

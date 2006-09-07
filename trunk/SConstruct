@@ -92,6 +92,7 @@ sources = Split("""
 	abtree/abtree.c
 	cfgreader/cfg.c
 	resmanager/res.c
+	dialogue/dialogue.c
 	""")
 
 ku2lib = env.Library("ku2", sources)
@@ -111,6 +112,26 @@ env4mm.Append(CPPPATH = sdl_includes+["mm"])
 ku2mm = env4mm.Library("ku2mm", mm_sources)
 
 ###
+#	Kane Utilities 2 Test programm
+###
+test_sources = Split("""
+	test/ku.c
+	""")
+
+test_libs = Split("""
+	SDL
+	SDL_image
+	SDL_ttf
+	ku2
+	ku2mm
+	""")
+
+env4test = env4mm.Copy()
+env4test.Append(LIBS = test_libs, LIBPATH = ["."])
+
+ku2test = env4test.Program("ku2test", test_sources)
+
+###
 #	Getting list of modules to build
 ###
 build = ARGUMENTS.get("build", "core,mm")
@@ -119,3 +140,5 @@ if "core" in build and not "core" in notbuild:
 	Default(ku2lib)
 if "mm" in build and not "mm" in notbuild:
 	Default(ku2mm)
+if "test" in build and not "test" in notbuild:
+	Default(ku2test)

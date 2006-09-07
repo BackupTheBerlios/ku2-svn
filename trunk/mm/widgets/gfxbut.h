@@ -46,10 +46,10 @@ struct STRUCT_GUI_GFXBUT_OBJ
 		*back_mdn;	//!< "Mouse Down" image.
 	SDL_Surface
 		*face;		//!< Current image surface.
-}	gui_frame_t;
+}	gui_gfxbut_t;
 
 //! Frame parameters for frame_set() and frame_get().
-enum FRAME_PARAMS
+enum GFXBUT_PARAMS
 {
 	GFXBUT_NORM,	//!< Change the normal image. Data are image name (\ref res.h).
 	GFXBUT_MON,		//!< Change the "mouse-on" image. Data are image name.
@@ -57,28 +57,24 @@ enum FRAME_PARAMS
 	GFXBUT_CLICK	//!< Change the "click" callback function. Data are pointer to function.
 };
 
-//! Initialize a frame object.
+//! Initialize a graphical button object.
 /*!
-	This function should be passed to gui_obj_create() to create a frame.
+	This function should be passed to gui_obj_create() to create a graphical button.
 */
 kucode_t gfxbut_init( gui_obj_t *obj );
 
-//! Load a frame.
+//! Load a graphical button.
 kucode_t gfxbut_load( gui_obj_t *obj );
 
-//! Unload a frame.
 kucode_t gfxbut_uload( gui_obj_t *obj );
 
 kucode_t gfxbut_enable( gui_obj_t *obj );
 kucode_t gfxbut_dim( gui_obj_t *obj );
 
-//! Set the attribute of the frame.
 kucode_t gfxbut_set( gui_obj_t *obj, int param, void *data );
 
-//! Get the attribute of the frame.
 kucode_t gfxbut_get( gui_obj_t *obj, int param, void *data );
 
-//! Draw the frame.
 kucode_t gfxbut_draw( gui_obj_t *obj, int x, int y, int w, int h );
 
 #ifdef __cplusplus
