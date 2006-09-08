@@ -32,6 +32,17 @@ extern "C" {
 typedef
 struct STRUCT_GUI_OBJ gui_obj_t;
 
+//! Widget callback function.
+/*!
+	This function is used to make a widget do some action.
+	\param obj GUI object.
+	\param data Function parameters.
+	\return \a KE_NONE if there were no error, else some error code is
+	returned. For more details see widget related documentation.
+*/
+typedef
+kucode_t (*gui_cb_f)( gui_obj_t *obj, void *data );
+
 //! Widget loading function.
 /*!
 	This function is used for creating and destroying GUI objects.
@@ -78,9 +89,10 @@ kucode_t (*gui_draw_f)( gui_obj_t *obj, int x, int y, int w, int h );
 typedef
 enum
 {
-	GUIE_ERROR,		//!< A minor error has accured (event stays unmanaged).
 	GUIE_CRITICAL,	//!< A major error has accured. Break the procession.
+	GUIE_DRAW,		//!< Event is managed end screen needs to be updated.
 	GUIE_EAT,		//!< "Eat" an event (event is managed).
+	GUIE_ERROR,		//!< A minor error has accured (event stays unmanaged).
 	GUIE_LEAVE		//!< Leave an event (event is unmanaged).
 }	gui_event_st;
 
@@ -149,8 +161,7 @@ struct STRUCT_GUI_OBJ
 
 	gui_load_f
 		initf,		//!< Function for initializing a widget.
-		loadf,		//!< Function for loading a widget.
-		uloadf;		//!< Function for unloading a widget.
+		destroyf;	//!< Function for destroying a widget.
 
 	gui_mouse_f
 		mon,		//!< Mouse move event handler.
@@ -256,6 +267,7 @@ kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status );
 //! Draw the object.
 /*!
 	Draws an object and its subobjects.
+	\note If \a obj is \e NULL then the root object is used.
 	\sa gui_draw_f().
 */
 kucode_t gui_draw( gui_obj_t *obj, int x, int y, int w, int h );

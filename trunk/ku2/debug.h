@@ -25,9 +25,17 @@ extern "C" {
 #ifdef DEBUG
 
 void printf_debug( const char *file, const char *func, int line, char *fmt, ... );
+void pavoid_debug( const char *file, const char *func, int line );
 
 #define pdebug( m, ... ) \
-printf_debug(__FILE__,__FUNCTION__,__LINE__,m,##__VA_ARGS__)
+printf_debug(__FILE__, __FUNCTION__, __LINE__, m, ##__VA_ARGS__)
+
+#define ku_avoid( expr ) \
+if ( expr ) \
+{ \
+	pavoid_debug(__FILE__, __FUNCTION__, __LINE__); \
+	return KE_ASSERT; \
+}
 
 #else	//	DEBUG
 
@@ -37,6 +45,14 @@ printf_debug(__FILE__,__FUNCTION__,__LINE__,m,##__VA_ARGS__)
 	\param m Message format.
 */
 #define pdebug( m, ... )
+
+//! Assert the expression.
+/*!
+	Checks the expression. If it is true, then logs a message and returnes
+	\a KE_ASSERT.
+	\param expr Expression.
+*/
+#define ku_avoid( expr )
 
 #endif	//	DEBUG
 

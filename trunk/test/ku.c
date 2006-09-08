@@ -91,7 +91,7 @@ static kucode_t oper_gui( void )
 	return kucode;
 }
 
-int main( void )
+int main( int argc, char *argv[] )
 {
 	char *oper;
 	int finished = 0;

@@ -29,6 +29,11 @@ void printf_debug( const char *file, const char *func, int line, char *fmt, ... 
 	va_end(ap);
 }
 
+void pavoid_debug( const char *file, const char *func, int line )
+{
+	plog(gettext("Not avoided expression >> %s: %d [%s]\n"), file, line, func);
+}
+
 void *malloc_debug( size_t size )
 {
 	void *ptr = malloc(size);

@@ -31,6 +31,7 @@ typedef
 enum
 {
 	KE_NONE,		//!< No error.
+	KE_ASSERT,		//!< Assertion has failed.
 	KE_MEMORY,		//!< Memory allocation error.
 	KE_EMPTY,		//!< Data container is empty.
 	KE_NOTFOUND,	//!< Data was not found.

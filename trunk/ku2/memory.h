@@ -28,9 +28,6 @@ void *malloc_debug( size_t size );
 void free_debug( void *__ptr );
 void memory_stat( void );
 
-#define pdebug( m, ... ) \
-printf_debug(__FILE__,__FUNCTION__,__LINE__,m,##__VA_ARGS__)
-
 #define dmalloc( size ) \
 malloc_debug(size)
 

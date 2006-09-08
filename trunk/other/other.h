@@ -25,6 +25,9 @@ extern "C" {
 //! Get the largest value.
 #define MAXint( a, b ) ((a>b)?(a):(b))
 
+//! Get the smallest value
+#define MINint( a, b ) ((a<b)?(a):(b))
+
 //! Convert the macros content to the constant string.
 #define STR( m ) _STR_(m)
 

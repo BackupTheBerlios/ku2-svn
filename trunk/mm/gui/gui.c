@@ -15,6 +15,7 @@
 #include "abtree/abtree.h"
 #include "log/log.h"
 #include "ku2/gettext.h"
+#include "other/other.h"
 
 //! Comparing function.
 static int gui_compf( void *obj1, void *obj2 )
@@ -26,7 +27,7 @@ static int gui_compf( void *obj1, void *obj2 )
 static int gui_freef( void *obj )
 {
 	if ( ((gui_obj_t*)obj)->status > GUI_NOTLOADED )
-		((gui_obj_t*)obj)->uloadf(obj);
+		((gui_obj_t*)obj)->uload(obj);
 	dfree(obj);
 	return 0;
 }
@@ -58,11 +59,16 @@ static kucode_t gui_ins_to_children( gui_obj_t *parent, gui_obj_t *child )
 	return KE_NONE;
 }
 
+//! All created objects.
 static tree_t *gui_objects;
+
+//! Last object ID.
 static uint gui_lastid = 0;
 
-static gui_obj_t *obj_root;
-static gui_obj_t *obj_mon;
+static gui_obj_t
+	*obj_root,		//!< Root object.
+	*obj_mon,		//!< Object, where is the mouse.
+	*obj_mdown;		//!< Object, where the mouse button was pressed.
 
 kucode_t gui_init( void )
 {
@@ -74,6 +80,7 @@ kucode_t gui_init( void )
 
 	obj_root = NULL;
 	obj_mon = NULL;
+	obj_mdown = NULL;
 	
 	plog(gettext("GUI engine has been initialized.\n"));
 	pstop();
@@ -144,11 +151,12 @@ kucode_t gui_obj_delete( gui_obj_t *obj )
 	
 	recursion_lvl++;
 	
+	// выгружаем подобъект
 	if ( obj->status > GUI_NOTLOADED )
-	{
-		// удаляем подобъект
-		obj->uloadf(obj);
-	}
+		obj->uload(obj);
+	
+	// удаляем подобъект
+	obj->destroyf(obj);
 	
 	// удаляем потомков
 	if ( obj->children )
@@ -164,7 +172,7 @@ kucode_t gui_obj_delete( gui_obj_t *obj )
 	{
 		gui_excl_from_parent(obj);
 	}
-	
+
 	plog(gettext("Object \"%s\" %u is deleted!\n"), (char*)obj->widget, obj->id);
 	dfree(obj);
 	recursion_lvl--;
@@ -216,8 +224,8 @@ kucode_t gui_move( gui_obj_t *obj, gui_obj_t *host, int x, int y, int w, int h )
 		obj->width = w;
 		obj->height = h;
 
-		if ( obj->dim(obj) != KE_NONE )
-			plog(gettext("Note: a widget failed to change its dimension: %d\n"), kucode);
+		if ( obj->dim && (obj->dim(obj) != KE_NONE) )
+			return kucode;
 	}
 
 	plog(gettext("Object \"%s\" %u was moved!\n"), (char*)obj->widget, obj->id);
@@ -229,8 +237,12 @@ kucode_t gui_set( gui_obj_t *obj, int param, void *data )
 {
 	pstart();
 
-	if ( obj->set(obj, param, data) != KE_NONE )
-		return kucode;
+	if ( obj->set )
+	{
+		if ( obj->set(obj, param, data) != KE_NONE )
+			return kucode;
+	}	else
+		KU_ERRQ(KE_INVALID);
 
 	pstop();
 	return KE_NONE;
@@ -240,8 +252,12 @@ kucode_t gui_get( gui_obj_t *obj, int param, void *data )
 {
 	pstart();
 
-	if ( obj->get(obj, param, data ) != KE_NONE )
-		return kucode;
+	if ( obj->get )
+	{
+		if ( obj->get(obj, param, data ) != KE_NONE )
+			return kucode;
+	}	else
+		KU_ERRQ(KE_INVALID);
 
 	pstop();
 	return KE_NONE;
@@ -257,7 +273,7 @@ kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status )
 		case GUI_NOTLOADED:
 		{
 			// выгрузить объект
-			if ( obj->uloadf(obj) != KE_NONE )
+			if ( obj->uload(obj) != KE_NONE )
 				return kucode;
 			break;
 		}
@@ -267,24 +283,24 @@ kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status )
 			// сделать его доступным
 			if ( obj->status == GUI_NOTLOADED )
 			{
-				if ( obj->loadf(obj) != KE_NONE )
+				if ( obj->load(obj) != KE_NONE )
 					return kucode;
 			}
-			if ( obj->enable(obj) != KE_NONE )
+			if ( obj->enable && (obj->enable(obj) != KE_NONE) )
 				return kucode;
 			break;
 		}
 		case GUI_DISABLED:
 		{
 			// сделать объект недоступным, но видимым
-			if ( obj->disable(obj) != KE_NONE )
+			if ( obj->disable && (obj->disable(obj) != KE_NONE) )
 				return kucode;
 			break;
 		}
 		case GUI_HIDDEN:
 		{
 			// скрыть объект
-			if ( obj->hide(obj) != KE_NONE )
+			if ( obj->hide && (obj->hide(obj) != KE_NONE) )
 				return kucode;
 		}
 	}
@@ -297,7 +313,11 @@ kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status )
 
 kucode_t gui_draw( gui_obj_t *obj, int x, int y, int w, int h )
 {
+	int finished;
 	pstart();
+
+	if ( obj == NULL )
+		obj = obj_root;
 
 	if ( obj->draw(obj, 0, 0, 0, 0) != KE_NONE )
 		return kucode;
@@ -305,8 +325,14 @@ kucode_t gui_draw( gui_obj_t *obj, int x, int y, int w, int h )
 	if ( obj->children )
 	{
 		if ( dl_list_first(obj->children) == KE_NONE )
-			do if ( gui_draw(dl_list_cur(obj->children), 0, 0, 0, 0) != KE_NONE )
-				return kucode; while ( !dl_list_islast(obj->children) );
+		{
+			do
+			{
+				finished = dl_list_islast(obj->children);
+				if ( gui_draw(dl_list_next(obj->children), 0, 0, 0, 0) != KE_NONE )
+					return kucode;
+			}	while ( !finished );
+		}
 	}
 
 	pstop();
@@ -344,7 +370,7 @@ static gui_obj_t *gui_search_by_coord( int x, int y )
 gui_event_st gui_process( SDL_Event *event )
 {
 	gui_obj_t *obj;
-	gui_event_st status = GUIE_LEAVE;
+	gui_event_st status[2] = { GUIE_LEAVE, GUIE_LEAVE };
 	pstart();
 	
 	switch ( event->type )
@@ -355,24 +381,40 @@ gui_event_st gui_process( SDL_Event *event )
 			if ( obj != obj_mon )
 			{
 				// сменился фокус мышки
-				if ( obj_mon )
-				{
-					if ( obj_mon->moff(obj_mon, 0, 0, 0) == GUIE_CRITICAL )
-						return GUIE_CRITICAL;
-				}
+				if ( obj_mon && obj_mon->moff )
+					status[0] = obj_mon->moff(obj_mon, 0, 0, 0);
 				obj_mon = obj;
 			}
-			if ( obj )
+			if ( obj && obj->mon )
+				status[1] = obj->mon(obj, event->motion.x-obj->rx, \
+					event->motion.y-obj->ry, 0);
+			break;
+		}
+		case SDL_MOUSEBUTTONDOWN:
+		{
+			#ifdef DEBUG
+			if ( obj_mdown != NULL )
+				plog("Debug: double mouse-down detected! (%s)\n", (char*)obj_mdown->widget);
+			#endif
+			obj_mdown = gui_search_by_coord(event->button.x, event->button.y);
+			if ( obj_mdown && obj_mdown->mdown )
+				status[0] = obj_mdown->mdown(obj_mdown, event->button.x-obj_mdown->rx, \
+					event->button.y-obj_mdown->ry, event->button.button);
+			break;
+		}
+		case SDL_MOUSEBUTTONUP:
+		{
+			if ( obj_mdown )
 			{
-				if ( obj->mon(obj, event->motion.x-obj->rx, \
-					event->motion.y-obj->ry, 0) == GUIE_CRITICAL )
-					return GUIE_CRITICAL;
-				status = GUIE_EAT;
+				if ( obj_mdown->mup )
+					status[0] = obj_mdown->mup(obj_mdown, event->button.x-obj_mdown->rx, \
+						event->button.y-obj_mdown->ry, event->button.button);
+				obj_mdown = NULL;
 			}
 			break;
 		}
 	}
 	
 	pstop();
-	return status;
+	return MINint(status[0], status[1]);
 }
