@@ -392,10 +392,11 @@ gui_event_st gui_process( SDL_Event *event )
 		}
 		case SDL_MOUSEBUTTONDOWN:
 		{
-			#ifdef DEBUG
+			#if 0
 			if ( obj_mdown != NULL )
 				plog("Debug: double mouse-down detected! (%s)\n", (char*)obj_mdown->widget);
 			#endif
+			ku_avoid( obj_mdown != NULL );
 			obj_mdown = gui_search_by_coord(event->button.x, event->button.y);
 			if ( obj_mdown && obj_mdown->mdown )
 				status[0] = obj_mdown->mdown(obj_mdown, event->button.x-obj_mdown->rx, \

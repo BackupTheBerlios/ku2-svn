@@ -46,10 +46,6 @@ enum
 	GFX_ALLIG_RIGHT	//!< By right side.
 }	gfx_txtallig_t;
 
-//! Text style (bold, underlined or italics).
-typedef
-int gfx_txtstyle_t;
-
 //! Drawing mode.
 typedef
 enum
@@ -154,18 +150,6 @@ kucode_t gfx_draw( const SDL_Surface *src, SDL_Surface *dst, gfx_imgmode_t mode,
 */
 SDL_Surface *gfx_txtrender ( const char *text, const TTF_Font *font, gfx_txtstyle_t style, SDL_Color colour );
 
-/*
-	1.	Написать текст на изображении
-	2.	text - текст
-		font - шрифт
-		dst - изображение назначения
-		style - стиль шрифта
-		colour - цвет шрифта
-		x, y - координаты назначения
-		_x, _y, _w, _h - участок исходного текста
-	3.	---
-	4.	ошибки gfx_txtrender и gfx_draw
-*/
 //! Render the text on the destination surface.
 /*!
 	Renders the text on the destination surface.

@@ -46,29 +46,6 @@ void *gfx_img_control( const char *path, rescontrol_t action, void *data )
 	return img;
 }
 
-void *gfx_fnt_control( const char *path, rescontrol_t action, void *data )
-{
-	TTF_Font *font;
-	pstart();
-
-	if ( action == RES_LOAD )
-	{
-		font = TTF_OpenFont(path, (int)data);
-		if ( font == NULL )
-		{
-			plog(gettext("Failed to open a font '%s`: %s"), path, TTF_GetError());
-			return NULL;
-		}
-	}	else
-	{
-		TTF_CloseFont(data);
-		font = NULL;
-	}
-
-	pstop();
-	return font;
-}
-
 kucode_t gfx_create_window( int width, int height, int bpp, int fullscreen,
 						   gfx_mode_t mode, const char *caption, const char *bar_caption )
 {

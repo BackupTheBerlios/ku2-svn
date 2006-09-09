@@ -105,6 +105,7 @@ mm_sources = Split("""
 	mm/gui/gui.c
 	mm/widgets/frame.c
 	mm/widgets/gfxbut.c
+	mm/widgets/textline.c
 	""")
 
 env4mm = env.Copy()
