@@ -146,12 +146,12 @@ kucode_t gfx_draw( const SDL_Surface *src, SDL_Surface *dst, gfx_imgmode_t mode,
 	return KE_NONE;
 }
 
-SDL_Surface *gfx_txtrender ( const char *text, const TTF_Font *font, gfx_txtstyle_t style, SDL_Color colour )
+SDL_Surface *gfx_txtrender ( const char *text, const gfx_font_t *font, SDL_Color colour )
 {
 	SDL_Surface *txtface;
 	pstart();
 	
-	TTF_SetFontStyle((TTF_Font*)font, style);
+	//TTF_SetFontStyle((TTF_Font*)font, style);
 	txtface = TTF_RenderUTF8_Blended((TTF_Font*)font, text, colour);
 	if ( txtface == NULL )
 	{
@@ -165,13 +165,13 @@ SDL_Surface *gfx_txtrender ( const char *text, const TTF_Font *font, gfx_txtstyl
 }
 
 kucode_t gfx_print( const char *text, const TTF_Font *font, SDL_Surface *dst, \
-				   gfx_txtstyle_t style, SDL_Color colour, int x, int y, \
+				   /*gfx_txtstyle_t style,*/ SDL_Color colour, int x, int y, \
 				   int _x, int _y, int _w, int _h )
 {
 	SDL_Surface *txtface;
 	pstart();
 	
-	txtface = gfx_txtrender(text, font, style, colour);
+	//txtface = gfx_txtrender(text, font, style, colour);
 	if ( txtface == NULL )
 		return kucode;
 	

@@ -23,8 +23,8 @@ extern "C" {
 #endif
 
 #include "SDL.h"
-#include "SDL_ttf.h"
 
+#include "font.h"
 #include "ku2/ecode.h"
 #include "resmanager/res.h"
 
@@ -142,13 +142,12 @@ kucode_t gfx_draw( const SDL_Surface *src, SDL_Surface *dst, gfx_imgmode_t mode,
 	Renders the text.
 	\param text Text to be rendered.
 	\param font Font to render with.
-	\param style Font style (see SDL_ttf.h).
 	\param colour Text colour.
 	\return Rendered surface, or \e NULL if there was an error and
 	\ref kucode is set to the valid value: \n
 	\a KE_EXTERNAL: \b TTF_RenderUTF8_Blended() has failed.
 */
-SDL_Surface *gfx_txtrender ( const char *text, const TTF_Font *font, gfx_txtstyle_t style, SDL_Color colour );
+SDL_Surface *gfx_txtrender ( const char *text, const gfx_font_t *font, SDL_Color colour );
 
 //! Render the text on the destination surface.
 /*!
@@ -171,7 +170,7 @@ SDL_Surface *gfx_txtrender ( const char *text, const TTF_Font *font, gfx_txtstyl
 	If \a _h is zero then the whole text height is rendered. \n
 	if \a dst is \e NULL then the text is rendered on the screen.
 */
-kucode_t gfx_print( const char *text, const TTF_Font *font, SDL_Surface *dst, \
+//kucode_t gfx_print( const char *text, const TTF_Font *font, SDL_Surface *dst, \
 				   gfx_txtstyle_t style, SDL_Color colour, int x, int y, \
 				   int _x, int _y, int _w, int _h );
 

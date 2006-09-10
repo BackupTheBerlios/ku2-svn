@@ -41,9 +41,14 @@ typedef
 struct
 {
 	TTF_Font *font;
+	gfx_font_style_t style;
+	int size;
 }	gfx_font_t;
 
-kucode_t font_open( const char *name, gfx_font_style_t style, int size );
+gfx_font_t *font_open( const char *name, gfx_font_style_t style, int size );
+kucode_t font_close( gfx_font_t *font );
+
+gfx_font_t *font_change( gfx_font_t *font, gfx_font_style_t style, int size );
 
 #ifdef __cplusplus
 }

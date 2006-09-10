@@ -27,6 +27,48 @@
 #include "mm/widgets/frame.h"
 #include "mm/widgets/gfxbut.h"
 
+static int running;
+static gui_obj_t *window,
+	*button1, *button2, *button3;
+
+static kucode_t oper_gui_window( void )
+{
+	pstart();
+	
+	window = gui_obj_create(frame_init, sizeof(gui_frame_t), GUI_KEEPCHILDREN);
+	if ( window == NULL )
+	{
+		plog(gettext("Failed to create window: %d\n"), kucode);
+		return kucode;
+	}
+	if ( gui_set(window, FRAME_BACKGROUND, "menu back") != KE_NONE )
+	{
+		plog(gettext("Failed to set an attribute of the window: %d\n"), kucode);
+		gui_obj_delete(window);
+		return kucode;
+	}
+	if ( gui_move(window, NULL, 0, 0, 800, 600) != KE_NONE )
+	{
+		plog(gettext("Failed to place a window: %d\n"), kucode);
+		gui_obj_delete(window);
+		return kucode;
+	}
+	if ( gui_ch_status(window, GUI_ENABLED) != KE_NONE )
+	{
+		plog(gettext("Failed to load a window: %d\n"), kucode);
+		gui_obj_delete(window);
+		return kucode;
+	}
+	if ( gui_draw(window, 0, 0, 0, 0) != KE_NONE )
+	{
+		gui_obj_delete(window);
+		return kucode;
+	}
+	
+	pstop();
+	return KE_NONE;
+}
+
 static kucode_t oper_gui( void )
 {
 	__label__ lerror;
@@ -37,8 +79,10 @@ static kucode_t oper_gui( void )
 	enum
 	{
 		INIT_SDL,
-		INIT_RES
+		INIT_RES,
+		INIT_GUI
 	}	init;
+	SDL_Event event;
 	pstart();
 	
 	//	SDL инициализация
@@ -68,8 +112,55 @@ static kucode_t oper_gui( void )
 			"resource 'image`: %d\n"), kucode);
 		goto lerror;
 	}
+	if ( (res_add("test/data/images/background.png", \
+		"menu back", RES_IMAGE, NULL, 0) != KE_NONE) || \
+		(res_add("test/data/images/gfxbut_nor.png", "button", \
+		RES_IMAGE, NULL, 0) != KE_NONE) || \
+		(res_add("test/data/images/gfxbut_mon.png", "button on", \
+		RES_IMAGE, NULL, 0) != KE_NONE) || \
+		(res_add("test/data/images/gfxbut_md.png", "button down", \
+		RES_IMAGE, NULL, 0) != KE_NONE) )
+	{
+		plog(gettext("Failed to add resources: %d\n"), kucode);
+		goto lerror;
+	}
+	
+	//	инициализация GUI
+	if ( gui_init() != KE_NONE )
+		goto lerror;
+	init = INIT_GUI;
+	
+	//	загрузка окна
+	if ( oper_gui_window() != KE_NONE )
+		goto lerror;
+	SDL_Flip(screen);
+	
+	//	цикл GUI
+	running = 1;
+	while ( running )
+	{
+		if ( SDL_WaitEvent(&event) )
+		{
+			switch ( gui_process(&event) )
+			{
+				case GUIE_LEAVE:
+				{
+					switch ( event.type )
+					{
+						case SDL_QUIT:
+							running = 0;
+					}
+					break;
+				}
+			}
+		}	else
+		{
+			plog(gettext("Failed for waiting for an event: %s\n"), SDL_GetError());
+		}
+	}
 	
 	//	завершение
+	gui_halt();
 	res_halt();
 	SDL_Quit();
 	
@@ -79,6 +170,10 @@ static kucode_t oper_gui( void )
 	lerror:
 	switch ( init )
 	{
+		case INIT_GUI:
+		{
+			gui_halt();
+		}
 		case INIT_RES:
 		{
 			res_halt();
