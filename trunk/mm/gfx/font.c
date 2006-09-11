@@ -10,6 +10,11 @@
 #include "ku2/ecode.h"
 #include "ku2/debug.h"
 
+void *gfx_fnt_control( const char *path, rescontrol_t action, void *data )
+{
+	return NULL;
+}
+
 gfx_font_t *font_open( const char *name, gfx_font_style_t style, int size )
 {
 	pstart();

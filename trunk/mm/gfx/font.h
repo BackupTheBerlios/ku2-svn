@@ -45,6 +45,14 @@ struct
 	int size;
 }	gfx_font_t;
 
+//! Font control function.
+/*!
+	Font control function for Resource manager.
+	\note Parameter \a (\a int\a )data is loading font size.
+	\sa rescontrol_f() and gfx_img_control().
+*/
+void *gfx_fnt_control( const char *path, rescontrol_t action, void *data );
+
 gfx_font_t *font_open( const char *name, gfx_font_style_t style, int size );
 kucode_t font_close( gfx_font_t *font );
 

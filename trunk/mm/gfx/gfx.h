@@ -90,14 +90,6 @@ extern gfx_resolution_t gfx_resolution;
 */
 void *gfx_img_control( const char *path, rescontrol_t action, void *data );
 
-//! Font control function.
-/*!
-	Font control function for Resource manager.
-	\note Parameter \a (\a int\a )data is loading font size.
-	\sa rescontrol_f() and gfx_img_control().
-*/
-void *gfx_fnt_control( const char *path, rescontrol_t action, void *data );
-
 //! Set a video mode and create a window.
 /*!
 	Sets a video mode and, if needed, creates a window.

@@ -219,7 +219,7 @@ kucode_t gui_move( gui_obj_t *obj, gui_obj_t *host, int x, int y, int w, int h )
 
 	obj->x = x;
 	obj->y = y;
-	if ( w+h != 0 )
+	if ( (w != 0) && (h != 0) )
 	{
 		obj->width = w;
 		obj->height = h;

@@ -40,7 +40,7 @@ kucode_t gfxbut_init( gui_obj_t *obj )
 	obj->disable = NULL;
 	obj->hide = NULL;
 
-	obj->dim = NULL;
+	obj->dim = gfxbut_dim;
 
 	obj->set = gfxbut_set;
 	obj->get = gfxbut_get;
@@ -136,6 +136,21 @@ kucode_t gfxbut_uload( gui_obj_t *obj )
 	if ( res_release(widget->back_mdn_name) != KE_NONE )
 		plog(gettext("Note: Object \"gfxbutton\" %u failed to release " \
 			"a mouse-down background \"%s\": %d\n"), obj->id, widget->back_mdn_name, kucode);
+
+	pstop();
+	return KE_NONE;
+}
+
+kucode_t gfxbut_dim( gui_obj_t *obj )
+{
+	gui_gfxbut_t *const widget = (gui_gfxbut_t*)obj->widget;
+	pstart();
+
+	if ( obj->status > GUI_NOTLOADED )
+	{
+		obj->width = widget->back_nor->w;
+		obj->height = widget->back_nor->h;
+	}
 
 	pstop();
 	return KE_NONE;
@@ -301,7 +316,7 @@ gui_event_st gfxbut_mup( gui_obj_t *obj, int x, int y, int z )
 		status = gfxbut_mon(obj, x, y, z); else
 		status = gfxbut_moff(obj, x, y, z);
 
-	if ( widget->click && (widget->click(obj, (int)z) != KE_NONE) )
+	if ( widget->click && (widget->click(obj, (void*)z) != KE_NONE) )
 		return GUIE_ERROR;
 
 	pstop();

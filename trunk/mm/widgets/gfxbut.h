@@ -101,6 +101,14 @@ kucode_t gfxbut_load( gui_obj_t *obj );
 */
 kucode_t gfxbut_uload( gui_obj_t *obj );
 
+//! Change the button dimentions
+/*!
+	Changes the button dimentions to normal image dimentions.
+	\return Always \a KE_NONE.
+	\sa gui_dim_f().
+*/
+kucode_t gfxbut_dim( gui_obj_t *obj );
+
 //! Set the attribute of the graphical button.
 /*!
 	Sets a button attribute.
