@@ -214,8 +214,7 @@ void *dl_list_next( list_t *list )
 	if ( !node )
 		return NULL;
 	
-	if ( node->next )
-		list->ptr = node->next;
+	list->ptr = node->next;
 	
 	return node->data;
 }
@@ -227,8 +226,7 @@ void *dl_list_prev( list_t *list )
 	if ( !node )
 		return NULL;
 	
-	if ( node->prev )
-		list->ptr = node->prev;
+	list->ptr = node->prev;
 	
 	return node->data;
 }
@@ -243,9 +241,14 @@ int dl_list_isfirst( list_t *list )
 	return !(list->ptr && list->ptr->prev);
 }
 
+int dl_list_offside( list_t *list )
+{
+	return !list->ptr;
+}
+
 kucode_t dl_list_first( list_t *list )
 {
-	if ( !list->ptr )
+	if ( !list->head )
 		return KE_EMPTY;
 	list->ptr = list->head;
 	return KE_NONE;
@@ -253,7 +256,7 @@ kucode_t dl_list_first( list_t *list )
 
 kucode_t dl_list_last( list_t *list )
 {
-	if ( !list->ptr )
+	if ( !list->tail )
 		return KE_EMPTY;
 	list->ptr = list->tail;
 	return KE_NONE;

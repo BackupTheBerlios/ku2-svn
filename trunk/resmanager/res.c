@@ -198,6 +198,7 @@ kucode_t res_release( const char *name )
 	if ( res == NULL )
 		KU_ERRQ(KE_NOTFOUND);
 
+	ku_avoid( res->loadcnt == 0 );
 	if ( res->loadcnt == 1 )
 	{
 		//	выгрузка ресурса

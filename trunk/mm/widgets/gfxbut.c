@@ -18,6 +18,33 @@
 #include "gfx/gfx.h"
 #include "gui/gui.h"
 
+static void gfxbut_ch_state( gui_obj_t *obj, int state )
+{
+	gui_gfxbut_t *const widget = (gui_gfxbut_t*)obj->widget;
+
+	switch ( state )
+	{
+		case GFXBUT_NORM:
+		{
+			widget->face = widget->back_nor;
+			break;
+		}
+		case GFXBUT_MON:
+		{
+			widget->face = widget->back_mon;
+			break;
+		}
+		case GFXBUT_MDN:
+		{
+			widget->face = widget->back_mdn;
+			break;
+		}
+	}
+
+	obj->width = widget->face->w;
+	obj->height = widget->face->h;
+}
+
 kucode_t gfxbut_init( gui_obj_t *obj )
 {
 	gui_gfxbut_t *const widget = (gui_gfxbut_t*)obj->widget;
@@ -40,7 +67,7 @@ kucode_t gfxbut_init( gui_obj_t *obj )
 	obj->disable = NULL;
 	obj->hide = NULL;
 
-	obj->dim = gfxbut_dim;
+	obj->dim = NULL;
 
 	obj->set = gfxbut_set;
 	obj->get = gfxbut_get;
@@ -114,7 +141,7 @@ kucode_t gfxbut_load( gui_obj_t *obj )
 		return kucode;
 	}
 
-	widget->face = widget->back_nor;
+	gfxbut_ch_state(obj, GFXBUT_NORM);
 
 	pstop();
 	return KE_NONE;
@@ -141,6 +168,7 @@ kucode_t gfxbut_uload( gui_obj_t *obj )
 	return KE_NONE;
 }
 
+#if 0
 kucode_t gfxbut_dim( gui_obj_t *obj )
 {
 	gui_gfxbut_t *const widget = (gui_gfxbut_t*)obj->widget;
@@ -155,6 +183,7 @@ kucode_t gfxbut_dim( gui_obj_t *obj )
 	pstop();
 	return KE_NONE;
 }
+#endif
 
 kucode_t gfxbut_set( gui_obj_t *obj, int param, void *data )
 {
@@ -249,18 +278,17 @@ gui_event_st gfxbut_mon( gui_obj_t *obj, int x, int y, int z )
 	gui_gfxbut_t *const widget = (gui_gfxbut_t*)obj->widget;
 	pstart();
 
-	widget->st_mon = 1;
-
-	if ( !widget->st_mdown )
+	if ( !widget->st_mdown && !widget->st_mon )
 	{
-		widget->face = widget->back_mon;
-		if ( gfx_draw(widget->face, NULL, GFX_IMG_REAL, obj->rx, \
-			obj->ry, 0, 0, 0, 0) != KE_NONE )
+		gfxbut_ch_state(obj, GFXBUT_MON);
+		if ( gfxbut_draw(obj, 0, 0, 0, 0) != KE_NONE )
 			return GUIE_ERROR;
 
 		pstop();
 		return GUIE_DRAW;
 	}
+
+	widget->st_mon = 1;
 
 	pstop();
 	return GUIE_EAT;
@@ -275,9 +303,8 @@ gui_event_st gfxbut_moff( gui_obj_t *obj, int x, int y, int z )
 
 	if ( !widget->st_mdown )
 	{
-		widget->face = widget->back_nor;
-		if ( gfx_draw(widget->face, NULL, GFX_IMG_REAL, obj->rx, obj->ry, \
-			0, 0, 0, 0) != KE_NONE )
+		gfxbut_ch_state(obj, GFXBUT_NORM);
+		if ( gfxbut_draw(obj, 0, 0, 0, 0) != KE_NONE )
 			return GUIE_ERROR;
 
 		pstop();
@@ -295,10 +322,11 @@ gui_event_st gfxbut_mdown( gui_obj_t *obj, int x, int y, int z )
 
 	widget->st_mdown = 1;
 
-	widget->face = widget->back_mdn;
-	if ( gfx_draw(widget->face, NULL, GFX_IMG_REAL, obj->rx, obj->ry, \
-		0, 0, 0, 0) != KE_NONE )
+	gfxbut_ch_state(obj, GFXBUT_MDN);
+	if ( gfxbut_draw(obj, 0, 0, 0, 0) != KE_NONE )
 		return GUIE_ERROR;
+
+	plog("%d\n", widget->st_mon);
 
 	pstop();
 	return GUIE_DRAW;
@@ -310,11 +338,13 @@ gui_event_st gfxbut_mup( gui_obj_t *obj, int x, int y, int z )
 	gui_event_st status;
 	pstart();
 
-	widget->st_mdown = 0;
+	plog("%d\n", widget->st_mon);
 
+	widget->st_mdown = 0;
+	widget->st_mon = 1-widget->st_mon;
 	if ( widget->st_mon )
-		status = gfxbut_mon(obj, x, y, z); else
-		status = gfxbut_moff(obj, x, y, z);
+		status = gfxbut_moff(obj, x, y, z); else
+		status = gfxbut_mon(obj, x, y, z);
 
 	if ( widget->click && (widget->click(obj, (void*)z) != KE_NONE) )
 		return GUIE_ERROR;

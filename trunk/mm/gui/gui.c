@@ -26,8 +26,9 @@ static int gui_compf( void *obj1, void *obj2 )
 //! Freeing function.
 static int gui_freef( void *obj )
 {
-	if ( ((gui_obj_t*)obj)->status > GUI_NOTLOADED )
-		((gui_obj_t*)obj)->uload(obj);
+	((gui_obj_t*)obj)->destroyf(obj);
+	if ( ((gui_obj_t*)obj)->children )
+		dl_list_free(((gui_obj_t*)obj)->children, NULL);
 	dfree(obj);
 	return 0;
 }
@@ -132,7 +133,7 @@ gui_obj_t *gui_obj_create( gui_load_f initf, uint widget_sz, ku_flag32_t flags )
 
 	obj->id = gui_lastid++;
 
-	plog(gettext("Object \"%s\" %u is created!\n"), (char*)obj->widget, obj->id);
+	plog(gettext("Object '%s` %u is created!\n"), (char*)obj->widget, obj->id);
 	pstop();
 	return obj;
 }
@@ -163,7 +164,7 @@ kucode_t gui_obj_delete( gui_obj_t *obj )
 	{
 		if ( dl_list_first(obj->children) == KE_NONE )
 			do gui_obj_delete(dl_list_cur(obj->children));
-				while ( !dl_list_islast(obj->children) );
+				while ( !dl_list_offside(obj->children) );
 		dl_list_free(obj->children, NULL);
 	}
 	
@@ -173,7 +174,7 @@ kucode_t gui_obj_delete( gui_obj_t *obj )
 		gui_excl_from_parent(obj);
 	}
 
-	plog(gettext("Object \"%s\" %u is deleted!\n"), (char*)obj->widget, obj->id);
+	plog(gettext("Object '%s` %u is deleted!\n"), (char*)obj->widget, obj->id);
 	dfree(obj);
 	recursion_lvl--;
 	
@@ -228,7 +229,7 @@ kucode_t gui_move( gui_obj_t *obj, gui_obj_t *host, int x, int y, int w, int h )
 			return kucode;
 	}
 
-	plog(gettext("Object \"%s\" %u was moved!\n"), (char*)obj->widget, obj->id);
+	plog(gettext("Object '%s` %u was moved!\n"), (char*)obj->widget, obj->id);
 	pstop();
 	return KE_NONE;
 }
@@ -313,7 +314,6 @@ kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status )
 
 kucode_t gui_draw( gui_obj_t *obj, int x, int y, int w, int h )
 {
-	int finished;
 	pstart();
 
 	if ( obj == NULL )
@@ -328,10 +328,9 @@ kucode_t gui_draw( gui_obj_t *obj, int x, int y, int w, int h )
 		{
 			do
 			{
-				finished = dl_list_islast(obj->children);
 				if ( gui_draw(dl_list_next(obj->children), 0, 0, 0, 0) != KE_NONE )
 					return kucode;
-			}	while ( !finished );
+			}	while ( !dl_list_offside(obj->children) );
 		}
 	}
 
@@ -359,7 +358,7 @@ static gui_obj_t *gui_search_by_coord( int x, int y )
 				obj = nobj;
 				break;
 			}
-			if  ( dl_list_isfirst(obj->children) )
+			if  ( dl_list_offside(obj->children) )
 				return obj;
 		}
 	}
@@ -392,10 +391,6 @@ gui_event_st gui_process( SDL_Event *event )
 		}
 		case SDL_MOUSEBUTTONDOWN:
 		{
-			#if 0
-			if ( obj_mdown != NULL )
-				plog("Debug: double mouse-down detected! (%s)\n", (char*)obj_mdown->widget);
-			#endif
 			ku_avoid( obj_mdown != NULL );
 			obj_mdown = gui_search_by_coord(event->button.x, event->button.y);
 			if ( obj_mdown && obj_mdown->mdown )

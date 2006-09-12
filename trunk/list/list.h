@@ -148,7 +148,8 @@ void *dl_list_cur( list_t *list );
 	Gets the data of the current element of the list and the next element,
 	if exists, becomes the current one.
 	\param list List to deal with.
-	\return Data of the current element, or \e NULL if list is empty.
+	\return Data of the current element, or \e NULL if list is empty or
+	the current element is off the list.
 	\note \ref kucode is not affected.
 	\sa dl_list_cur() and dl_list_prev().
 */
@@ -159,7 +160,8 @@ void *dl_list_next( list_t *list );
 	Gets the data of the current element of the list and the previous element,
 	if exists, becomes the current one.
 	\param list List to deal with.
-	\return Data of the current element, or \e NULL if list is empty.
+	\return Data of the current element, or \e NULL if list is empty or
+	the current element is off the list.
 	\note \ref kucode is not affected.
 	\sa dl_list_cur() and dl_list_next().
 */
@@ -170,9 +172,10 @@ void *dl_list_prev( list_t *list );
 	Checks whether the current element is the last one.
 	\param list List to deal with.
 	\retval 0 Current element is not the last one.
-	\retval 1 Current element is the last one, or list it empty.
+	\retval !0 Current element is the last one, list it empty or
+	the current element is off the list.
 	\note \ref kucode is not affected.
-	\sa dl_list_isfirst().
+	\sa dl_list_isfirst() and dl_list_offside.
 */
 int dl_list_islast( list_t *list );
 
@@ -181,11 +184,23 @@ int dl_list_islast( list_t *list );
 	Checks whether the current element is the first one.
 	\param list List to deal with.
 	\retval 0 Current element is not the first one.
-	\retval 1 Current element is the first one, or list it empty.
+	\retval !0 Current element is the first one, list it empty or
+	the current element is off the list.
 	\note \ref kucode is not affected.
-	\sa dl_list_islast().
+	\sa dl_list_islast() and dl_list_offside().
 */
 int dl_list_isfirst( list_t *list );
+
+//! Check whether the current element is off the list.
+/*!
+	Checks whether the current element is off the list.
+	\param list List to deal with.
+	\retval 0 Current element is in the list.
+	\retval !0 Current element is off the list (including if list is empty).
+	\note \ref kucode is not affected.
+	\sa dl_list_isfirst() and dl_list_islast().
+*/
+int dl_list_offside( list_t *list );
 
 //! Go the the first element of the list.
 /*!
