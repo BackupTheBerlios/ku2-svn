@@ -13,7 +13,7 @@
 	Resource manager routines, such as loading, unloading diffrent types of resources.
 	\author J. Anton
 	\date Mon Aug 28 12:46:26 2006
-	\version 1.1.0
+	\version 1.2.0
 */
 
 #ifndef KU__RES_H__
@@ -71,8 +71,24 @@ struct STRUCT_RES
 	ku_flag32_t
 		flags;		//!< Resource unit flags.
 	void *param;	//!< Loading parameters.
-	int type;		//!< Type resource belongs to.
+	restype_t *type;
+					//!< Type resource belongs to.
 }	res_t;
+
+//! Type flags.
+enum RESTYPE_FLAGS
+{
+	RESTYPE_ZFL = 0,
+					//!< Zero flag.
+	//! Every time load a unique object.
+	/*!
+		When calling res_access() or res_access_adv() every time a new
+		object is loaded.
+		\note res_release() should not be called on a such tipe resources, so
+		resource should be freed by the caller.
+	*/
+	RESTYPE_UNIQ = 1
+};
 
 //! Initialize resource engine.
 /*!
@@ -111,9 +127,10 @@ kucode_t res_assign( int type, ku_flag32_t flags, rescontrol_f control );
 	\param path Resource file path.
 	\param name Resource name.
 	\param type Resource type.
-	\param param Resource loading parameters.
+	\param param Resource loading parameter.
 	\param flags Resource flags.
 	\retval KE_NONE No error.
+	\retval KE_INVALID Resource type does not exist (invalid type).
 	\retval KE_MEMORY Memory allocation error.
 	\retval KE_* abtree_ins() errors.
 */
@@ -127,11 +144,23 @@ kucode_t res_add( const char *path, const char *name, int type, void *param,
 	\param name Resource name.
 	\return Resource data, or \e NULL if error and \ref kucode is set to the
 	valid value: \n \a KE_NOTFOUND: resource with the selected name was not found. \n
-	\a KE_INVALID: resource type does not exist (invalid type). \n
 	\a KE_EXTERNAL: control function has returned \e NULL.
-	\sa res_release().
+	\sa res_access_adv() and res_release().
 */
 void *res_access( const char *name );
+
+//! Get access to resource data (advanced).
+/*!
+	Gets access to resource data. If resource is not loaded yet, data are loaded
+	using the control function.
+	\param name Resource name.
+	\param param Loading parameter which is used instead of res_add() \a param.
+	\return Resource data, or \e NULL if error and \ref kucode is set to the
+	valid value: \n \a KE_NOTFOUND: resource with the selected name was not found. \n
+	\a KE_EXTERNAL: control function has returned \e NULL.
+	\sa res_access() and res_release().
+*/
+void *res_access_adv( const char *name, void *param );
 
 //! Release the resource data.
 /*!
@@ -142,7 +171,7 @@ void *res_access( const char *name );
 	\retval KE_NOTFOUND Resource with the selected name was not found.
 	\retval KE_INVALID Invalid resource type.
 	\retval KE_EXTERNAL control function did not return \e NULL.
-	\sa res_access().
+	\sa res_access() and res_access_adv().
 */
 kucode_t res_release( const char *name );
 

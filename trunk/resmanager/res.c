@@ -20,15 +20,7 @@ static tree_t *reses, *restypes;
 
 static kucode_t res_uload( res_t *res )
 {
-	restype_t searchtype;
-	restype_t *rtype;
-
-	searchtype.type = res->type;
-	rtype = abtree_search(restypes, &searchtype);
-	if ( rtype == NULL )
-		KU_ERRQ(KE_INVALID);
-
-	res->data = rtype->control(NULL, RES_ULOAD, res->data);
+	res->data = res->type->control(NULL, RES_ULOAD, res->data);
 	if ( res->data != NULL )
 		KU_ERRQ(KE_EXTERNAL);
 
@@ -125,17 +117,23 @@ kucode_t res_add( const char *path, const char *name, int type, void *param,
 				 ku_flag32_t flags )
 {
 	res_t *res;
+	restype_t searchtype, *rtype;
 	pstart();
+	
+	searchtype.type = type;
+	rtype = abtree_search(restypes, &searchtype);
+	if ( rtype == NULL )
+		KU_ERRQ(KE_INVALID);
 	
 	res = dmalloc(sizeof(res_t)+strlen(name)+strlen(path)+2);
 	if ( res == NULL )
 		KU_ERRQ(KE_MEMORY);
-
+	
 	res->name = (char*)res+sizeof(res_t);
 	strcpy((char*)res->name, name);
 	res->path = res->name+strlen(name)+1;
 	strcpy((char*)res->path, path);
-	res->type = type;
+	res->type = rtype;
 	res->param = param;
 	res->flags = flags;
 	res->loadcnt = 0;
@@ -154,8 +152,6 @@ kucode_t res_add( const char *path, const char *name, int type, void *param,
 void *res_access( const char *name )
 {
 	res_t *res;
-	restype_t searchtype;
-	restype_t *rtype;
 	pstart();
 	
 	res = res_search(name);
@@ -165,25 +161,51 @@ void *res_access( const char *name )
 		return NULL;
 	}
 	
-	if ( res->loadcnt == 0 )
+	if ( (res->loadcnt == 0) || (res->type->flags&RESTYPE_UNIQ) )
 	{
 		//	загрузка ресурса
-		searchtype.type = res->type;
-		rtype = abtree_search(restypes, &searchtype);
-		if ( rtype == NULL )
-		{
-			kucode = KE_INVALID;
-			return NULL;
-		}
-		
-		res->data = rtype->control(res->path, RES_LOAD, res->param);
+		res->data = res->type->control(res->path, RES_LOAD, res->param);
 		if ( res->data == NULL )
 		{
 			kucode = KE_EXTERNAL;
 			return NULL;
 		}
+		res->loadcnt = 1;
+	}	else
+	{
+		res->loadcnt++;
 	}
-	res->loadcnt++;
+	
+	pstop();
+	return res->data;
+}
+
+void *res_access_adv( const char *name, void *param )
+{
+	res_t *res;
+	pstart();
+	
+	res = res_search(name);
+	if ( res == NULL )
+	{
+		kucode = KE_NOTFOUND;
+		return NULL;
+	}
+	
+	if ( (res->loadcnt == 0) || (res->type->flags&RESTYPE_UNIQ) )
+	{
+		//	загрузка ресурса
+		res->data = res->type->control(res->path, RES_LOAD, param);
+		if ( res->data == NULL )
+		{
+			kucode = KE_EXTERNAL;
+			return NULL;
+		}
+		res->loadcnt = 1;
+	}	else
+	{
+		res->loadcnt++;
+	}
 	
 	pstop();
 	return res->data;
@@ -197,6 +219,9 @@ kucode_t res_release( const char *name )
 	res = res_search(name);
 	if ( res == NULL )
 		KU_ERRQ(KE_NOTFOUND);
+	
+	if ( res->type->flags&RESTYPE_UNIQ )
+		KU_ERRQ(KE_INVALID);
 
 	ku_avoid( res->loadcnt == 0 );
 	if ( res->loadcnt == 1 )

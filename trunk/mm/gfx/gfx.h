@@ -162,9 +162,9 @@ SDL_Surface *gfx_txtrender ( const char *text, const gfx_font_t *font, SDL_Color
 	If \a _h is zero then the whole text height is rendered. \n
 	if \a dst is \e NULL then the text is rendered on the screen.
 */
-//kucode_t gfx_print( const char *text, const TTF_Font *font, SDL_Surface *dst, \
+/*kucode_t gfx_print( const char *text, const TTF_Font *font, SDL_Surface *dst, \
 				   gfx_txtstyle_t style, SDL_Color colour, int x, int y, \
-				   int _x, int _y, int _w, int _h );
+				   int _x, int _y, int _w, int _h );*/
 
 #if 0
 /*

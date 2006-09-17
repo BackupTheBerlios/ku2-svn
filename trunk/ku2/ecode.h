@@ -39,7 +39,8 @@ enum
 	KE_IO,			//!< Input/Output error.
 	KE_SYNTAX,		//!< Syntax error.
 	KE_EXTERNAL,	//!< External error.
-	KE_INVALID		//!< Invalid data.
+	KE_INVALID,		//!< Invalid data.
+	KE_LIBRARY		//!< External library error.
 }	kucode_t;
 
 //! Contains code of the last error.
