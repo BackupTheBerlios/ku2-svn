@@ -23,6 +23,14 @@ extern "C" {
 #endif
 
 #include "ku2/ecode.h"
+#include "ku2/types.h"
+
+//! Logging flags.
+enum LOG_FLAGS
+{
+	LOG_ZFL = 0,	//!< Zero flag.
+	LOG_NHEAD = 1	//!< No header and footer of the logging session.
+};
 
 //! Open a log file.
 /*!
@@ -34,6 +42,17 @@ extern "C" {
 */
 kucode_t openlog( const char *file );
 
+//! Open a log file (advanced).
+/*!
+	Opens a file for appending a log messages. Starts the logging session.
+	\param file A log filename.
+	\param flags Logging flags (options).
+	\retval KE_NONE No error.
+	\retval KE_IO Cannot open a file.
+	\sa closelog(), flushlog() and plog().
+*/
+kucode_t openlog_adv( const char *file, ku_flag32_t flags );
+
 //! Close a log file.
 /*!
 	Closes the log file. Stops the logging session.
@@ -42,6 +61,16 @@ kucode_t openlog( const char *file );
 	\sa openlog(), flushlog() and plog().
 */
 kucode_t closelog( void );
+
+//! Close a log file (advanced).
+/*!
+	Closes the log file. Stops the logging session.
+	\param flags Logging flags (options).
+	\retval KE_NONE No error.
+	\retval KE_IO Cannot close a file.
+	\sa openlog(), flushlog() and plog().
+*/
+kucode_t closelog_adv( ku_flag32_t flags );
 
 //! Flush the log file.
 /*!

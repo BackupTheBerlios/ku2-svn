@@ -22,6 +22,9 @@
 extern "C" {
 #endif
 
+#include "ku2/ecode.h"
+#include "ku2/types.h"
+
 //! Get the largest value.
 #define MAXint( a, b ) ((a>b)?(a):(b))
 
@@ -75,6 +78,10 @@ char *vstr( const char *fmt, ... );
 	\sa qdir2().
 */
 void qdir( char *path );
+
+uint ku_mtime( void );
+kucode_t ku_strtolong( const char *str, long int *i );
+kucode_t ku_strtoulong( const char *str, unsigned long int *i );
 
 #ifdef __cplusplus
 }

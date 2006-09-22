@@ -21,6 +21,11 @@ FILE *logstream;
 
 kucode_t openlog( const char *file )
 {
+	return openlog_adv(file, LOG_ZFL);
+}
+
+kucode_t openlog_adv( const char *file, ku_flag32_t flags )
+{
 	FILE *f;
 	pstart();
 	
@@ -29,8 +34,12 @@ kucode_t openlog( const char *file )
 		KU_ERRQ(KE_IO);
 	
 	logstream = f;
-	fprintf(logstream, "========\n");
-	plog(gettext("Logging has been started\n"));
+
+	if ( !(flags&LOG_NHEAD) )
+	{
+		fprintf(logstream, "========\n");
+		plog(gettext("Logging has been started\n"));
+	}
 	
 	pstop();
 	return KE_NONE;
@@ -38,13 +47,24 @@ kucode_t openlog( const char *file )
 
 kucode_t closelog( void )
 {
+	return closelog_adv(LOG_ZFL);
+}
+
+kucode_t closelog_adv( ku_flag32_t flags )
+{
 	pstart();
 	
-	plog(gettext("Logging is being stopped\n"));
-	fprintf(logstream, "========\n\n");
+	if ( !(flags&LOG_NHEAD) )
+	{
+		plog(gettext("Logging is being stopped\n"));
+		fprintf(logstream, "========\n\n");
+	}
 	
 	if ( fclose(logstream) != 0 )
+	{
+		logstream = NULL;
 		KU_ERRQ(KE_IO);
+	}
 	
 	logstream = NULL;
 	

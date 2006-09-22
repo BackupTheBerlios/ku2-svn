@@ -10,9 +10,13 @@
 #include <stdarg.h>
 #include <errno.h>
 #include <string.h>
+#include <limits.h>
+#include <sys/timeb.h>
+#include <stdlib.h>
 
 #include "other.h"
 #include "ku2/gettext.h"
+#include "ku2/ecode.h"
 
 #ifdef DEBUG
 #include "log/log.h"
@@ -60,4 +64,35 @@ void qdir( char *path )
 		c[0] = '/';
 		c[1] = 0;
 	}
+}
+
+uint ku_mtime( void )
+{
+    struct timeb ttm;
+    ftime(&ttm);
+    return (uint)(ttm.time*1000+ttm.millitm);
+}
+
+kucode_t ku_strtolong( const char *str, long int *i )
+{
+	char *ep;
+	long int res = strtol(str, &ep, 10);
+	
+	if ( (*str == 0) || (*ep != 0) || (res == LONG_MAX) || (res == LONG_MIN) )
+	    KU_ERRQ(KE_INVALID);
+	*i = res;
+
+	return KE_NONE;
+}
+
+kucode_t ku_strtoulong( const char *str, unsigned long int *i )
+{
+	char *ep;
+	long int res = strtoul(str, &ep, 10);
+
+	if ( (*str == 0) || (*ep != 0) || (res == ULONG_MAX) )
+	    KU_ERRQ(KE_INVALID);
+	*i = res;
+
+	return KE_NONE;
 }
