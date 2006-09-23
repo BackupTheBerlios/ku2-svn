@@ -80,6 +80,7 @@ char *vstr( const char *fmt, ... );
 void qdir( char *path );
 
 uint ku_mtime( void );
+char *ku_ttime( void );
 kucode_t ku_strtolong( const char *str, long int *i );
 kucode_t ku_strtoulong( const char *str, unsigned long int *i );
 

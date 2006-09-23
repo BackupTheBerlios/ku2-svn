@@ -13,6 +13,7 @@
 #include <limits.h>
 #include <sys/timeb.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "other.h"
 #include "ku2/gettext.h"
@@ -71,6 +72,18 @@ uint ku_mtime( void )
     struct timeb ttm;
     ftime(&ttm);
     return (uint)(ttm.time*1000+ttm.millitm);
+}
+
+char *ku_ttime( void )
+{
+	time_t t;
+	struct tm *tm;
+	time(&t);
+	
+	tm = localtime(&t);
+	return vstr("%.2d.%.2d.%.4d %.2d:%.2d:%.2d", \
+		tm->tm_mday, tm->tm_mon+1, tm->tm_year+1900, \
+		tm->tm_hour, tm->tm_min, tm->tm_sec);
 }
 
 kucode_t ku_strtolong( const char *str, long int *i )
