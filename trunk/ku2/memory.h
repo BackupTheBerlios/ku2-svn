@@ -23,6 +23,7 @@ extern "C" {
 #endif
 
 #ifdef DEBUG
+#include <stdlib.h>
 
 void *malloc_debug( size_t size );
 void free_debug( void *__ptr );

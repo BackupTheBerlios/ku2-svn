@@ -58,11 +58,9 @@ env = conf.Finish()
 mode = ARGUMENTS.get("mode", "debug")
 if mode == "debug":
 	env.Append(CCFLAGS = debug_ccflags, CPPDEFINES = ["DEBUG"])
-	debug = ARGUMENTS.get("debug", "memory,func,log")
+	debug = ARGUMENTS.get("debug", "memory,log")
 	if "memory" in debug:
 		env.Append(CPPDEFINES = ["DEBUG_MEMORY"])
-	if "func" in debug:
-		env.Append(CPPDEFINES = ["DEBUG_FUNC"])
 	if "log" in debug:
 		env.Append(CPPDEFINES = ["DEBUG_LOG"])
 elif mode == "release":

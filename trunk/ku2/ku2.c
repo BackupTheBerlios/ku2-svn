@@ -17,8 +17,10 @@
 #include "log/log.h"
 
 kucode_t kucode;
-uint mallocs = 0;
-size_t sizes = 0;
+
+static uint mallocs = 0;
+static size_t sizes = 0;
+static int ku_func_debug_is_on = 0;
 
 void printf_debug( const char *file, const char *func, int line, char *fmt, ... )
 {
@@ -62,4 +64,21 @@ void memory_stat( void )
 	plog(gettext("Memory status:\n" \
 		"\tbytes allocated: %d\n" \
 		"\tblocks: %u.\n"), sizes, mallocs);
+}
+
+void func_debug( int status )
+{
+	ku_func_debug_is_on = status;
+}
+
+void pstart_debug( const char *func )
+{
+	if ( ku_func_debug_is_on )
+		printf("### ==> %s >>>\n", func);
+}
+
+void pstop_debug( const char *func )
+{
+	if ( ku_func_debug_is_on )
+		printf("### <== %s <<<\n", func);
 }
