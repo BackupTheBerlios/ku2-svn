@@ -63,9 +63,9 @@ kucode_t cfg_close( void )
 		KU_ERRQ(KE_EMPTY);
 	
 	fclose(cfgf);
+	cfgf = NULL;
 	
 	abtree_free(qtree, qtree_free);
-	dfree(qtree);
 	
 	pstop();
 	return KE_NONE;
