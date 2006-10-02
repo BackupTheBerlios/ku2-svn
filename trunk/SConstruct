@@ -54,6 +54,9 @@ env = conf.Finish()
 
 ###
 #	Getting building mode
+#	Possible modes:
+#		debug - build with debugging
+#		release - build with optimisations and witout debuggin
 ###
 mode = ARGUMENTS.get("mode", "debug")
 if mode == "debug":
@@ -73,8 +76,10 @@ else:
 
 ###
 #	Getting list of add-ons to build with.
+#	Possible add-ons:
+#		gettext - use libintl support
 ###
-use = ARGUMENTS.get("use", "gettext")
+use = ARGUMENTS.get("use", "")
 notuse = ARGUMENTS.get("notuse", "")
 if "gettext" in use and not "gettext" in notuse:
 	env.Append(CPPDEFINES = ["USE_GETTEXT"])
@@ -96,15 +101,15 @@ sources = Split("""
 ku2lib = env.Library("ku2", sources)
 
 ###
-#	Kane Utilities 2 SDL GUI and multimedia
+#	Kane Utilities 2 SDL GUI and multimedia module
 ###	
 mm_sources = Split("""
-	mm/gfx/gfx.c
-	mm/gfx/font.c
-	mm/gui/gui.c
-	mm/widgets/frame.c
-	mm/widgets/gfxbut.c
-	mm/widgets/textline.c
+	modules/mm/gfx/gfx.c
+	modules/mm/gfx/font.c
+	modules/mm/gui/gui.c
+	modules/mm/widgets/frame.c
+	modules/mm/widgets/gfxbut.c
+	modules/mm/widgets/textline.c
 	""")
 
 env4mm = env.Copy()
@@ -113,7 +118,16 @@ env4mm.Append(CPPPATH = sdl_includes+["mm"])
 ku2mm = env4mm.Library("ku2mm", mm_sources)
 
 ###
-#	Kane Utilities 2 Test programm
+#	Kane Utilities 2 communication module
+###
+com_sources = Split("""
+	modules/com/channel/channel.c
+	""")
+
+ku2com = env.Library("ku2com", com_sources)
+
+###
+#	Kane Utilities 2 Test programme
 ###
 test_sources = Split("""
 	test/ku.c
@@ -134,12 +148,19 @@ ku2test = env4test.Program("ku2test", test_sources)
 
 ###
 #	Getting list of modules to build
+#	Possible modules:
+#		core - build core library (default)
+#		mm - build multimedia module
+#		com - build communication module (default)
+#		test - build the test programme
 ###
-build = ARGUMENTS.get("build", "core,mm")
+build = ARGUMENTS.get("build", "core,com")
 notbuild = ARGUMENTS.get("notbuild", "")
 if "core" in build and not "core" in notbuild:
 	Default(ku2lib)
 if "mm" in build and not "mm" in notbuild:
 	Default(ku2mm)
+if "com" in build and not "com" in notbuild:
+	Default(ku2com)
 if "test" in build and not "test" in notbuild:
 	Default(ku2test)
