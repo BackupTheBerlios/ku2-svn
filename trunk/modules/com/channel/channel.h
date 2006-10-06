@@ -19,17 +19,35 @@ extern "C" {
 #include "ku2/ecode.h"
 #include "ku2/types.h"
 
-typedef
-struct
-{
-	int o2;
-}	channel_t;
+#ifdef WIN32
+#include <winsock2.h>
+#endif
+
+#define CHANNEL_BUFFER_SIZE 1024
+#define STREAM_BLOCK_SIZE 4096
 
 typedef
 enum
 {
 	O1
 }	channel_opt_t;
+
+typedef
+struct
+{
+	#ifdef WIN32
+	SOCKET fd;
+	#else
+	int fd;
+	#endif
+
+	char **inbuf, **outbuf;
+	uint bufsz;
+	uint *rpos, *wpos;
+
+	//	options
+	uint max_block_size;
+}	channel_t;
 
 //! Open a log file.
 /*!
@@ -39,14 +57,18 @@ enum
 	\retval KE_IO Cannot open a file.
 	\sa closelog(), flushlog() and plog().
 */
-channel_t *channel_assign( int fd, uint streams, ku_flag32_t flags );
+#ifdef WIN32
+channel_t *channel_assign( SOCKET fd, uint streams, uint bufsz, ku_flag32_t flags );
+#else
+channel_t *channel_assign( int fd, uint streams, uint bufsz, ku_flag32_t flags );
+#endif
 
 kucode_t channel_release( channel_t *channel );
 kucode_t channel_setopt( channel_t *channel, channel_opt_t opt, void *data );
 kucode_t channel_getopt( channel_t *channel, channel_opt_t opt, void *data );
 
 kucode_t channel_write( channel_t *channel, uint stream, const char *buffer, uint size );
-int channel_read( channel_t *channel, uint stream, const char *buffer, uint size );
+int channel_read( channel_t *channel, uint stream, char *buffer, uint size );
 kucode_t channel_update( channel_t *channel );
 
 #ifdef __cplusplus

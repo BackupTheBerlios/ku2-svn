@@ -34,6 +34,7 @@ enum
 	KE_ASSERT,		//!< Assertion has failed.
 	KE_MEMORY,		//!< Memory allocation error.
 	KE_EMPTY,		//!< Data container is empty.
+	KE_FULL,		//!< Data container is full.
 	KE_NOTFOUND,	//!< Data was not found.
 	KE_DOUBLE,		//!< Data already exists.
 	KE_IO,			//!< Input/Output error.

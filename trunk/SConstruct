@@ -11,7 +11,7 @@ env = Environment(CPPPATH = ["."])
 #	Platform depended variables and actions
 ###
 if env["PLATFORM"] == "win32":
-	env.Append(CCFLAGS = ["/W3", "/MD", "/Wp64"], CPPDEFINES = ["_CRT_SECURE_NO_DEPRECATE", "WIN32"])
+	env.Append(CCFLAGS = ["/W3", "/MD", "/Wp64"], CPPDEFINES = ["_CRT_SECURE_NO_DEPRECATE", "WIN32", "VCPP"])
 	debug_ccflags = ["/ZI"]
 	release_ccflags = ["/O2"]
 	release_linkflags = [""]
