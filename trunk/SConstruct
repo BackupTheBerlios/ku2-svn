@@ -11,7 +11,9 @@ env = Environment(CPPPATH = ["."])
 #	Platform depended variables and actions
 ###
 if env["PLATFORM"] == "win32":
-	env.Append(CCFLAGS = ["/W3", "/MD", "/Wp64"], CPPDEFINES = ["_CRT_SECURE_NO_DEPRECATE", "WIN32", "VCPP"])
+	env.Append(CCFLAGS = ["/W3", "/MD", "/Wp64"], \
+		CPPDEFINES = ["_CRT_SECURE_NO_DEPRECATE", "WIN32", "VCPP"])
+		#LINKFLAGS = ["/SUBSYSTEM:WINDOWS"])
 	debug_ccflags = ["/ZI"]
 	release_ccflags = ["/O2"]
 	release_linkflags = [""]
@@ -113,7 +115,7 @@ mm_sources = Split("""
 	""")
 
 env4mm = env.Copy()
-env4mm.Append(CPPPATH = sdl_includes+["mm"])
+env4mm.Append(CPPPATH = sdl_includes+["modules/mm"])
 
 ku2mm = env4mm.Library("ku2mm", mm_sources)
 
@@ -133,11 +135,12 @@ test_sources = Split("""
 	test/ku.c
 	""")
 
+#	SDL
+#	SDL_image
+#	SDL_ttf
+#	ku2mm
 test_libs = Split("""
-	SDL
-	SDL_image
-	SDL_ttf
-	ku2mm
+	ku2com
 	ku2
 	""")
 

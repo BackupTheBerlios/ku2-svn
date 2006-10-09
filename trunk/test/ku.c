@@ -21,11 +21,14 @@
 #include "dialogue/dialogue.h"
 #include "other/other.h"
 
-#include "mm/mm.h"
-#include "mm/gfx/gfx.h"
-#include "mm/gui/gui.h"
-#include "mm/widgets/frame.h"
-#include "mm/widgets/gfxbut.h"
+#include "modules/com/channel/channel.h"
+
+#if 0
+#include "modules/mm/mm.h"
+#include "modules/mm/gfx/gfx.h"
+#include "modules/mm/gui/gui.h"
+#include "modules/mm/widgets/frame.h"
+#include "modules/mm/widgets/gfxbut.h"
 
 static int running;
 static gui_obj_t *window,
@@ -185,13 +188,21 @@ static kucode_t oper_gui( void )
 	}
 	return kucode;
 }
+#endif
 
 int main( int argc, char *argv[] )
 {
 	char *oper;
 	int finished = 0;
+	channel_t *chan;
 	pstart();
 	
+	chan = channel_assign(0, 3, 0, 0);
+	channel_write(chan, 0, "hello world!!", 14);
+	channel_write(chan, 1, "qwe", 4);
+	channel_write(chan, 0, "ttt", 4);
+
+	#if 0
 	dlgue_stream(stdin, stdout);
 	
 	if ( openlog("ku2.log") != KE_NONE )
@@ -237,6 +248,7 @@ int main( int argc, char *argv[] )
 	
 	dlogmemstat();
 	closelog();
+	#endif
 	pstop();
 	return EXIT_SUCCESS;
 }

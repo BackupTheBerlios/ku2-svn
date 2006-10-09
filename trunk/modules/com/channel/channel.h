@@ -1,10 +1,9 @@
-
 /*!
 	\file
 	\brief Communication channels.
 	
 	Communication channels for parallel data transfer throug it
-	(mainly for sockets).
+	(for sockets).
 	\author J. Anton
 	\date
 	\version 0.1.0
@@ -41,9 +40,13 @@ struct
 	int fd;
 	#endif
 
-	char **inbuf, **outbuf;
-	uint bufsz;
-	uint *rpos, *wpos;
+	uint bufsz, streams;
+
+	char *inbuf;
+	uint *irpos, *iwpos;
+
+	char *outbuf;
+	uint *orpos, *owpos;
 
 	//	options
 	uint max_block_size;

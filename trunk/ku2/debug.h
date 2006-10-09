@@ -37,7 +37,15 @@ printf_debug(__FILE__, __FUNCTION__, __LINE__, m, ##__VA_ARGS__)
 if ( expr ) \
 { \
 	pavoid_debug(__FILE__, __FUNCTION__, __LINE__); \
-	return KE_ASSERT; \
+	KU_ERRQ(KE_ASSERT); \
+}
+
+#define ku_avoid_adv( expr, retval ) \
+if ( expr ) \
+{ \
+	pavoid_debug(__FILE__, __FUNCTION__, __LINE__); \
+	kucode = KE_ASSERT; \
+	return retval; \
 }
 
 #define func_debug_on func_debug(1)
@@ -55,13 +63,24 @@ if ( expr ) \
 */
 #define pdebug( m, ... )
 
-//! Assert the expression.
+//! Assess the expression.
 /*!
 	Checks the expression. If it is true, then logs a message and returnes
 	\a KE_ASSERT.
 	\param expr Expression.
+	\sa ku_avoid_adv().
 */
 #define ku_avoid( expr )
+
+//! Assess the expression (advanced).
+/*!
+	Checks the expression. If it is true, then logs a message and returnes
+	an error value.
+	\param expr Expression.
+	\param retval Value to be returned.
+	\sa ku_avoid().
+*/
+#define ku_avoid_adv( expr, retval )
 
 //! Turn on function debug wath.
 #define func_debug_on

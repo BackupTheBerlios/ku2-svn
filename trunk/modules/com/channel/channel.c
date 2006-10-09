@@ -21,13 +21,14 @@ channel_t *channel_assign( int fd, uint streams, uint bufsz, ku_flag32_t flags )
 #endif
 {
 	channel_t *chan;
-	uint i, offset = sizeof(channel_t)+2*(sizeof(uint)*streams);
+	uint i;
+	const uint offset = sizeof(channel_t)+4*sizeof(uint)*streams;
 	pstart();
 
 	if ( bufsz == 0 )
 		bufsz = CHANNEL_BUFFER_SIZE;
 
-	chan = dmalloc(sizeof(channel_t) + 2*streams*(bufsz+sizeof(uint)));
+	chan = dmalloc(sizeof(channel_t) + 2*streams*(bufsz+2*sizeof(uint)));
 	if ( chan == NULL )
 	{
 		kucode = KE_MEMORY;
@@ -36,16 +37,19 @@ channel_t *channel_assign( int fd, uint streams, uint bufsz, ku_flag32_t flags )
 
 	chan->fd = fd;
 	chan->bufsz = bufsz;
-	chan->wpos = (uint*)((int8_t*)chan+sizeof(channel_t));
-	chan->rpos = (uint*)((int8_t*)chan->wpos+sizeof(uint)*streams);
+	chan->streams = streams;
 	chan->max_block_size = STREAM_BLOCK_SIZE;
+
+	chan->owpos = (uint*)((int8_t*)chan+sizeof(channel_t));
+	chan->orpos = (uint*)((int8_t*)chan->owpos+sizeof(uint)*streams);
+	chan->iwpos = (uint*)((int8_t*)chan->orpos+sizeof(uint)*streams);
+	chan->irpos = (uint*)((int8_t*)chan->iwpos+sizeof(uint)*streams);
 	
-	for ( i = 0; i < streams; i++, offset += 2*bufsz )
-	{
-		chan->outbuf[i] = (int8_t*)(chan)+offset;
-		chan->inbuf[i] = (int8_t*)(chan)+offset+bufsz;
-		chan->wpos[i] = chan->rpos[i] = 0;
-	}
+	chan->outbuf = (int8_t*)(chan)+offset;
+	chan->inbuf = (int8_t*)(chan)+offset+bufsz*streams;
+
+	for ( i = 0; i < streams; i++ )
+		chan->owpos[i] = chan->orpos[i] = chan->iwpos[i] = chan->irpos[i] = 0;
 
 	pstop();
 	return chan;
@@ -79,11 +83,13 @@ kucode_t channel_write( channel_t *channel, uint stream, const char *buffer, uin
 {
 	pstart();
 
-	if ( size > channel->bufsz-channel->wpos[stream] )
+	ku_avoid(stream >= channel->streams);
+
+	if ( size > channel->bufsz-channel->owpos[stream] )
 		return KE_FULL;
 
-	memcpy(channel->outbuf[stream]+channel->wpos[stream], buffer, size);
-	channel->wpos[stream] += size;
+	memcpy(channel->outbuf+stream*channel->bufsz+channel->owpos[stream], buffer, size);
+	channel->owpos[stream] += size;
 
 	pstop();
 	return KE_NONE;
@@ -93,11 +99,16 @@ int channel_read( channel_t *channel, uint stream, char *buffer, uint size )
 {
 	pstart();
 
-	if ( size > channel->wpos[stream]-channel->rpos[stream] )
-		return KE_EMPTY;
+	ku_avoid_adv(stream >= channel->streams, -1);
 
-	memcpy(buffer, channel->inbuf[stream]+channel->rpos[stream], size);
-	channel->rpos[stream] += size;
+	if ( size > channel->iwpos[stream]-channel->irpos[stream] )
+	{
+		kucode = KE_EMPTY;
+		return -1;
+	}
+
+	memcpy(buffer, channel->inbuf+stream*channel->bufsz+channel->irpos[stream], size);
+	channel->irpos[stream] += size;
 
 	pstop();
 	return 0;
@@ -105,9 +116,38 @@ int channel_read( channel_t *channel, uint stream, char *buffer, uint size )
 
 kucode_t channel_update( channel_t *channel )
 {
+	uint i, offset = 0;
+	int bsr;	// bytes sent/received
 	pstart();
 
+	for ( ;; )
+	{
+		int no_action = 1;
 
+		for ( i = 0; i < channel->streams; i++, offset += channel->bufsz )
+		{
+			int btsr ;	// bytes to send/receive
+
+			btsr = channel->owpos[i]-channel->orpos[i];
+			if ( btsr != 0 )
+			{
+				bsr = send(channel->fd, channel->outbuf+offset+channel->orpos[i], btsr, 0);
+				#ifdef WIN32
+				if ( bsr == SOCKET_ERROR )
+				#else
+				if ( bsr == -1 )
+				#endif
+					KU_ERRQ(KE_IO);
+
+
+
+				no_action = 1;
+			}
+		}
+
+		if ( no_action )
+			break;
+	}
 
 	pstop();
 	return KE_NONE;
