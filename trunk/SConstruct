@@ -124,6 +124,7 @@ ku2mm = env4mm.Library("ku2mm", mm_sources)
 ###
 com_sources = Split("""
 	modules/com/channel/channel.c
+	modules/com/ttp/ttp.c
 	""")
 
 ku2com = env.Library("ku2com", com_sources)
