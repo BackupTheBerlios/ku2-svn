@@ -74,7 +74,7 @@ kucode_t cfg_close( void )
 kucode_t cfg_query( const char *id, const char *fmt, ... )
 {
 	cfg_query_t *q;
-	int i;
+	uint i;
 	va_list va;
 	pstart();
 	
@@ -144,7 +144,7 @@ kucode_t cfg_process( ku_flag32_t flags )
 	while ( fgets(buf, CFG_BUFFER, cfgf) != NULL )
 	{
 		char *c = buf, *cur;
-		int i, wassign;
+		uint i, wassign;
 		
 		cfg_line++;
 		

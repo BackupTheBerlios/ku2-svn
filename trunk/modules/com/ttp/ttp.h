@@ -5,7 +5,7 @@
 	Communication protocol for text data transfer.
 	\author J. Anton
 	\date
-	\version 0.1.0
+	\version 1.0.0
 */
 
 #ifndef KU__TTP_H__
@@ -14,23 +14,29 @@
 extern "C" {
 #endif
 
-#include "ku2/ecode.h"
-#include "ku2/types.h"
+//! Size of the message buffer.
+#define TTP_BUFFER_SIZE 2048
 
-#define PARSER_ARG_CNT 16
-extern char *p_arg[PARSER_ARG_CNT];
-extern int p_argc;
-
-/*
-	1.	–азбиение сообщени€ на параметры
-	2.	msg - сообщение
-	3.	 оличество прочитаных параметров,
-		0, если ошибка,
-		p_arg - список полученых параметров
-		p_argc - их количество
-	4.	---
+//! Decode the protocol message.
+/*!
+	Decodes the protocol message and splits it into
+	parameters. Rules:\n
+	1. A message ends with the symbol with code 0.\n
+	2. Any two parameters are separetad by one space.\n
+	3. After @ folows non-controling symbol.\n
+	4. After / folows ASCII code for a symbol.\n
+	5. Symbols between quotation marks are the one parameter.
+	\param msg Message to be parsed.
+	\param args Array of pointers to parameters.
+	\param argc_max Maximum parameter count.
+	\return Parameter count of this protocol message or 0 if there was an error and
+	\ref kucode is set to the valid value. Possible values: \n
+	\e KE_EMPTY Command is empty.\n
+	\e KE_FULL Too many parameters.\n
+	\e KE_INVALID Invalid symbol code after /.\n
+	\e KE_SYNTAX @ at the end of the command or no closing quotation mark.
 */
-int parse( char *msg );
+int ttp_decode( const char *msg, char **args, int argc_max );
 
 #ifdef __cplusplus
 }

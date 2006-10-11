@@ -79,9 +79,42 @@ char *vstr( const char *fmt, ... );
 */
 void qdir( char *path );
 
+//! Get the milliseconds.
+/*!
+	Gets the UNIX time in milliseconds.
+	\return Milliseconds.
+	\sa ku_ttime().
+*/
 uint ku_mtime( void );
+
+//! Get the time string.
+/*!
+	Gets the time in form DD.MM.YYYY HH:MM:SS.
+	\return Time string.
+	\sa ku_mtime().
+*/
 char *ku_ttime( void );
+
+//! Convert string to long integer.
+/*!
+	Converts string to long integer.
+	\param str String to be converted.
+	\param i Long integer to be saved to.
+	\retval KE_NONE No errors.
+	\retval KE_INVALID Invalid number.
+	\sa ku_strtoulong().
+*/
 kucode_t ku_strtolong( const char *str, long int *i );
+
+//! Convert string to unsigned long integer.
+/*!
+	Converts string to unsigned long integer.
+	\param str String to be converted.
+	\param i Long integer to be saved to.
+	\retval KE_NONE No errors.
+	\retval KE_INVALID Invalid number.
+	\sa ku_strtolong().
+*/
 kucode_t ku_strtoulong( const char *str, unsigned long int *i );
 
 #ifdef __cplusplus

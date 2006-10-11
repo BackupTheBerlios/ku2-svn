@@ -1,87 +1,91 @@
 #include <stdlib.h>
 
+#include "ku2/ecode.h"
 #include "ku2/debug.h"
-#include "ku2/memory.h"
 #include "ttp.h"
 
-char *p_arg[PARSER_ARG_CNT];
-int p_argc, p_size[PARSER_ARG_CNT];
-char p_buf[BUFFER_SIZE_USER];
+static char p_buf[TTP_BUFFER_SIZE];
 
-int parse( char *msg )
+int ttp_decode( const char *msg, char **args, int argc_max )
 {
-	int i=1, qu=0, tmp;
-	char *src=msg;
-	char *dst=p_buf;
+	int i = 1, qu = 0, tmp;
+	int argc;
+	const char *src = msg;
+	char *dst = p_buf;
 	char *p;
 	pstart();
 	
-	p_arg[0]=dst;
-	if ( *src==0 ) return 0;
-	while ( *src!=0 )
+	args[0] = dst;
+	if ( *src == 0 )
+	{
+		kucode = KE_EMPTY;
+		return 0;
+	}
+	while ( *src != 0 )
 	{
 		switch ( *src )
 		{
 			case ' ':
+			{
 				if ( !qu )
 				{
-					*(dst++)=0;
-					if ( i==PARSER_ARG_CNT )
+					*(dst++) = 0;
+					if ( i == argc_max )
 					{
-						plog(gettext("Cannot parse: too many parameters\n"));
+						kucode = KE_FULL;
 						return 0;
 					}	else
 					{
-						p_size[i-1]=dst-p_arg[i-1]-1;
-						p_arg[i++]=dst;
+						args[i++] = dst;
 					}
 					src++;
 				}	else
 				{
-					*(dst++)=*(src++);
+					*(dst++) = *(src++);
 				}
 				break;
+			}
 			case '/':
-				tmp=strtol(++src,&p,0);
-				if ( p==src )
+			{
+				tmp = strtol(++src, &p, 0);
+				if ( (p == src) || (tmp<0) || (tmp>255) )
 				{
-					plog(gettext("Cannot parse: after '/' must be a number\n"));
+					kucode = KE_INVALID;
 					return 0;
 				}
-				if ( (tmp<0) || (tmp>255) )
-				{
-					plog(gettext("Cannot parse: symbol code is invalid\n"));
-					return 0;
-				}
-				*(dst++)=(char)tmp;
-				src=p;
+				*(dst++) = (char)tmp;
+				src = p;
 				break;
+			}
 			case '@':
-				if ( *(++src)!=0 )
-					*(dst++)=*(src++);
+			{
+				if ( *(++src) != 0 )
+					*(dst++) = *(src++);
 				else
 				{
-					plog(gettext("Cannot parse: '@` at the end\n"));
+					kucode = KE_SYNTAX;
 					return 0;
 				}
 				break;
+			}
 			case '"':
-				qu=1-qu;
+			{
+				qu = 1-qu;
 				src++;
 				break;
+			}
 			default:
-				*(dst++)=*(src++);
+				*(dst++) = *(src++);
 		}
 	}
-	*dst=0;
+	*dst = 0;
 	if ( qu )
 	{
-		plog(gettext("Cannot parse: quotation mark is needed\n"));
+		kucode = KE_SYNTAX;
 		return 0;
 	}
 
-	p_size[i-1]=dst-p_arg[i-1];
-	p_argc=i;
+	argc = i;
 	pstop();
 	return i;
 }
