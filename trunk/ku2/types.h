@@ -20,6 +20,18 @@
 extern "C" {
 #endif
 
+//! 2 power 16
+#define BIN16 (uint16_t)(-1)
+
+//! 2 power 16 minus 1
+#define BIN16m1 (BIN16-1)
+
+//! 2 power 32
+#define BIN32 (uint32_t)(-1)
+
+//! 2 power 32 minus 1
+#define BIN32m1 (BIN32-1)
+
 #if !defined(NO_STDINT_H)
 #include <stdint.h>
 

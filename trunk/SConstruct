@@ -38,6 +38,8 @@ if not conf.CheckCHeader("errno.h"):
 	Exit()
 if not conf.CheckCHeader("libintl.h"):
 	env.Append(CPPDEFINES = ["NO_LIBINTL_H"])
+if not conf.CheckCHeader("limits.h"):
+	Exit()
 if not conf.CheckCHeader("stdarg.h"):
 	Exit()
 if not conf.CheckCHeader("stdint.h"):
@@ -50,8 +52,15 @@ if not conf.CheckCHeader("stdlib.h"):
 	Exit()
 if not conf.CheckCHeader("string.h"):
 	Exit()
+if not conf.CheckCHeader("sys/timeb.h"):
+	Exit()
 if not conf.CheckCHeader("time.h"):
 	Exit()
+
+#	Headers for Win32:
+if env["PLATFORM"] == "win32":
+	if not conf.CheckCHeader("winsock2"):
+		env.Append(CPPDEFINES = ["NO_WINSOCK2_H"])
 env = conf.Finish()
 
 ###
@@ -95,6 +104,7 @@ sources = Split("""
 	other/other.c
 	list/dl_list.c
 	abtree/abtree.c
+	stack/stack.c
 	cfgreader/cfg.c
 	resmanager/res.c
 	dialogue/dialogue.c
