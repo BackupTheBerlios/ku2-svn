@@ -28,7 +28,7 @@ extern "C" {
 typedef
 enum
 {
-	O1
+	CHOPT_MAX_BLOCK_SZ
 }	channel_opt_t;
 
 typedef
@@ -52,14 +52,6 @@ struct
 	uint max_block_size;
 }	channel_t;
 
-//! Open a log file.
-/*!
-	Opens a file for appending a log messages. Starts the logging session.
-	\param file A log filename.
-	\retval KE_NONE No error.
-	\retval KE_IO Cannot open a file.
-	\sa closelog(), flushlog() and plog().
-*/
 #ifdef WIN32
 channel_t *channel_assign( SOCKET fd, uint streams, uint bufsz, ku_flag32_t flags );
 #else

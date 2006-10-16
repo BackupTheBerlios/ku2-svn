@@ -68,6 +68,18 @@ kucode_t channel_release( channel_t *channel )
 kucode_t channel_setopt( channel_t *channel, channel_opt_t opt, void *data )
 {
 	pstart();
+
+	switch ( opt )
+	{
+		case CHOPT_MAX_BLOCK_SZ:
+		{
+			channel->max_block_size = *(uint*)data;
+			break;
+		}
+		default:
+			KU_ERRQ(KE_INVALID);
+	}
+
 	pstop();
 	return KE_NONE;
 }
@@ -75,6 +87,18 @@ kucode_t channel_setopt( channel_t *channel, channel_opt_t opt, void *data )
 kucode_t channel_getopt( channel_t *channel, channel_opt_t opt, void *data )
 {
 	pstart();
+
+	switch ( opt )
+	{
+		case CHOPT_MAX_BLOCK_SZ:
+		{
+			*(uint*)data = channel->max_block_size;
+			break;
+		}
+		default:
+			KU_ERRQ(KE_INVALID);
+	}
+
 	pstop();
 	return KE_NONE;
 }
@@ -114,6 +138,11 @@ int channel_read( channel_t *channel, uint stream, char *buffer, uint size )
 	return 0;
 }
 
+/*
+	THE CODE ABOVE IS CHECKED!
+	AND DOES NOT NEED TO BE UPDATED FOR NOW,
+	TODO: DATA NETWORK EXCHANGE. (LOWER)
+*/
 kucode_t channel_update( channel_t *channel )
 {
 	uint i, offset = 0;
