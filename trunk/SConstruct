@@ -113,19 +113,15 @@ sources = Split("""
 ku2lib = env.Library("ku2", sources)
 
 ###
-#	Kane Utilities 2 SDL GUI and multimedia module
+#	Kane Utilities 2 SDL/OpenGL GUI and multimedia module
 ###	
 mm_sources = Split("""
-	modules/mm/gfx/gfx.c
-	modules/mm/gfx/font.c
-	modules/mm/gui/gui.c
-	modules/mm/widgets/frame.c
-	modules/mm/widgets/gfxbut.c
-	modules/mm/widgets/textline.c
+	modules/opengl/gfx/image.c
+	modules/opengl/gui/gui.c
 	""")
 
 env4mm = env.Copy()
-env4mm.Append(CPPPATH = sdl_includes+["modules/mm"])
+env4mm.Append(CPPPATH = sdl_includes+["modules/opengl"])
 
 ku2mm = env4mm.Library("ku2mm", mm_sources)
 
@@ -168,7 +164,7 @@ ku2test = env4test.Program("ku2test", test_sources)
 #		com - build communication module (default)
 #		test - build the test programme
 ###
-build = ARGUMENTS.get("build", "core,com")
+build = ARGUMENTS.get("build", "core,com,mm")
 notbuild = ARGUMENTS.get("notbuild", "")
 if "core" in build and not "core" in notbuild:
 	Default(ku2lib)

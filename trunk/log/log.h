@@ -83,10 +83,31 @@ void flushlog( void );
 /*!
 	Prints to a file a formated log message. Before the message date and time
 	are printed.
+	\param fmt Formated message.
 	\note No newline symbol at the end of the message is added.
-	\sa openlog(), closelog() and flushlog().
+	\sa openlog(), closelog(), plog_adv() and flushlog().
 */
 void plog( const char *fmt, ... );
+
+//! Print a log message (advanced).
+/*!
+	Prints to a file a formated log message. Before the message date, time
+	and topic are printed.
+	\param topic Message topic.
+	\param fmt Formated message.
+	\note No newline symbol at the end of the message is added.
+	\sa openlog(), closelog(), plog() and flushlog().
+*/
+void plog_adv( const char *topic, const char *fmt, ... );
+
+//! Print a log message with the function name.
+/*!
+	Prints to a file a formated log message. Before the message date, time
+	and the current function are printed.
+	\param fmt Formated message.
+*/
+#define plogfn( fmt, ... ) \
+plog_adv(__FUNCTION__, fmt, ##__VA_ARGS__)
 
 #ifdef __cplusplus
 }

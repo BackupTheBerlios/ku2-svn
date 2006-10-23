@@ -99,3 +99,26 @@ void plog( const char *fmt, ... )
 	#endif
 	va_end(ap);
 }
+
+void plog_adv( const char *topic, const char *fmt, ... )
+{
+	va_list ap;
+	time_t t;
+	struct tm *tm;
+	time(&t);
+	
+	tm = localtime(&t);
+	
+	va_start(ap, fmt);
+	fprintf(logstream, "[%.2d.%.2d.%.4d %.2d:%.2d:%.2d] %s: ", \
+		tm->tm_mday, tm->tm_mon+1, tm->tm_year+1900, \
+		tm->tm_hour, tm->tm_min, tm->tm_sec, topic);
+	vfprintf(logstream, fmt, ap);
+	#ifdef DEBUG_LOG
+	printf("=== LOG === [%.2d.%.2d.%.4d %.2d:%.2d:%.2d] %s: ", \
+		tm->tm_mday, tm->tm_mon+1, tm->tm_year+1900, \
+		tm->tm_hour, tm->tm_min, tm->tm_sec, topic);
+	vprintf(fmt, ap);
+	#endif
+	va_end(ap);
+}
