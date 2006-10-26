@@ -45,6 +45,7 @@ static void *gfx_img_control( const char *path, rescontrol_t action, void *data 
 
 kucode_t gfx_add_image_resources( int resource_type, const char *resfile )
 {
+	uint i = 0;
 	char img_id[CFG_BUFFER],
 		img_file[CFG_BUFFER];
 	kucode_t code;
@@ -75,20 +76,25 @@ kucode_t gfx_add_image_resources( int resource_type, const char *resfile )
 	{
 		if ( res_add(img_file, img_id, resource_type, NULL, 0) != KE_NONE )
 		{
-			plogfn(gettext("Failed to add an image resource: %d.\n"), kucode);
+			plogfn(gettext("Failed to add an image resource (line %d): %d.\n"), \
+				cfg_line, kucode);
 			cfg_close();
 			return kucode;
 		}
+		i++;
 	}
 	if ( code != KE_NONE )
 	{
-		plogfn(gettext("Failed to process a resource file: %d.\n"), kucode);
+		plogfn(gettext("Failed to process a resource file on line %d: %d.\n"), \
+			cfg_line, kucode);
 		cfg_close();
 		return kucode;
 	}
 	
 	if ( cfg_close() != KE_NONE )
 		plogfn(gettext("Warning: failed to close a resource file: %d.\n"), kucode);
+	
+	plogfn(gettext("%d images added.\n"), i);
 	
 	pstop();
 	return KE_NONE;

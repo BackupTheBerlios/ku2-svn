@@ -14,8 +14,6 @@
 #include "ku2/types.h"
 #include "ku2/memory.h"
 
-#define STACK_DEAULT_NODE_SIZE 32
-
 stack_t *stack_create( uint elements, ku_flag32_t flags )
 {
 	stack_t *stack;
@@ -57,7 +55,7 @@ kucode_t stack_push( stack_t *stack, void *data )
 	pstart();
 	
 	if ( stack->pos == stack->nodesz )
-		return KE_FULL;
+		KU_ERRQ(KE_FULL);
 	
 	stack->data[stack->pos++] = data;
 	
@@ -70,7 +68,10 @@ void *stack_pop( stack_t *stack )
 	pstart();
 	
 	if ( stack->pos == 0 )
+	{
+		kucode = KE_EMPTY;
 		return NULL;
+	}
 	
 	pstop();
 	return stack->data[--stack->pos];

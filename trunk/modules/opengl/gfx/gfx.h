@@ -28,14 +28,6 @@ extern "C" {
 #include "ku2/ecode.h"
 #include "resmanager/res.h"
 
-//! Screen mode.
-typedef
-enum
-{
-	GFX_SOFTWARE,	//!< Software screen.
-	GFX_HARDWARE	//!< Hardware screen.
-}	gfx_mode_t;
-
 //! Text alligment.
 typedef
 enum
@@ -68,46 +60,6 @@ enum
 	GFX_IMG_REAL
 }	gfx_imgmode_t;
 
-//! The most similar standart video mode.
-typedef
-enum
-{
-	GFX_RES_640,	//!< Video mode 640x480
-	GFX_RES_800		//!< Video mode 800x600
-}	gfx_resolution_t;
-
-//! Screen surface.
-extern SDL_Surface *screen;
-
-//! The most similar standart mode.
-extern gfx_resolution_t gfx_resolution;
-
-//! Image control function.
-/*!
-	Image control function for Resource manager.
-	\note Parameter \a data is not used.
-	\sa rescontrol_f() and gfx_fnt_control().
-*/
-void *gfx_img_control( const char *path, rescontrol_t action, void *data );
-
-//! Set a video mode and create a window.
-/*!
-	Sets a video mode and, if needed, creates a window.
-	\param width Screen width.
-	\param height Screen height.
-	\param bpp Bits per pixel (colour mode).
-	\param fullscreen Fulscreen mode.
-	\param mode Video adapter mode.
-	\param caption Caption of the window.
-	\param bar_caption Caption of the window in window list.
-	\retval KE_NONE No error.
-	\retval KE_INVALID Invalid resolution.
-	\retval KE_EXTERNAL \b SDL_SetVideoMode() has failed.
-	\note Window will be doestroyed only after \b SDL_Quit() call.
-*/
-kucode_t gfx_create_window( int width, int height, int bpp, int fullscreen, \
-						   gfx_mode_t mode, const char *caption, const char *bar_caption );
-
 //! Draw an image.
 /*!
 	Draws and image \a src on \a dst.
@@ -126,8 +78,7 @@ kucode_t gfx_create_window( int width, int height, int bpp, int fullscreen, \
 	If \a _h is zero then the whole height is copied. \n
 	if \a dst is \e NULL then the source image is copied on the screen.
 */
-kucode_t gfx_draw( const SDL_Surface *src, SDL_Surface *dst, gfx_imgmode_t mode, \
-				  int x, int y, int _x, int _y, int _w, int _h );
+kucode_t gfx_draw( SDL_Surface *src, int x, int y );
 
 //! Render the text.
 /*!
@@ -140,39 +91,6 @@ kucode_t gfx_draw( const SDL_Surface *src, SDL_Surface *dst, gfx_imgmode_t mode,
 	\a KE_EXTERNAL: \b TTF_RenderUTF8_Blended() has failed.
 */
 SDL_Surface *gfx_txtrender ( const char *text, const gfx_font_t *font, SDL_Color colour );
-
-//! Render the text on the destination surface.
-/*!
-	Renders the text on the destination surface.
-	\param text Text to be rendered.
-	\param font Font to render with.
-	\param dst Destination surface, where to render the text.
-	\param style Font style (see SDL_ttf.h).
-	\param colour Text colour.
-	\param x Destination \a x.
-	\param y Destination \a y.
-	\param _x Source \a x.
-	\param _y Source \a y.
-	\param _w Source text width.
-	\param _h Source text height.
-	\retval KE_NONE No error.
-	\retval KE_* gfx_txtrender() errors.
-	\retval KE_* gfx_draw() errors.
-	\note If \a _w is zero then the whole text width is rendered. \n
-	If \a _h is zero then the whole text height is rendered. \n
-	if \a dst is \e NULL then the text is rendered on the screen.
-*/
-/*kucode_t gfx_print( const char *text, const TTF_Font *font, SDL_Surface *dst, \
-				   gfx_txtstyle_t style, SDL_Color colour, int x, int y, \
-				   int _x, int _y, int _w, int _h );*/
-
-#if 0
-/*
-	NOT IMPLEMENTED
-*/
-kucode_t gfx_printf( const char *text, const TTF_Font *font, SDL_Surface *dst, gfx_txtstyle_t style, \
-		SDL_Color colour, int x, int y, int w, int h, gfx_txtallig_t allig );
-#endif
 
 #ifdef __cplusplus
 }

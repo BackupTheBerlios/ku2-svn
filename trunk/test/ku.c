@@ -23,7 +23,7 @@
 
 #include "modules/com/channel/channel.h"
 
-#if 0
+#if 1
 #include "modules/mm/mm.h"
 #include "modules/mm/gfx/gfx.h"
 #include "modules/mm/gui/gui.h"
@@ -97,9 +97,18 @@ static kucode_t oper_gui( void )
 	init = INIT_SDL;
 	
 	//	создание видео режима
-	if ( gfx_create_window(640, 480, 32, 0, GFX_SOFTWARE, \
-		"Kane Utilities 2 GUI testing", "KU2 GUI") != KE_NONE )
+	//	создание видео режима OpenGL
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	screen = SDL_SetVideoMode(width, height, bpp, video_flags);
+	if ( screen == NULL )
+	{
+		plog(gettext("Failed to set a video mode: %s\n"), SDL_GetError());
 		goto lerror;
+	}
 	
 	//	загрузка ресурсов
 	if ( res_init() != KE_NONE )
@@ -196,13 +205,8 @@ int main( int argc, char *argv[] )
 	int finished = 0;
 	channel_t *chan;
 	pstart();
-	
-	chan = channel_assign(0, 3, 0, 0);
-	channel_write(chan, 0, "hello world!!", 14);
-	channel_write(chan, 1, "qwe", 4);
-	channel_write(chan, 0, "ttt", 4);
 
-	#if 0
+	#if 1
 	dlgue_stream(stdin, stdout);
 	
 	if ( openlog("ku2.log") != KE_NONE )
