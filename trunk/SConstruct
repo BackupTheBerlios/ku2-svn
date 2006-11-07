@@ -116,8 +116,10 @@ ku2lib = env.Library("ku2", sources)
 #	Kane Utilities 2 SDL/OpenGL GUI and multimedia module
 ###	
 mm_sources = Split("""
+	modules/opengl/gfx/gfx.c
 	modules/opengl/gfx/image.c
 	modules/opengl/gui/gui.c
+	modules/opengl/widgets/frame.c
 	""")
 
 env4mm = env.Copy()

@@ -23,7 +23,7 @@ extern "C" {
 #endif
 
 #include "SDL.h"
-#include "gui/gui.h"
+#include "modules/opengl/gui/gui.h"
 #include "ku2/ecode.h"
 
 //! Frame GUI object.
@@ -106,7 +106,7 @@ kucode_t frame_get( gui_obj_t *obj, int param, void *data );
 	\retval KE_* gfx_draw() errors.
 	\sa gui_draw_f().
 */
-kucode_t frame_draw( gui_obj_t *obj, int x, int y, int w, int h );
+kucode_t frame_draw( gui_obj_t *obj, int x, int y );
 
 #ifdef __cplusplus
 }

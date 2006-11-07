@@ -6,6 +6,8 @@
  *  kane@mail.berlios.de
  ****************************************************************************/
 
+#include <stdarg.h>
+
 #include "gui.h"
 #include "ku2/debug.h"
 #include "ku2/ecode.h"
@@ -83,7 +85,6 @@ kucode_t gui_init( void )
 	obj_mon = NULL;
 	obj_mdown = NULL;
 	
-	plog(gettext("GUI engine has been initialized.\n"));
 	pstop();
 	return KE_NONE;
 }
@@ -94,7 +95,6 @@ kucode_t gui_halt( void )
 
 	abtree_free(gui_objects, gui_freef);
 
-	plog(gettext("GUI engine has been halted.\n"));
 	pstop();
 	return KE_NONE;
 }
@@ -127,23 +127,17 @@ gui_obj_t *gui_obj_create( gui_load_f initf, uint widget_sz, ku_flag32_t flags )
 
 	if ( abtree_ins(gui_objects, obj) != KE_NONE )
 	{
+		obj->destroyf(obj);
 		dfree(obj);
 		return NULL;
 	}
 
 	obj->id = gui_lastid++;
 
-	plog(gettext("Object '%s` %u is created!\n"), (char*)obj->widget, obj->id);
+	pdebug("Object '%s` %u is created!\n", (char*)obj->widget, obj->id);
 	pstop();
 	return obj;
 }
-
-#if 0
-gui_obj_t *gui_obj_clone( gui_obj_t *obj )
-{
-
-}
-#endif
 
 kucode_t gui_obj_delete( gui_obj_t *obj )
 {
@@ -174,7 +168,7 @@ kucode_t gui_obj_delete( gui_obj_t *obj )
 		gui_excl_from_parent(obj);
 	}
 
-	plog(gettext("Object '%s` %u is deleted!\n"), (char*)obj->widget, obj->id);
+	pdebug("Object '%s` %u is deleted!\n", (char*)obj->widget, obj->id);
 	dfree(obj);
 	recursion_lvl--;
 	
@@ -182,84 +176,126 @@ kucode_t gui_obj_delete( gui_obj_t *obj )
 	return KE_NONE;
 }
 
-kucode_t gui_move( gui_obj_t *obj, gui_obj_t *host, int x, int y, int w, int h )
+void gui_root( gui_obj_t *obj )
 {
-	gui_obj_t *tobj;
 	pstart();
+	
+	obj_root = obj;
+	
+	pdebug("Object '%s` %u became a root!\n", (char*)obj->widget, obj->id);
+	pstop();
+}
 
-	if ( (obj->parent != host) && host )
-	{
-		// меняется иерархия объектов
-		if ( gui_ins_to_children(host, obj) != KE_NONE )
-			return kucode;
-		if ( obj->parent )
-		{
-			gui_excl_from_parent(obj);
-			gui_draw(obj->parent, obj->x, obj->y, obj->width, obj->height);
-		}
-		obj->parent = host;
-
-		// поиск абсолютных координат
-		obj->rx = x;
-		obj->ry = y;
-		for ( tobj = obj->parent; tobj; tobj = tobj->parent )
-		{
-			obj->rx += tobj->x;
-			obj->ry += tobj->y;
-		}
-	}	else
-	if ( host == NULL )
-	{
-		// объект становится корневым
-		obj_root = obj;
-		obj->parent = NULL;
-
-		obj->rx = x;
-		obj->ry = y;
-	}
-
+kucode_t gui_move( gui_obj_t *obj, int x, int y )
+{
+	pstart();
+	
 	obj->x = x;
 	obj->y = y;
-	if ( (w != 0) && (h != 0) )
-	{
-		obj->width = w;
-		obj->height = h;
 
-		if ( obj->dim && (obj->dim(obj) != KE_NONE) )
-			return kucode;
-	}
-
-	plog(gettext("Object '%s` %u was moved!\n"), (char*)obj->widget, obj->id);
+	pdebug("Object '%s` %u was moved!\n", (char*)obj->widget, obj->id);
 	pstop();
 	return KE_NONE;
 }
 
-kucode_t gui_set( gui_obj_t *obj, int param, void *data )
+kucode_t gui_resize( gui_obj_t *obj, int w, int h )
 {
 	pstart();
+	
+	obj->width = w;
+	obj->height = h;
 
+	if ( obj->dim && (obj->dim(obj) != KE_NONE) )
+		return kucode;
+	
+	pdebug("Object '%s` %u was resized!\n", (char*)obj->widget, obj->id);
+	pstop();
+	return KE_NONE;
+}
+
+kucode_t gui_ch_host( gui_obj_t *obj, gui_obj_t *host )
+{
+	pstart();
+	
+	ku_avoid( obj->parent == host );
+	
+	if ( host )
+		if ( gui_ins_to_children(host, obj) != KE_NONE )
+			return kucode;
+	
+	if ( obj->parent )
+		gui_excl_from_parent(obj);
+	obj->parent = host;
+	
+	pdebug("Object '%s` %u changed host!\n", (char*)obj->widget, obj->id);
+	pstop();
+	return KE_NONE;
+}
+
+kucode_t gui_set( gui_obj_t *obj, int parcnt, ... )
+{
+	va_list ap;
+	int i, param;
+	void *data;
+	pstart();
+	
+	ku_avoid( parcnt <= 0 );
+	
+	va_start(ap, parcnt);
+	
 	if ( obj->set )
 	{
-		if ( obj->set(obj, param, data) != KE_NONE )
-			return kucode;
+		for ( i = 0; i < parcnt; i++ )
+		{
+			param = va_arg(ap, int);
+			data = va_arg(ap, void*);
+			if ( obj->set(obj, param, data) != KE_NONE )
+			{
+				va_end(ap);
+				return kucode;
+			}
+		}
 	}	else
+	{
+		va_end(ap);
 		KU_ERRQ(KE_INVALID);
-
+	}
+	
+	va_end(ap);
 	pstop();
 	return KE_NONE;
 }
 
-kucode_t gui_get( gui_obj_t *obj, int param, void *data )
+kucode_t gui_get( gui_obj_t *obj, int parcnt, ... )
 {
+	va_list ap;
+	int i, param;
+	void *data;
 	pstart();
-
-	if ( obj->get )
+	
+	ku_avoid( parcnt <= 0 );
+	
+	va_start(ap, parcnt);
+	
+	if ( obj->set )
 	{
-		if ( obj->get(obj, param, data ) != KE_NONE )
-			return kucode;
+		for ( i = 0; i < parcnt; i++ )
+		{
+			param = va_arg(ap, int);
+			data = va_arg(ap, void*);
+			if ( obj->get(obj, param, data) != KE_NONE )
+			{
+				va_end(ap);
+				return kucode;
+			}
+		}
 	}	else
+	{
+		va_end(ap);
 		KU_ERRQ(KE_INVALID);
-
+	}
+	
+	va_end(ap);
 	pstop();
 	return KE_NONE;
 }
@@ -312,14 +348,11 @@ kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status )
 	return KE_NONE;
 }
 
-kucode_t gui_draw( gui_obj_t *obj, int x, int y, int w, int h )
+static kucode_t gui_obj_draw( gui_obj_t *obj, int x, int y )
 {
 	pstart();
 
-	if ( obj == NULL )
-		obj = obj_root;
-
-	if ( obj->draw(obj, 0, 0, 0, 0) != KE_NONE )
+	if ( obj->draw(obj, obj->x+x, obj->y+y) != KE_NONE )
 		return kucode;
 
 	if ( obj->children )
@@ -328,7 +361,7 @@ kucode_t gui_draw( gui_obj_t *obj, int x, int y, int w, int h )
 		{
 			do
 			{
-				if ( gui_draw(dl_list_next(obj->children), 0, 0, 0, 0) != KE_NONE )
+				if ( gui_obj_draw(dl_list_next(obj->children), obj->x+x, obj->y+y) != KE_NONE )
 					return kucode;
 			}	while ( !dl_list_offside(obj->children) );
 		}
@@ -338,9 +371,14 @@ kucode_t gui_draw( gui_obj_t *obj, int x, int y, int w, int h )
 	return KE_NONE;
 }
 
+kucode_t gui_draw( void )
+{
+	return gui_obj_draw(obj_root, 0, 0);
+}
+
 static gui_obj_t *gui_search_by_coord( int x, int y )
 {
-	gui_obj_t *obj = obj_root;
+	/*gui_obj_t *obj = obj_root;
 	
 	if ( (!obj) || (obj->rx > x) || (obj->rx+obj->width < x) || \
 		(obj->ry > y) || (obj->ry+obj->height < y ) )
@@ -361,16 +399,17 @@ static gui_obj_t *gui_search_by_coord( int x, int y )
 			if  ( dl_list_offside(obj->children) )
 				return obj;
 		}
-	}
+	}*/
 	
-	return obj;
+	//return obj;
+	return NULL;
 }
 
 gui_event_st gui_process( SDL_Event *event )
 {
-	gui_obj_t *obj;
+	//gui_obj_t *obj;
 	gui_event_st status[2] = { GUIE_LEAVE, GUIE_LEAVE };
-	pstart();
+	/*pstart();
 	
 	switch ( event->type )
 	{
@@ -409,7 +448,7 @@ gui_event_st gui_process( SDL_Event *event )
 			}
 			break;
 		}
-	}
+	}*/
 	
 	pstop();
 	return MINint(status[0], status[1]);

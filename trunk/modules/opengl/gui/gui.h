@@ -83,7 +83,7 @@ kucode_t (*gui_sg_f)( gui_obj_t *obj, int param, void *data );
 
 //! Drawing function.
 typedef
-kucode_t (*gui_draw_f)( gui_obj_t *obj, int x, int y, int w, int h );
+kucode_t (*gui_draw_f)( gui_obj_t *obj, int x, int y );
 
 //! GUI event status.
 typedef
@@ -166,9 +166,7 @@ struct STRUCT_GUI_OBJ
 	int x,			//!< Relative object left side \a x.
 		y,			//!< Relative object top size \a y.
 		width,		//!< Object width.
-		height,		//!< Object height.
-		rx,			//!< Real object \a x.
-		ry;			//!< Real object \a y.
+		height;		//!< Object height.
 
 	uint widget_sz;	//!< Size of the widget related information.
 
@@ -238,10 +236,6 @@ kucode_t gui_halt( void );
 */
 gui_obj_t *gui_obj_create( gui_load_f initf, uint widget_sz, ku_flag32_t flags );
 
-#if 0
-gui_obj_t *gui_obj_clone( gui_obj_t *obj );
-#endif
-
 //! Delete a GUI object.
 /*!
 	Deletes a GUI object (widget) and its children, excluding it from the
@@ -250,6 +244,8 @@ gui_obj_t *gui_obj_clone( gui_obj_t *obj );
 	\return Always \a KE_NONE.
 */
 kucode_t gui_obj_delete( gui_obj_t *obj );
+
+void gui_root( gui_obj_t *obj );
 
 //! Move and place an object to the different place.
 /*!
@@ -266,21 +262,23 @@ kucode_t gui_obj_delete( gui_obj_t *obj );
 	\note If \a w and \a h are zeros then the object is not resized. \n
 	If \a host is NULL then the object becomes a root object.
 */
-kucode_t gui_move( gui_obj_t *obj, gui_obj_t *host, int x, int y, int w, int h );
+kucode_t gui_move( gui_obj_t *obj, int x, int y );
+kucode_t gui_resize( gui_obj_t *obj, int w, int h );
+kucode_t gui_ch_host( gui_obj_t *obj, gui_obj_t *host );
 
 //! Set the widget attribute.
 /*!
 	Sets the widget attribute.
 	\sa gui_sg_f() and gui_get().
 */
-kucode_t gui_set( gui_obj_t *obj, int param, void *data );
+kucode_t gui_set( gui_obj_t *obj, int parcnt, ... );
 
 //! Get the widget attribute.
 /*!
 	Gets the widhet attribute.
 	\sa gui_sg_f() and gui_set().
 */
-kucode_t gui_get( gui_obj_t *obj, int param, void *data );
+kucode_t gui_get( gui_obj_t *obj, int parcnt, ... );
 
 //! Change the object status.
 /*!
@@ -297,7 +295,7 @@ kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status );
 	\note If \a obj is \e NULL then the root object is used.
 	\sa gui_draw_f().
 */
-kucode_t gui_draw( gui_obj_t *obj, int x, int y, int w, int h );
+kucode_t gui_draw( void );
 
 //! Process an event.
 /*!

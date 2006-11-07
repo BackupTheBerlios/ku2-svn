@@ -31,7 +31,7 @@ kucode_t gfx_draw( SDL_Surface *src, int x, int y )
 		plogfn(gettext("Failed to lock an SDL surface: %s.\n"), SDL_GetError());
 		KU_ERRQ(KE_EXTERNAL);
 	}
-	glDrawPixels(src->w, src->h, GL_RGBA, GL_UNSIGNED_INT, src->pixels);
+	glDrawPixels(src->w, src->h, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, src->pixels);
 	SDL_UnlockSurface(src);
 	
 	pstop();
@@ -44,7 +44,7 @@ SDL_Surface *gfx_txtrender ( const char *text, const gfx_font_t *font, SDL_Color
 	pstart();
 	
 	//TTF_SetFontStyle((TTF_Font*)font, style);
-	txtface = TTF_RenderUTF8_Blended((TTF_Font*)font, text, colour);
+	//txtface = TTF_RenderUTF8_Blended((TTF_Font*)font, text, colour);
 	if ( txtface == NULL )
 	{
 		plog(gettext("Error while rendering text: %s\n"), TTF_GetError());

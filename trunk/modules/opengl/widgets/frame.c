@@ -150,13 +150,12 @@ kucode_t frame_get( gui_obj_t *obj, int param, void *data )
 	return KE_NONE;
 }
 
-kucode_t frame_draw( gui_obj_t *obj, int x, int y, int w, int h )
+kucode_t frame_draw( gui_obj_t *obj, int x, int y )
 {
 	gui_frame_t *const frame = (gui_frame_t*)obj->widget;
 	pstart();
 
-	if ( gfx_draw(frame->background, NULL, GFX_IMG_REAL, obj->rx, \
-		obj->ry, x, y, w, h) != KE_NONE )
+	if ( gfx_draw(frame->background, x, y) != KE_NONE )
 		return kucode;
 
 	pstop();
