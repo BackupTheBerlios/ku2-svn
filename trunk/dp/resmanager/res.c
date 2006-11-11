@@ -14,7 +14,7 @@
 #include "ku2/debug.h"
 #include "ku2/memory.h"
 #include "ku2/types.h"
-#include "abtree/abtree.h"
+#include "ds/abtree/abtree.h"
 
 static tree_t *reses, *restypes;
 

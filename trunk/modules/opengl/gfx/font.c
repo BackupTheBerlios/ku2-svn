@@ -14,9 +14,9 @@
 #include "ku2/gettext.h"
 #include "ku2/memory.h"
 
-#include "resmanager/res.h"
-#include "abtree/abtree.h"
-#include "log/log.h"
+#include "dp/resmanager/res.h"
+#include "ds/abtree/abtree.h"
+#include "io/log/log.h"
 
 tree_t *fonts;
 

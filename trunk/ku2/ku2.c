@@ -14,7 +14,7 @@
 #include "ku2/debug.h"
 #include "ku2/types.h"
 #include "ku2/gettext.h"
-#include "log/log.h"
+#include "io/log/log.h"
 
 kucode_t kucode;
 

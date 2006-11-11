@@ -20,7 +20,7 @@
 #include "ku2/ecode.h"
 
 #ifdef DEBUG
-#include "log/log.h"
+#include "io/log/log.h"
 #endif
 
 char *qstr( const char *s1, const char *s2 )

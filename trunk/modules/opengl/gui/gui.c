@@ -13,9 +13,9 @@
 #include "ku2/ecode.h"
 #include "ku2/memory.h"
 #include "ku2/types.h"
-#include "list/list.h"
-#include "abtree/abtree.h"
-#include "log/log.h"
+#include "ds/list/list.h"
+#include "ds/abtree/abtree.h"
+#include "io/log/log.h"
 #include "ku2/gettext.h"
 #include "other/other.h"
 

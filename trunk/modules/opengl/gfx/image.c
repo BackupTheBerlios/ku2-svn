@@ -16,9 +16,9 @@
 #include "ku2/ecode.h"
 #include "ku2/debug.h"
 #include "ku2/gettext.h"
-#include "log/log.h"
-#include "resmanager/res.h"
-#include "cfgreader/cfg.h"
+#include "io/log/log.h"
+#include "dp/resmanager/res.h"
+#include "io/cfgreader/cfg.h"
 
 static void *gfx_img_control( const char *path, rescontrol_t action, void *data )
 {

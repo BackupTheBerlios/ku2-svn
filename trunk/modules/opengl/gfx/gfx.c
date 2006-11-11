@@ -9,8 +9,13 @@
 #include "SDL.h"
 #include "SDL_ttf.h"
 
+#if !defined(NO_NVIDIA_GL_H)
 #include <nvidia/GL/gl.h>
 #include <nvidia/GL/glext.h>
+#else
+#include <GL/gl.h>
+#include <GL/glext.h>
+#endif
 
 #include "gfx.h"
 #include "ku2/ecode.h"
@@ -18,8 +23,8 @@
 #include "ku2/types.h"
 #include "ku2/gettext.h"
 #include "other/other.h"
-#include "log/log.h"
-#include "resmanager/res.h"
+#include "io/log/log.h"
+#include "dp/resmanager/res.h"
 
 kucode_t gfx_draw( SDL_Surface *src, int x, int y )
 {

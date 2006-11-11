@@ -1,11 +1,16 @@
 #
 #	SConstruct file for Kane Utilities 2
 #
-#	Fri Apr  7 17:16:57 2006
+#	Sat Nov 11 13:57:52 2006
 #		J. Anton, Copyright 2006
 #
 
+###
+#	Initialisation
+##
 env = Environment(CPPPATH = ["."])
+mm_defines = []
+com_defines = []
 
 ###
 #	Platform depended variables and actions
@@ -16,7 +21,7 @@ if env["PLATFORM"] == "win32":
 		#LINKFLAGS = ["/SUBSYSTEM:WINDOWS"])
 	debug_ccflags = ["/ZI"]
 	release_ccflags = ["/O2"]
-	release_linkflags = [""]
+	release_linkflags = []
 	sdl_includes = ["D:\devel\Microsoft Visual Studio 8\VC\include\SDL"]
 elif env["PLATFORM"] == "posix":
 	env.Append(CCFLAGS = ["-Wall"])
@@ -57,10 +62,16 @@ if not conf.CheckCHeader("sys/timeb.h"):
 if not conf.CheckCHeader("time.h"):
 	Exit()
 
-#	Headers for Win32:
+#	Headers for OPENGL module:
+if not conf.CheckCHeader("nvidia/GL/gl.h"):
+	mm_defines += ["NO_NVIDIA_GL_H"]
+	if not conf.CheckCHeader("GL/gl.h"):
+		mm_defines += ["NO_GL_H"]
+
+#	Headers for COM module:
 if env["PLATFORM"] == "win32":
 	if not conf.CheckCHeader("winsock2"):
-		env.Append(CPPDEFINES = ["NO_WINSOCK2_H"])
+		com_defines += ["NO_WINSOCK2_H"]
 env = conf.Finish()
 
 ###
@@ -100,14 +111,14 @@ if "gettext" in use and not "gettext" in notuse:
 ###
 sources = Split("""
 	ku2/ku2.c
-	log/log.c
 	other/other.c
-	list/dl_list.c
-	abtree/abtree.c
-	stack/stack.c
-	cfgreader/cfg.c
-	resmanager/res.c
-	dialogue/dialogue.c
+	io/log/log.c
+	io/cfgreader/cfg.c
+	io/dialogue/dialogue.c
+	ds/list/dl_list.c
+	ds/abtree/abtree.c
+	ds/stack/stack.c
+	dp/resmanager/res.c
 	""")
 
 ku2lib = env.Library("ku2", sources)
@@ -123,7 +134,7 @@ mm_sources = Split("""
 	""")
 
 env4mm = env.Copy()
-env4mm.Append(CPPPATH = sdl_includes+["modules/opengl"])
+env4mm.Append(CPPPATH = sdl_includes, CPPDEFINES = mm_defines)
 
 ku2mm = env4mm.Library("ku2mm", mm_sources)
 
@@ -135,7 +146,10 @@ com_sources = Split("""
 	modules/com/ttp/ttp.c
 	""")
 
-ku2com = env.Library("ku2com", com_sources)
+env4com = env.Copy()
+env4com.Append(CPPDEFINES = com_defines)
+
+ku2com = env4com.Library("ku2com", com_sources)
 
 ###
 #	Kane Utilities 2 Test programme
@@ -162,11 +176,11 @@ ku2test = env4test.Program("ku2test", test_sources)
 #	Getting list of modules to build
 #	Possible modules:
 #		core - build core library (default)
-#		mm - build multimedia module
-#		com - build communication module (default)
+#		mm - build multimedia module (default)
+#		com - build communication module
 #		test - build the test programme
 ###
-build = ARGUMENTS.get("build", "core,com,mm")
+build = ARGUMENTS.get("build", "core,mm,com")
 notbuild = ARGUMENTS.get("notbuild", "")
 if "core" in build and not "core" in notbuild:
 	Default(ku2lib)

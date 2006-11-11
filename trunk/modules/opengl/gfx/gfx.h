@@ -26,7 +26,7 @@ extern "C" {
 
 #include "font.h"
 #include "ku2/ecode.h"
-#include "resmanager/res.h"
+#include "dp/resmanager/res.h"
 
 //! Text alligment.
 typedef

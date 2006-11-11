@@ -26,7 +26,7 @@ extern "C" {
 
 #include "ku2/ecode.h"
 #include "ku2/types.h"
-#include "list/list.h"
+#include "ds/list/list.h"
 
 //! GUI object.
 typedef

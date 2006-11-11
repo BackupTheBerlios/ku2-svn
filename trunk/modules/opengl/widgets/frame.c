@@ -13,10 +13,10 @@
 #include "ku2/debug.h"
 #include "ku2/memory.h"
 #include "ku2/gettext.h"
-#include "log/log.h"
-#include "resmanager/res.h"
-#include "gfx/gfx.h"
-#include "gui/gui.h"
+#include "io/log/log.h"
+#include "dp/resmanager/res.h"
+#include "modules/opengl/gfx/gfx.h"
+#include "modules/opengl/gui/gui.h"
 
 kucode_t frame_init( gui_obj_t *obj )
 {
