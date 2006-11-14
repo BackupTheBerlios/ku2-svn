@@ -12,8 +12,8 @@
 	
 	Functions for GUI management.
 	\author J. Anton
-	\date Wed Aug 30 12:08:32 2006
-	\version 1.0.0
+	\date Mon Nov 13 18:49:31 2006
+	\version 1.0.1
 */
 
 #ifndef KU__GUI_H__
@@ -27,6 +27,14 @@ extern "C" {
 #include "ku2/ecode.h"
 #include "ku2/types.h"
 #include "ds/list/list.h"
+
+#define GUI_PROJ_LEFT -4
+#define GUI_PROJ_WIDTH 8
+#define GUI_PROJ_BOTTOM -3
+#define GUI_PROJ_HEIGHT 6
+
+#define GUI_PROJ_X(_x, _w) (((float)GUI_PROJ_WIDTH)/(_w)*(_x)+GUI_PROJ_LEFT)
+#define GUI_PROJ_Y(_y, _h) (((float)GUI_PROJ_HEIGHT)/(_h)*(_y)-GUI_PROJ_BOTTOM)
 
 //! GUI object.
 typedef

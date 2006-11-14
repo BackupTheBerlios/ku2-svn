@@ -8,6 +8,8 @@
 
 #include <stdarg.h>
 
+#include <nvidia/GL/gl.h>
+
 #include "gui.h"
 #include "ku2/debug.h"
 #include "ku2/ecode.h"
@@ -70,8 +72,13 @@ static uint gui_lastid = 0;
 
 static gui_obj_t
 	*obj_root,		//!< Root object.
-	*obj_mon,		//!< Object, where is the mouse.
+	*obj_mon,		//!< Object, where the mouse is.
 	*obj_mdown;		//!< Object, where the mouse button was pressed.
+
+static int gui_lrx,	//!< Real X of the found object.
+	gui_lry,		//!< Real Y of the found object.
+	gui_mdown_rx,	//!< Real X of object, where the mouse button was pressed.
+	gui_mdown_ry;	//!< Real Y of object, where the mouse button was pressed.
 
 kucode_t gui_init( void )
 {
@@ -310,7 +317,7 @@ kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status )
 		case GUI_NOTLOADED:
 		{
 			// выгрузить объект
-			if ( obj->uload(obj) != KE_NONE )
+			if ( obj->uload && (obj->uload(obj) != KE_NONE) )
 				return kucode;
 			break;
 		}
@@ -320,7 +327,7 @@ kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status )
 			// сделать его доступным
 			if ( obj->status == GUI_NOTLOADED )
 			{
-				if ( obj->load(obj) != KE_NONE )
+				if ( obj->load && (obj->load(obj) != KE_NONE) )
 					return kucode;
 			}
 			if ( obj->enable && (obj->enable(obj) != KE_NONE) )
@@ -373,43 +380,53 @@ static kucode_t gui_obj_draw( gui_obj_t *obj, int x, int y )
 
 kucode_t gui_draw( void )
 {
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	//glFrustum(GUI_PROJ_LEFT, -GUI_PROJ_LEFT, \
+		GUI_PROJ_BOTTOM, -GUI_PROJ_BOTTOM, 0.1, 2);
+	glOrtho(-4, 4, -3, 3, 1, -1);
+	glMatrixMode(GL_MODELVIEW);
 	return gui_obj_draw(obj_root, 0, 0);
 }
 
 static gui_obj_t *gui_search_by_coord( int x, int y )
 {
-	/*gui_obj_t *obj = obj_root;
+	gui_obj_t *obj = obj_root;
 	
-	if ( (!obj) || (obj->rx > x) || (obj->rx+obj->width < x) || \
-		(obj->ry > y) || (obj->ry+obj->height < y ) )
+	if ( (!obj) || (obj->status == GUI_HIDDEN) || (obj->x > x) || \
+		(obj->x+obj->width < x) || (obj->y > y) || (obj->y+obj->height < y ) )
 		return NULL;
 	
+	gui_lrx = obj->x;
+	gui_lry = obj->y;
 	while ( obj->children && (obj->children->size > 0) )
 	{
 		dl_list_last(obj->children);
 		for (;;)
 		{
 			gui_obj_t *nobj = dl_list_prev(obj->children);
-			if ( (nobj->rx <= x) && (nobj->rx+nobj->width >= x) && \
-				(nobj->ry <=y ) && (nobj->ry+nobj->height >= y) )
+			if ( (nobj->status < GUI_HIDDEN) && \
+				(nobj->x+gui_lrx <= x) && (nobj->x+gui_lrx+nobj->width >= x) && \
+				(nobj->y+gui_lry <=y ) && (nobj->y+gui_lry+nobj->height >= y) )
 			{
 				obj = nobj;
+				gui_lrx += obj->x;
+				gui_lry += obj->y;
 				break;
 			}
 			if  ( dl_list_offside(obj->children) )
 				return obj;
 		}
-	}*/
+	}
 	
-	//return obj;
-	return NULL;
+	return obj;
 }
 
 gui_event_st gui_process( SDL_Event *event )
 {
-	//gui_obj_t *obj;
+	gui_obj_t *obj;
 	gui_event_st status[2] = { GUIE_LEAVE, GUIE_LEAVE };
-	/*pstart();
+	pstart();
 	
 	switch ( event->type )
 	{
@@ -423,32 +440,34 @@ gui_event_st gui_process( SDL_Event *event )
 					status[0] = obj_mon->moff(obj_mon, 0, 0, 0);
 				obj_mon = obj;
 			}
-			if ( obj && obj->mon )
-				status[1] = obj->mon(obj, event->motion.x-obj->rx, \
-					event->motion.y-obj->ry, 0);
+			if ( obj && (obj->status < GUI_DISABLED ) && obj->mon )
+				status[1] = obj->mon(obj, event->motion.x-gui_lrx, \
+					event->motion.y-gui_lry, 0);
 			break;
 		}
 		case SDL_MOUSEBUTTONDOWN:
 		{
 			ku_avoid( obj_mdown != NULL );
 			obj_mdown = gui_search_by_coord(event->button.x, event->button.y);
-			if ( obj_mdown && obj_mdown->mdown )
-				status[0] = obj_mdown->mdown(obj_mdown, event->button.x-obj_mdown->rx, \
-					event->button.y-obj_mdown->ry, event->button.button);
+			if ( obj_mdown && (obj_mdown->status < GUI_DISABLED) && obj_mdown->mdown )
+				status[0] = obj_mdown->mdown(obj_mdown, event->button.x-gui_lrx, \
+					event->button.y-gui_lry, event->button.button);
+			gui_mdown_rx = gui_lrx;
+			gui_mdown_ry = gui_lry;
 			break;
 		}
 		case SDL_MOUSEBUTTONUP:
 		{
-			if ( obj_mdown )
+			if ( obj_mdown && (obj_mdown->status < GUI_DISABLED) )
 			{
 				if ( obj_mdown->mup )
-					status[0] = obj_mdown->mup(obj_mdown, event->button.x-obj_mdown->rx, \
-						event->button.y-obj_mdown->ry, event->button.button);
+					status[0] = obj_mdown->mup(obj_mdown, event->button.x-gui_mdown_rx, \
+						event->button.y-gui_mdown_ry, event->button.button);
 				obj_mdown = NULL;
 			}
 			break;
 		}
-	}*/
+	}
 	
 	pstop();
 	return MINint(status[0], status[1]);

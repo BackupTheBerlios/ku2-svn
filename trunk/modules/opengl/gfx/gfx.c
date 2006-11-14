@@ -26,6 +26,8 @@
 #include "io/log/log.h"
 #include "dp/resmanager/res.h"
 
+extern SDL_Surface *screen;
+
 kucode_t gfx_draw( SDL_Surface *src, int x, int y )
 {
 	pstart();
@@ -38,6 +40,7 @@ kucode_t gfx_draw( SDL_Surface *src, int x, int y )
 	}
 	glDrawPixels(src->w, src->h, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, src->pixels);
 	SDL_UnlockSurface(src);
+	//SDL_BlitSurface(src, NULL, screen, NULL);
 	
 	pstop();
 	return KE_NONE;
