@@ -23,6 +23,18 @@ extern "C" {
 #endif
 
 #include "ku2/ecode.h"
+#include "ku2/types.h"
+
+//! Image.
+typedef
+struct
+{
+	uint32_t format;
+					//!< GL pixel format.
+	uint w,			//!< Image width.
+		h;			//!< Image height.
+	void *pixels;	//!< Pixel data.
+}	gfx_image_t;
 
 //! Assign an image resource type and add resources from file.
 /*!

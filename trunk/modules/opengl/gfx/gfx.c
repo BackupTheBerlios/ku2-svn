@@ -26,21 +26,18 @@
 #include "io/log/log.h"
 #include "dp/resmanager/res.h"
 
-extern SDL_Surface *screen;
-
-kucode_t gfx_draw( SDL_Surface *src, int x, int y )
+kucode_t gfx_draw( gfx_image_t *src, int x, int y )
 {
+	GLenum format;
 	pstart();
 	
 	glWindowPos2i(x, y);
-	if ( SDL_LockSurface(src) != 0 )
-	{
-		plogfn(gettext("Failed to lock an SDL surface: %s.\n"), SDL_GetError());
-		KU_ERRQ(KE_EXTERNAL);
-	}
-	glDrawPixels(src->w, src->h, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, src->pixels);
-	SDL_UnlockSurface(src);
-	//SDL_BlitSurface(src, NULL, screen, NULL);
+	
+	
+	
+	glDrawPixels(src->w, src->h, src->format, GL_UNSIGNED_BYTE, src->pixels);
+	
+	
 	
 	pstop();
 	return KE_NONE;

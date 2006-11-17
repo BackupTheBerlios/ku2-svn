@@ -174,6 +174,9 @@ kucode_t gui_obj_delete( gui_obj_t *obj )
 	{
 		gui_excl_from_parent(obj);
 	}
+	
+	// удаляем из списка объектов
+	abtree_rem(gui_objects, obj, NULL);
 
 	pdebug("Object '%s` %u is deleted!\n", (char*)obj->widget, obj->id);
 	dfree(obj);

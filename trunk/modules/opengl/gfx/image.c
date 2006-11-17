@@ -11,10 +11,12 @@
 
 #include "SDL.h"
 #include "SDL_image.h"
+#include <GL/gl.h>
 
 #include "image.h"
 #include "ku2/ecode.h"
 #include "ku2/debug.h"
+#include "ku2/memory.h"
 #include "ku2/gettext.h"
 #include "io/log/log.h"
 #include "dp/resmanager/res.h"
@@ -22,20 +24,62 @@
 
 static void *gfx_img_control( const char *path, rescontrol_t action, void *data )
 {
-	SDL_Surface *img;
+	SDL_Surface *sdlimg;
+	gfx_image_t *img;
+	int oldy, newy;
 	pstart();
 
 	if ( action == RES_LOAD )
 	{
-		img = IMG_Load(path);
-		if ( img == NULL )
+		//	загрузка изображения
+		sdlimg = IMG_Load(path);
+		if ( sdlimg == NULL )
 		{
 			plogfn(gettext("Failed to load an image '%s`: %s\n"), path, IMG_GetError());
 			return NULL;
 		}
+		
+		//	создание gfx_image_t
+		SDL_LockSurface(sdlimg);
+		img = dmalloc(sizeof(gfx_image_t)+ \
+			sdlimg->format->BytesPerPixel*sdlimg->w*sdlimg->h);
+		if ( img == NULL )
+		{
+			plogfn(gettext("Out of memory.\n"));
+			SDL_FreeSurface(sdlimg);
+			return NULL;
+		}
+		
+		img->w = sdlimg->w;
+		img->h = sdlimg->h;
+		switch ( sdlimg->format->BitsPerPixel )
+		{
+			case 24:
+			{
+				img->format = GL_RGB;
+				break;
+			}
+			default:
+			{
+				plogfn(gettext("Not supported image pixel format: %d bits.\n"), \
+					sdlimg->format->BitsPerPixel);
+				SDL_FreeSurface(sdlimg);
+				return NULL;
+			}
+		}
+		img->pixels = (int8_t*)img+sizeof(gfx_image_t);
+		
+		for ( oldy = img->h-1, newy = 0; newy < img->h; oldy--, newy++ )
+			memmove(img->pixels+newy*sdlimg->format->BytesPerPixel*img->w, \
+				sdlimg->pixels+oldy*sdlimg->format->BytesPerPixel*img->w, \
+				sdlimg->format->BytesPerPixel*img->w);
+		SDL_UnlockSurface(sdlimg);
+		
+		//	удаление SDL_Surface
+		SDL_FreeSurface(sdlimg);
 	}	else
 	{
-		SDL_FreeSurface(data);
+		dfree(data);
 		img = NULL;
 	}
 

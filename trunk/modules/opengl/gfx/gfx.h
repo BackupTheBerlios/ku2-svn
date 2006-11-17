@@ -25,6 +25,7 @@ extern "C" {
 #include "SDL.h"
 
 #include "font.h"
+#include "image.h"
 #include "ku2/ecode.h"
 #include "dp/resmanager/res.h"
 
@@ -78,7 +79,7 @@ enum
 	If \a _h is zero then the whole height is copied. \n
 	if \a dst is \e NULL then the source image is copied on the screen.
 */
-kucode_t gfx_draw( SDL_Surface *src, int x, int y );
+kucode_t gfx_draw( gfx_image_t *src, int x, int y );
 
 //! Render the text.
 /*!
