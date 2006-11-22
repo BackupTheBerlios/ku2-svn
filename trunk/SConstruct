@@ -129,6 +129,7 @@ ku2lib = env.Library("ku2", sources)
 mm_sources = Split("""
 	modules/opengl/gfx/gfx.c
 	modules/opengl/gfx/image.c
+	modules/opengl/gfx/font.c
 	modules/opengl/gui/gui.c
 	modules/opengl/widgets/frame.c
 	""")

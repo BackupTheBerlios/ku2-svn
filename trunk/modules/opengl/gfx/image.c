@@ -9,9 +9,14 @@
 #include <string.h>
 #include <errno.h>
 
+#if !defined(NO_NVIDIA_GL_H)
+#include <nvidia/GL/gl.h>
+#else
+#include <GL/gl.h>
+#endif
+
 #include "SDL.h"
 #include "SDL_image.h"
-#include <GL/gl.h>
 
 #include "image.h"
 #include "ku2/ecode.h"

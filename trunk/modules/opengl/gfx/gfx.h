@@ -29,38 +29,6 @@ extern "C" {
 #include "ku2/ecode.h"
 #include "dp/resmanager/res.h"
 
-//! Text alligment.
-typedef
-enum
-{
-	GFX_ALLIG_LEFT,	//!< By left side.
-	GFX_ALLIG_MIDDLE,
-					//!< By middle.
-	GFX_ALLIG_RIGHT	//!< By right side.
-}	gfx_txtallig_t;
-
-//! Drawing mode.
-typedef
-enum
-{
-	//! Sprite mode.
-	/*!
-		Selected area of the source image will be drawn
-		at \a x and \a y coordinates in the destination
-		image.
-	*/
-	GFX_IMG_PIECE,
-	
-	//! Image mode.
-	/*!
-		Selected area of the source image will be drawn
-		there, where it were if the whole source image
-		was drawn at \a x and \a y coordinates in the
-		destination image.
-	*/
-	GFX_IMG_REAL
-}	gfx_imgmode_t;
-
 //! Draw an image.
 /*!
 	Draws and image \a src on \a dst.

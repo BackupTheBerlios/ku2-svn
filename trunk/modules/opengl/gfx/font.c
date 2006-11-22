@@ -7,20 +7,19 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <errno.h>
 
 #include "font.h"
 #include "ku2/ecode.h"
 #include "ku2/debug.h"
 #include "ku2/gettext.h"
-#include "ku2/memory.h"
+//#include "ku2/memory.h"
 
 #include "dp/resmanager/res.h"
-#include "ds/abtree/abtree.h"
+#include "io/cfgreader/cfg.h"
 #include "io/log/log.h"
 
-tree_t *fonts;
-
-static void *font_control( const char *path, rescontrol_t action, void *data )
+static void *gfx_font_control( const char *path, rescontrol_t action, void *data )
 {
 	TTF_Font *font;
 	
@@ -41,147 +40,60 @@ static void *font_control( const char *path, rescontrol_t action, void *data )
 	return font;
 }
 
-static int font_cmpf( void *font1, void *font2 )
+kucode_t gfx_add_font_resources( int resource_type, const char *resfile )
 {
-	gfx_font_t *const f1 = font1,
-		*const f2 = font2;
-	int i;
-	
-	i = strcmp(f1->name, f2->name);
-	if ( i != 0 )
-		return i;
-	
-	if ( f1->style != f2->style )
-		return f1->style-f2->style;
-	
-	return f1->size-f2->size;
-}
-
-static int font_freef( void *font )
-{
-	TTF_CloseFont(((gfx_font_t*)font)->font);
-	dfree(font);
-	return 1;
-}
-
-kucode_t font_init( int typeID )
-{
+	uint i = 0;
+	char font_id[CFG_BUFFER],
+		font_file[CFG_BUFFER];
+	int font_size;
+	kucode_t code;
 	pstart();
 	
-	if ( TTF_Init() != 0 )
+	if ( res_assign(resource_type, RESTYPE_ZFL, gfx_font_control) != KE_NONE )
 	{
-		plog(gettext("Failed to initialize a SDL_ttf: %s\n"), TTF_GetError());
-		KU_ERRQ(KE_LIBRARY);
-	}
-	
-	if ( res_assign(typeID, RESTYPE_UNIQ, font_control) != KE_NONE )
-	{
-		plog(gettext("Failed to assign a font resource control function.\n"));
-		TTF_Quit();
+		plogfn(gettext("Failed to assign a font resource type: %d.\n"), kucode);
 		return kucode;
 	}
 	
-	fonts = abtree_create(font_cmpf, 0);
-	if ( fonts == NULL )
+	if ( cfg_open(resfile) != KE_NONE )
 	{
-		plog(gettext("Failed to create a tree.\n"));
-		TTF_Quit();
+		if ( kucode == KE_IO )
+			plogfn(gettext("Failed to open a file: %s.\n"), strerror(errno)); else
+			plogfn(gettext("Failed to open a file: %d.\n"), kucode);
 		return kucode;
 	}
 	
-	pstop();
-	return KE_NONE;
-}
-
-kucode_t font_halt( void )
-{
-	pstart();
-	
-	abtree_free(fonts, font_freef);
-	TTF_Quit();
-	
-	pstop();
-	return KE_NONE;
-}
-
-gfx_font_t *font_open( const char *name, gfx_font_style_t style, int size )
-{
-	gfx_font_t font_search;
-	gfx_font_t *font;
-	pstart();
-	
-	// поиск шрифта
-	font_search.name = (char*)name;
-	font_search.style = style;
-	font_search.size = size;
-	font = abtree_search(fonts, &font_search);
-	
-	if ( font )
+	if ( cfg_query("font", "ssi", font_id, font_file, &font_size) != KE_NONE )
 	{
-		font->instances++;
-	}	else
-	{
-		// загрузка шрифта
-		font = dmalloc(sizeof(gfx_font_t)+sizeof(char)*(strlen(name)+1));
-		if ( font == NULL )
-		{
-			kucode = KE_MEMORY;
-			return NULL;
-		}
-		
-		font->font = res_access_adv(name, &size);
-		if ( font->font == NULL )
-		{
-			dfree(font);
-			plog(gettext("Failed to access a font resource.\n"));
-			return NULL;
-		}
-		
-		// добавление в дерево
-		if ( abtree_ins(fonts, font) != KE_NONE )
-		{
-			TTF_CloseFont(font->font);
-			dfree(font);
-			return NULL;
-		}
-		
-		// установка параметров
-		TTF_SetFontStyle(font->font, style);
-		font->name = (char*)((int8_t*)font+sizeof(gfx_font_t));
-		strcpy(font->name, name);
-		font->style = style;
-		font->size = size;
-		font->instances = 1;
+		plogfn(gettext("Failed to add a query for the resource file: %d.\n"), kucode);
+		cfg_close();
+		return kucode;
 	}
 	
-	pstop();
-	return font;
-}
-
-kucode_t font_close( gfx_font_t *font )
-{
-	pstart();
-	
-	if ( font->instances == 1 )
+	while ( (code = cfg_process(CFG_STRICT|CFG_STEP)) == KE_SIGNAL )
 	{
-		TTF_CloseFont(font->font);
-		if ( abtree_rem(fonts, font, NULL) != KE_NONE )
-			plog(gettext("Note: failed to remove a font '%s` from the tree: %d.\n"),
-				font->name, kucode);
-		dfree(font);
-	}	else
-	{
-		font->instances--;
+		if ( res_add(font_file, font_id, resource_type, (void*)font_size, 0) != KE_NONE )
+		{
+			plogfn(gettext("Failed to add a font resource (line %d): %d.\n"), \
+				cfg_line, kucode);
+			cfg_close();
+			return kucode;
+		}
+		i++;
 	}
+	if ( code != KE_NONE )
+	{
+		plogfn(gettext("Failed to process a resource file on line %d: %d.\n"), \
+			cfg_line, kucode);
+		cfg_close();
+		return kucode;
+	}
+	
+	if ( cfg_close() != KE_NONE )
+		plogfn(gettext("Warning: failed to close a resource file: %d.\n"), kucode);
+	
+	plogfn(gettext("%d fonts added.\n"), i);
 	
 	pstop();
 	return KE_NONE;
-}
-
-gfx_font_t *font_change( gfx_font_t *font, gfx_font_style_t style, int size )
-{
-	pstart();
-	
-	pstop();
-	return NULL;
 }

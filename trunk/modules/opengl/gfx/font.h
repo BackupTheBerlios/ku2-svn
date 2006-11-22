@@ -42,70 +42,17 @@ enum
 }	gfx_font_style_t;
 
 //! Font object.
-typedef
-struct
-{
-	TTF_Font *font;	//!< Font data.
-	char *name;		//!< Font name.
-	gfx_font_style_t style;
-					//!< Font style.
-	int size;		//!< Font size.
-	uint instances;	//!< Times this font is loaded.
-}	gfx_font_t;
+typedef TTF_Font gfx_font_t;
 
-//! Initialize a font engine.
+//! Assign a font resource type and add resources from file.
 /*!
-	Starts a font engine. This function assignes a font control
-	function with type \a typeID.
-	\param typeID Font type ID for resource manager.
+	Assigns a font resource type (see \ref res.c) and adds resources from file.
+	\param resource_type Resource ID.
+	\param resfile File with list of resources.
 	\retval KE_NONE No error.
-	\retval KE_LIBRARY TTF_Init has failed.
-	\retval KE_* res_assign() and abtree_create() errors.
-	\sa font_halt().
+	\return res_assign(), cfg_open(), cfg_query() and cfg_process() errors.
 */
-kucode_t font_init( int typeID );
-
-//! Halt a font engine.
-/*!
-	Stops a font engine.
-	\return Always \a KE_NONE.
-	\sa font_init().
-*/
-kucode_t font_halt( void );
-
-//! Open a font.
-/*!
-	Opens a font with the selected attributes.
-	\param name Font name (for resource manager).
-	\param style Font style.
-	\param size Font size.
-	\return Opened font or \e NULL if error, \ref kucode is set to the valid value: \n
-	\a KE_MEMORY: Memory allocation has failed.\n
-	res_access_adv() and abtree_ins() errors.
-	\sa font_close() and font_change().
-*/
-gfx_font_t *font_open( const char *name, gfx_font_style_t style, int size );
-
-//! Close a font.
-/*!
-	Closes a font.
-	\param font Font to be closed.
-	\return Always \a KE_NONE.
-	\sa font_open() and font_change().
-*/
-kucode_t font_close( gfx_font_t *font );
-
-//! Change font attributes.
-/*!
-	Changes font attributes.
-	\param font Font to be changed.
-	\param style New font style.
-	\param size New font size.
-	\return New font.
-	\note This function is not realized yet!
-	\sa font_open() and font_close().
-*/
-gfx_font_t *font_change( gfx_font_t *font, gfx_font_style_t style, int size );
+kucode_t gfx_add_font_resources( int resource_type, const char *resfile );
 
 #ifdef __cplusplus
 }

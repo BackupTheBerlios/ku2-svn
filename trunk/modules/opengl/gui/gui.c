@@ -8,7 +8,11 @@
 
 #include <stdarg.h>
 
+#if !defined(NO_NVIDIA_GL_H)
 #include <nvidia/GL/gl.h>
+#else
+#include <GL/gl.h>
+#endif
 
 #include "gui.h"
 #include "ku2/debug.h"
