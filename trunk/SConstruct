@@ -132,6 +132,7 @@ mm_sources = Split("""
 	modules/opengl/gfx/font.c
 	modules/opengl/gui/gui.c
 	modules/opengl/widgets/frame.c
+	modules/opengl/widgets/button.c
 	""")
 
 env4mm = env.Copy()

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            gfxbut.h
+ *            button.h
  *
  *  Wed Aug 30 22:45:53 2006
  *  Copyright  2006  J. Anton
@@ -8,7 +8,7 @@
 
 /*!
 	\file
-	\brief Graphical button widget.
+	\brief Button widget.
 
 	Graphical button, no text. Thee images: normal state, "mouse-on" state and
 	"mouse-down" state.
@@ -17,22 +17,22 @@
 	\version 1.0.0
 */
 
-#ifndef KU__GUI_GFXBUT_H__
-#define KU__GUI_GFXBUT_H__
+#ifndef KU__GUI_BUTTON_H__
+#define KU__GUI_BUTTON_H__
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "SDL.h"
-#include "gui/gui.h"
+#include "modules/opengl/gfx/image.h"
+#include "modules/opengl/gui/gui.h"
 #include "ku2/ecode.h"
 
-//! Graphical button GUI object.
+//! Button GUI object.
 typedef
-struct STRUCT_GUI_GFXBUT_OBJ
+struct STRUCT_GUI_BUTTON_OBJ
 {
-	char wname[10];
-					//!< Widget name.
+	char wname[7];
+					//!< Widget name ('button`).
 
 	int st_mon,		//!< Whether mouse is upon the widget.
 		st_mdown;	//!< Whether mouse button is pressed.
@@ -45,25 +45,36 @@ struct STRUCT_GUI_GFXBUT_OBJ
 					//!< Normal image name.
 		*back_mon_name,
 					//!< "Mouse On" background image name.
-		*back_mdn_name;
+		*back_mdn_name,
 					//!< "Mouse Down" background image name.
+		*font_name;	//!< Font name.
 
-	SDL_Surface
+	gfx_image_t
 		*back_nor,	//!< Normal image.
 		*back_mon,	//!< "Mouse On" image.
 		*back_mdn;	//!< "Mouse Down" image.
-	SDL_Surface
-		*face;		//!< Current image surface.
-}	gui_gfxbut_t;
+	gfx_image_t
+		*face,		//!< Current image surface.
+		*fontface;	//!< Rendered text.
+
+	gfx_font_t
+		*font;		//!< Font.
+	gfx_font_style_t
+		font_style;	//!< Font style.
+
+	char *caption;	//!< Button caption.
+}	gui_button_t;
 
 //! Button parameters for gfxbut_set() and gfxbut_get().
-enum GFXBUT_PARAMS
+enum BUTTON_PARAMS
 {
-	GFXBUT_NORM,	//!< Change the normal image. Set/Get: data are (char*/char**) image name (\ref res.h).
-
-	GFXBUT_MON,		//!< Change the "mouse-on" image. Data are image name.
-	GFXBUT_MDN,		//!< Change the "mouse-down" image. Data are image name.
-	GFXBUT_CLICK	//!< Change the "click" callback function. Data are pointer to function.
+	BUTTON_NORM,	//!< Change the normal image. Set/Get: data are (char*/char**) image name (\ref res.h).
+	BUTTON_MON,		//!< Change the "mouse-on" image. Data are image name.
+	BUTTON_MDN,		//!< Change the "mouse-down" image. Data are image name.
+	BUTTON_CLICK,	//!< Change the "click" callback function. Data are pointer to function.
+	BUTTON_CAPTION,	//!< Change the title of the button (button text).
+	BUTTON_FONT,	//!< Change the font.
+	BUTTON_FSTYLE
 };
 
 //! Initialize a graphical button object.
@@ -73,7 +84,7 @@ enum GFXBUT_PARAMS
 	\return Always \a KE_NONE.
 	\sa gui_load_f(), gfxbut_destroy() and gui_obj_create().
 */
-kucode_t gfxbut_init( gui_obj_t *obj );
+kucode_t button_init( gui_obj_t *obj );
 
 //! Destroy a graphical button object.
 /*!
@@ -82,7 +93,7 @@ kucode_t gfxbut_init( gui_obj_t *obj );
 	\return Always \a KE_NONE.
 	\sa gui_load_f(), gfxbut_init() and gui_obj_delete().
 */
-kucode_t gfxbut_destroy( gui_obj_t *obj );
+kucode_t button_destroy( gui_obj_t *obj );
 
 //! Load a graphical button.
 /*!
@@ -91,7 +102,7 @@ kucode_t gfxbut_destroy( gui_obj_t *obj );
 	\retval KE_* res_aceess() errors.
 	\sa gui_status_f(), gfxbut_set() and gfxbut_uload().
 */
-kucode_t gfxbut_load( gui_obj_t *obj );
+kucode_t button_load( gui_obj_t *obj );
 
 //! Unload a graphical button.
 /*!
@@ -99,7 +110,7 @@ kucode_t gfxbut_load( gui_obj_t *obj );
 	\return Always \a KE_NONE.
 	\sa gui_status_f() and gfxbut_load().
 */
-kucode_t gfxbut_uload( gui_obj_t *obj );
+kucode_t button_uload( gui_obj_t *obj );
 
 //! Change the button dimentions
 /*!
@@ -107,7 +118,7 @@ kucode_t gfxbut_uload( gui_obj_t *obj );
 	\return Always \a KE_NONE.
 	\sa gui_dim_f().
 */
-kucode_t gfxbut_dim( gui_obj_t *obj );
+kucode_t button_dim( gui_obj_t *obj );
 
 //! Set the attribute of the graphical button.
 /*!
@@ -117,7 +128,7 @@ kucode_t gfxbut_dim( gui_obj_t *obj );
 	\retval KE_INVALID Invalid attribute.
 	\sa gui_sg_f() and gfxbut_get().
 */
-kucode_t gfxbut_set( gui_obj_t *obj, int param, void *data );
+kucode_t button_set( gui_obj_t *obj, int param, void *data );
 
 //! Get the attribute of the graphical button.
 /*!
@@ -126,7 +137,7 @@ kucode_t gfxbut_set( gui_obj_t *obj, int param, void *data );
 	\retval KE_INVALID Invalid attribute.
 	\sa gui_sg_f() and gfxbut_set().
 */
-kucode_t gfxbut_get( gui_obj_t *obj, int param, void *data );
+kucode_t button_get( gui_obj_t *obj, int param, void *data );
 
 //! Mouse-On event handler.
 /*!
@@ -134,7 +145,7 @@ kucode_t gfxbut_get( gui_obj_t *obj, int param, void *data );
 	\return Possible \a GUIE_ERROR with \ref kucode set to gfx_draw() errors.
 	\sa gui_mouse_f(), gfxbut_moff(), gfxbut_mdown() and gfxbut_mup().
 */
-gui_event_st gfxbut_mon( gui_obj_t *obj, int x, int y, int z );
+gui_event_st button_mon( gui_obj_t *obj, int x, int y, int z );
 
 //! Mouse-Off event handler.
 /*!
@@ -142,7 +153,7 @@ gui_event_st gfxbut_mon( gui_obj_t *obj, int x, int y, int z );
 	\return Possible \a GUIE_ERROR with \ref kucode set to gfx_draw() errors.
 	\sa gui_mouse_f(), gfxbut_mon(), gfxbut_mdown() and gfxbut_mup().
 */
-gui_event_st gfxbut_moff( gui_obj_t *obj, int x, int y, int z );
+gui_event_st button_moff( gui_obj_t *obj, int x, int y, int z );
 
 //! Mouse-Down event handler.
 /*!
@@ -150,7 +161,7 @@ gui_event_st gfxbut_moff( gui_obj_t *obj, int x, int y, int z );
 	\return Possible \a GUIE_ERROR with \ref kucode set to gfx_draw() errors.
 	\sa gui_mouse_f(), gfxbut_mon(), gfxbut_moff() and gfxbut_mup().
 */
-gui_event_st gfxbut_mdown( gui_obj_t *obj, int x, int y, int z );
+gui_event_st button_mdown( gui_obj_t *obj, int x, int y, int z );
 
 //! Mouse-Up event handler.
 /*!
@@ -158,7 +169,7 @@ gui_event_st gfxbut_mdown( gui_obj_t *obj, int x, int y, int z );
 	\return The same as gfxbut_mon() and gfxbut_moff().
 	\sa gui_mouse_f(), gfxbut_mon(), gfxbut_moff() and gfxbut_mdown().
 */
-gui_event_st gfxbut_mup( gui_obj_t *obj, int x, int y, int z );
+gui_event_st button_mup( gui_obj_t *obj, int x, int y, int z );
 
 //! Draw the graphical button.
 /*!
@@ -167,7 +178,7 @@ gui_event_st gfxbut_mup( gui_obj_t *obj, int x, int y, int z );
 	\retval KE_* gfx_draw() errors.
 	\sa gui_draw_f().
 */
-kucode_t gfxbut_draw( gui_obj_t *obj, int x, int y, int w, int h );
+kucode_t button_draw( gui_obj_t *obj, int x, int y );
 
 #ifdef __cplusplus
 }

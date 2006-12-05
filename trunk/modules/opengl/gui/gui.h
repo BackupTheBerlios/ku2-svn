@@ -216,11 +216,13 @@ struct STRUCT_GUI_OBJ
 /*!
 	Initializes the GUI engine. Other functions can be called only
 	after this one is called.
+	\param w Screen width.
+	\param h Screen height.
 	\retval KE_NONE No error.
 	\retval KE_* abtree_create() errors.
 	\sa gui_halt().
 */
-kucode_t gui_init( void );
+kucode_t gui_init( uint w, uint h );
 
 //! Halt the GUI engine.
 /*!

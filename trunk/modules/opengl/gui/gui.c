@@ -74,6 +74,9 @@ static tree_t *gui_objects;
 //! Last object ID.
 static uint gui_lastid = 0;
 
+static uint gui_w,	//!< Screen width.
+	gui_h;			//!< Screen height.
+
 static gui_obj_t
 	*obj_root,		//!< Root object.
 	*obj_mon,		//!< Object, where the mouse is.
@@ -84,7 +87,7 @@ static int gui_lrx,	//!< Real X of the found object.
 	gui_mdown_rx,	//!< Real X of object, where the mouse button was pressed.
 	gui_mdown_ry;	//!< Real Y of object, where the mouse button was pressed.
 
-kucode_t gui_init( void )
+kucode_t gui_init( uint w, uint h )
 {
 	pstart();
 
@@ -92,10 +95,13 @@ kucode_t gui_init( void )
 	if ( gui_objects == NULL )
 		return kucode;
 
+	gui_w = w;
+	gui_h = h;
+
 	obj_root = NULL;
 	obj_mon = NULL;
 	obj_mdown = NULL;
-	
+
 	pstop();
 	return KE_NONE;
 }
@@ -154,16 +160,16 @@ kucode_t gui_obj_delete( gui_obj_t *obj )
 {
 	static int recursion_lvl = 0;
 	pstart();
-	
+
 	recursion_lvl++;
-	
+
 	// выгружаем подобъект
 	if ( obj->status > GUI_NOTLOADED )
 		obj->uload(obj);
-	
+
 	// удаляем подобъект
 	obj->destroyf(obj);
-	
+
 	// удаляем потомков
 	if ( obj->children )
 	{
@@ -172,20 +178,20 @@ kucode_t gui_obj_delete( gui_obj_t *obj )
 				while ( !dl_list_offside(obj->children) );
 		dl_list_free(obj->children, NULL);
 	}
-	
+
 	// исключаем из потомков предка
 	if ( (recursion_lvl == 1) && obj->parent )
 	{
 		gui_excl_from_parent(obj);
 	}
-	
+
 	// удаляем из списка объектов
 	abtree_rem(gui_objects, obj, NULL);
 
 	pdebug("Object '%s` %u is deleted!\n", (char*)obj->widget, obj->id);
 	dfree(obj);
 	recursion_lvl--;
-	
+
 	pstop();
 	return KE_NONE;
 }
@@ -193,9 +199,9 @@ kucode_t gui_obj_delete( gui_obj_t *obj )
 void gui_root( gui_obj_t *obj )
 {
 	pstart();
-	
+
 	obj_root = obj;
-	
+
 	pdebug("Object '%s` %u became a root!\n", (char*)obj->widget, obj->id);
 	pstop();
 }
@@ -203,7 +209,7 @@ void gui_root( gui_obj_t *obj )
 kucode_t gui_move( gui_obj_t *obj, int x, int y )
 {
 	pstart();
-	
+
 	obj->x = x;
 	obj->y = y;
 
@@ -215,13 +221,13 @@ kucode_t gui_move( gui_obj_t *obj, int x, int y )
 kucode_t gui_resize( gui_obj_t *obj, int w, int h )
 {
 	pstart();
-	
+
 	obj->width = w;
 	obj->height = h;
 
 	if ( obj->dim && (obj->dim(obj) != KE_NONE) )
 		return kucode;
-	
+
 	pdebug("Object '%s` %u was resized!\n", (char*)obj->widget, obj->id);
 	pstop();
 	return KE_NONE;
@@ -230,17 +236,17 @@ kucode_t gui_resize( gui_obj_t *obj, int w, int h )
 kucode_t gui_ch_host( gui_obj_t *obj, gui_obj_t *host )
 {
 	pstart();
-	
+
 	ku_avoid( obj->parent == host );
-	
+
 	if ( host )
 		if ( gui_ins_to_children(host, obj) != KE_NONE )
 			return kucode;
-	
+
 	if ( obj->parent )
 		gui_excl_from_parent(obj);
 	obj->parent = host;
-	
+
 	pdebug("Object '%s` %u changed host!\n", (char*)obj->widget, obj->id);
 	pstop();
 	return KE_NONE;
@@ -252,11 +258,11 @@ kucode_t gui_set( gui_obj_t *obj, int parcnt, ... )
 	int i, param;
 	void *data;
 	pstart();
-	
+
 	ku_avoid( parcnt <= 0 );
-	
+
 	va_start(ap, parcnt);
-	
+
 	if ( obj->set )
 	{
 		for ( i = 0; i < parcnt; i++ )
@@ -274,7 +280,7 @@ kucode_t gui_set( gui_obj_t *obj, int parcnt, ... )
 		va_end(ap);
 		KU_ERRQ(KE_INVALID);
 	}
-	
+
 	va_end(ap);
 	pstop();
 	return KE_NONE;
@@ -286,11 +292,11 @@ kucode_t gui_get( gui_obj_t *obj, int parcnt, ... )
 	int i, param;
 	void *data;
 	pstart();
-	
+
 	ku_avoid( parcnt <= 0 );
-	
+
 	va_start(ap, parcnt);
-	
+
 	if ( obj->set )
 	{
 		for ( i = 0; i < parcnt; i++ )
@@ -308,7 +314,7 @@ kucode_t gui_get( gui_obj_t *obj, int parcnt, ... )
 		va_end(ap);
 		KU_ERRQ(KE_INVALID);
 	}
-	
+
 	va_end(ap);
 	pstop();
 	return KE_NONE;
@@ -399,11 +405,11 @@ kucode_t gui_draw( void )
 static gui_obj_t *gui_search_by_coord( int x, int y )
 {
 	gui_obj_t *obj = obj_root;
-	
+
 	if ( (!obj) || (obj->status == GUI_HIDDEN) || (obj->x > x) || \
 		(obj->x+obj->width < x) || (obj->y > y) || (obj->y+obj->height < y ) )
 		return NULL;
-	
+
 	gui_lrx = obj->x;
 	gui_lry = obj->y;
 	while ( obj->children && (obj->children->size > 0) )
@@ -425,7 +431,7 @@ static gui_obj_t *gui_search_by_coord( int x, int y )
 				return obj;
 		}
 	}
-	
+
 	return obj;
 }
 
@@ -434,11 +440,12 @@ gui_event_st gui_process( SDL_Event *event )
 	gui_obj_t *obj;
 	gui_event_st status[2] = { GUIE_LEAVE, GUIE_LEAVE };
 	pstart();
-	
+
 	switch ( event->type )
 	{
 		case SDL_MOUSEMOTION:
 		{
+			event->motion.y = gui_h-event->motion.y;
 			obj = gui_search_by_coord(event->motion.x, event->motion.y);
 			if ( obj != obj_mon )
 			{
@@ -454,7 +461,9 @@ gui_event_st gui_process( SDL_Event *event )
 		}
 		case SDL_MOUSEBUTTONDOWN:
 		{
+			_
 			ku_avoid( obj_mdown != NULL );
+			event->button.y = gui_h-event->button.y;
 			obj_mdown = gui_search_by_coord(event->button.x, event->button.y);
 			if ( obj_mdown && (obj_mdown->status < GUI_DISABLED) && obj_mdown->mdown )
 				status[0] = obj_mdown->mdown(obj_mdown, event->button.x-gui_lrx, \
@@ -465,17 +474,21 @@ gui_event_st gui_process( SDL_Event *event )
 		}
 		case SDL_MOUSEBUTTONUP:
 		{
+			_
 			if ( obj_mdown && (obj_mdown->status < GUI_DISABLED) )
 			{
 				if ( obj_mdown->mup )
+				{
+					event->motion.y = gui_h-event->motion.y;
 					status[0] = obj_mdown->mup(obj_mdown, event->button.x-gui_mdown_rx, \
 						event->button.y-gui_mdown_ry, event->button.button);
-				obj_mdown = NULL;
+				}
 			}
+			obj_mdown = NULL;
 			break;
 		}
 	}
-	
+
 	pstop();
 	return MINint(status[0], status[1]);
 }

@@ -28,17 +28,11 @@
 
 kucode_t gfx_draw( gfx_image_t *src, int x, int y )
 {
-	GLenum format;
 	pstart();
-	
+
 	glWindowPos2i(x, y);
-	
-	
-	
 	glDrawPixels(src->w, src->h, src->format, GL_UNSIGNED_BYTE, src->pixels);
-	
-	
-	
+
 	pstop();
 	return KE_NONE;
 }
@@ -47,7 +41,7 @@ SDL_Surface *gfx_txtrender ( const char *text, const gfx_font_t *font, SDL_Color
 {
 	SDL_Surface *txtface;
 	pstart();
-	
+
 	//TTF_SetFontStyle((TTF_Font*)font, style);
 	//txtface = TTF_RenderUTF8_Blended((TTF_Font*)font, text, colour);
 	if ( txtface == NULL )
@@ -56,7 +50,7 @@ SDL_Surface *gfx_txtrender ( const char *text, const gfx_font_t *font, SDL_Color
 		kucode = KE_EXTERNAL;
 		return NULL;
 	}
-	
+
 	pstop();
 	return txtface;
 }

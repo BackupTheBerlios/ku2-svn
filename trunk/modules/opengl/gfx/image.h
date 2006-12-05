@@ -9,7 +9,7 @@
 /*!
 	\file
 	\brief Image control.
-	
+
 	Functions for image control.
 	\author J. Anton
 	\date Mon Oct 23 17:54:43 2006
@@ -21,6 +21,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "SDL.h"
 
 #include "ku2/ecode.h"
 #include "ku2/types.h"
@@ -35,6 +37,8 @@ struct
 		h;			//!< Image height.
 	void *pixels;	//!< Pixel data.
 }	gfx_image_t;
+
+gfx_image_t *gfx_img_fromSDL( SDL_Surface *src );
 
 //! Assign an image resource type and add resources from file.
 /*!

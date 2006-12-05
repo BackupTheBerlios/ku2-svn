@@ -9,7 +9,7 @@
 /*!
 	\file
 	\brief SDL_ttf font management routines.
-	
+
 	Functions for font management operations.
 	\author J. Anton
 	\date Sat Sep 9 14:40:56 2006
@@ -23,6 +23,8 @@ extern "C" {
 #endif
 
 #include "SDL_ttf.h"
+
+#include "image.h"
 
 #include "ku2/ecode.h"
 #include "ku2/types.h"
@@ -43,6 +45,9 @@ enum
 
 //! Font object.
 typedef TTF_Font gfx_font_t;
+
+gfx_image_t *gfx_font_render( const char *text, gfx_font_t *font, gfx_font_style_t style, \
+	uint8_t r, uint8_t g, uint8_t b );
 
 //! Assign a font resource type and add resources from file.
 /*!
