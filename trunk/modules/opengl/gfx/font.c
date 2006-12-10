@@ -60,7 +60,7 @@ static void *gfx_font_control( const char *path, rescontrol_t action, void *data
 
 	if ( action == RES_LOAD )
 	{
-		font = TTF_OpenFont(path, *((int*)data));
+		font = TTF_OpenFont(path, (int)data);
 		if ( font == NULL )
 		{
 			plog(gettext("Failed to open a font '%s`: %s\n"), path, TTF_GetError());

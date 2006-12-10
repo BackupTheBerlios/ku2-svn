@@ -32,44 +32,57 @@ static void button_ch_state( gui_obj_t *obj, int state )
 		}
 		case BUTTON_MON:
 		{
-			widget->face = widget->back_mon;
+			widget->face = widget->back_mon ? widget->back_mon : widget->back_nor;
 			break;
 		}
 		case BUTTON_MDN:
 		{
-			widget->face = widget->back_mdn;
+			widget->face = widget->back_mdn ? widget->back_mdn : widget->back_nor;
 			break;
 		}
 	}
 
 	obj->width = widget->face->w;
 	obj->height = widget->face->h;
+
+	if ( widget->fontface )
+	{
+		widget->font_rx = (obj->width-widget->fontface->w)/2;
+		widget->font_ry = (obj->height-widget->fontface->h)/2;
+	}
+
 }
 
 kucode_t button_init( gui_obj_t *obj )
 {
 	gui_button_t *const widget = (gui_button_t*)obj->widget;
 	pstart();
-	
+
 	strcpy(widget->wname, "button");
+	widget->st_mon = 0;
+	widget->st_mdown = 0;
+
+	widget->click = NULL;
 	widget->back_nor_name = NULL;
 	widget->back_mon_name = NULL;
 	widget->back_mdn_name = NULL;
-	
-	widget->st_mon = 0;
-	widget->st_mdown = 0;
-	
-	widget->click = NULL;
-	
+	widget->font_name = NULL;
+
+	widget->font_r = \
+	widget->font_g = \
+	widget->font_b = 0;
+
+	widget->caption = NULL;
+
 	obj->destroyf = button_destroy;
 	obj->load = button_load;
 	obj->uload = button_uload;
 	obj->enable = NULL;
 	obj->disable = NULL;
 	obj->hide = NULL;
-	
+
 	obj->dim = NULL;
-	
+
 	obj->set = button_set;
 	obj->get = button_get;
 
@@ -104,42 +117,88 @@ kucode_t button_destroy( gui_obj_t *obj )
 	if ( widget->back_mdn_name )
 		dfree(widget->back_mdn_name);
 
+	if ( widget->font_name )
+		dfree(widget->font_name);
+
+	if ( widget->caption )
+		dfree(widget->caption);
+
 	pstop();
 	return KE_NONE;
 }
 
+//	загрузка данных кнопки
 kucode_t button_load( gui_obj_t *obj )
 {
 	gui_button_t *const widget = (gui_button_t*)obj->widget;
 	pstart();
 
+	ku_avoid( obj->status != GUI_NOTLOADED );
+
+	//	загружаем главное изображение, не может быть NULL
+	ku_avoid( widget->back_nor_name == NULL );
 	widget->back_nor = res_access(widget->back_nor_name);
 	if ( widget->back_nor == NULL )
 	{
-		plog(gettext("Object 'gfxbutton` %u background '%s` was not loaded: %d\n"), \
+		plogfn(gettext("Object %u background '%s` was not loaded: %d\n"), \
 			obj->id, widget->back_nor_name, kucode);
 		return kucode;
 	}
 
-	widget->back_mon = res_access(widget->back_mon_name);
-	if ( widget->back_mon == NULL )
+	/*
+		загружаем изображение активной кнопки,
+		если NULL, то используется нормальное изображение
+	*/
+	if ( widget->back_mon_name )
 	{
-		plog(gettext("Object 'gfxbutton` %u mouse-on background '%s` " \
-			"was not loaded: %d\n"), \
-			obj->id, widget->back_mon_name, kucode);
-		res_release(widget->back_nor_name);
-		return kucode;
-	}
+		widget->back_mon = res_access(widget->back_mon_name);
+		if ( widget->back_mon == NULL )
+		{
+			plogfn(gettext("Object %u mouse-on background '%s` was not loaded: %d\n"), \
+				obj->id, widget->back_mon_name, kucode);
+		}
+	}	else
+		widget->back_mon = NULL;
 
-	widget->back_mdn = res_access(widget->back_mdn_name);
-	if ( widget->back_mdn == NULL )
+	/*
+		загружаем изображение нажатой кнопки,
+		если NULL, то используется нормальное изображение
+	*/
+	if ( widget->back_mdn_name )
 	{
-		plog(gettext("Object 'gfxbutton` %u mouse-down background '%s` " \
-			"was not loaded: %d\n"), \
-			obj->id, widget->back_mdn_name, kucode);
-		res_release(widget->back_mon_name);
-		res_release(widget->back_nor_name);
-		return kucode;
+		widget->back_mdn = res_access(widget->back_mdn_name);
+		if ( widget->back_mdn == NULL )
+		{
+			plogfn(gettext("Object %u mouse-down background '%s` was not loaded: %d\n"), \
+				obj->id, widget->back_mdn_name, kucode);
+		}
+	}	else
+		widget->back_mdn = NULL;
+
+	/*
+		загружаем шрифт текста кнопки,
+		если NULL, то кнопка не будет иметь текста
+	*/
+	if ( widget->font_name )
+	{
+		widget->font = res_access(widget->font_name);
+		if ( widget->font == NULL )
+		{
+			plogfn(gettext("Object %u font '%s` was not loaded: %d\n"), \
+				obj->id, widget->font_name, kucode);
+		}	else
+		//	если установлен текст кнопки..
+		if ( widget->caption )
+		{
+			gfx_image_t *fontface = gfx_font_render(widget->caption, widget->font, \
+				widget->font_style, widget->font_r, widget->font_g, widget->font_b);
+			widget->fontface = fontface; //	если NULL, то текст не будет рисоваться
+		}	else
+			widget->fontface = NULL;
+	}	else
+	{
+		widget->font = NULL;
+		widget->fontface = NULL;
 	}
 
 	button_ch_state(obj, BUTTON_NORM);
@@ -148,22 +207,33 @@ kucode_t button_load( gui_obj_t *obj )
 	return KE_NONE;
 }
 
+//	освобождение от загруженных данных
 kucode_t button_uload( gui_obj_t *obj )
 {
 	gui_button_t *const widget = (gui_button_t*)obj->widget;
 	pstart();
 
+	ku_avoid( obj->status == GUI_NOTLOADED );
+
+	ku_avoid( widget->back_nor_name == NULL );
 	if ( res_release(widget->back_nor_name) != KE_NONE )
-		plog(gettext("Note: Object \"gfxbutton\" %u failed to release " \
-			"a background \"%s\": %d\n"), obj->id, widget->back_nor_name, kucode);
+		plogfn(gettext("Object %u failed to release a background \"%s\": %d\n"), \
+			obj->id, widget->back_nor_name, kucode);
 
-	if ( res_release(widget->back_mon_name) != KE_NONE )
-		plog(gettext("Note: Object \"gfxbutton\" %u failed to release " \
-			"a mouse-on background \"%s\": %d\n"), obj->id, widget->back_mon_name, kucode);
+	if ( widget->back_mon && (res_release(widget->back_mon_name) != KE_NONE) )
+		plogfn(gettext("Object %u failed to release a mouse-on background \"%s\": %d\n"), \
+			obj->id, widget->back_mon_name, kucode);
 
-	if ( res_release(widget->back_mdn_name) != KE_NONE )
-		plog(gettext("Note: Object \"gfxbutton\" %u failed to release " \
-			"a mouse-down background \"%s\": %d\n"), obj->id, widget->back_mdn_name, kucode);
+	if ( widget->back_mdn && (res_release(widget->back_mdn_name) != KE_NONE) )
+		plogfn(gettext("Object %u failed to release a mouse-down background \"%s\": %d\n"), \
+			obj->id, widget->back_mdn_name, kucode);
+
+	if ( widget->font && (res_release(widget->font_name) != KE_NONE) )
+		plogfn(gettext("Object %u failed to release a font \"%s\": %d\n"), \
+			obj->id, widget->font_name, kucode);
+
+	if ( widget->fontface )
+		dfree(widget->fontface);
 
 	pstop();
 	return KE_NONE;
@@ -173,7 +243,7 @@ kucode_t button_set( gui_obj_t *obj, int param, void *data )
 {
 	gui_button_t *const widget = (gui_button_t*)obj->widget;
 	pstart();
-	
+
 	switch ( param )
 	{
 		case BUTTON_NORM:
@@ -214,6 +284,48 @@ kucode_t button_set( gui_obj_t *obj, int param, void *data )
 			widget->click = (gui_cb_f)data;
 			break;
 		}
+		case BUTTON_CAPTION:
+		{
+			char *caption = dmalloc(sizeof(char)*(strlen((char*)data)+1));
+			if ( caption == NULL )
+				KU_ERRQ(KE_MEMORY);
+			strcpy(caption, (char*)data);
+			if ( widget->caption )
+				dfree(widget->caption);
+			widget->caption = caption;
+			break;
+		}
+		case BUTTON_FONT:
+		{
+			char *name = dmalloc(sizeof(char)*(strlen((char*)data)+1));
+			if ( name == NULL )
+				KU_ERRQ(KE_MEMORY);
+			strcpy(name, (char*)data);
+			if ( widget->font_name )
+				dfree(widget->font_name);
+			widget->font_name = name;
+			break;
+		}
+		case BUTTON_FSTYLE:
+		{
+			widget->font_style = (gfx_font_style_t)data;
+			break;
+		}
+		case BUTTON_FCR:
+		{
+			widget->font_r = (uint8_t)data;
+			break;
+		}
+		case BUTTON_FCG:
+		{
+			widget->font_g = (uint8_t)data;
+			break;
+		}
+		case BUTTON_FCB:
+		{
+			widget->font_b = (uint8_t)data;
+			break;
+		}
 		default:
 			KU_ERRQ(KE_INVALID);
 	}
@@ -249,6 +361,36 @@ kucode_t button_get( gui_obj_t *obj, int param, void *data )
 			*((gui_cb_f*)data) = widget->click;
 			break;
 		}
+		case BUTTON_CAPTION:
+		{
+			*((char**)data) = widget->caption;
+			break;
+		}
+		case BUTTON_FONT:
+		{
+			*((char**)data) = widget->font_name;
+			break;
+		}
+		case BUTTON_FSTYLE:
+		{
+			*((gfx_font_style_t*)data) = widget->font_style;
+			break;
+		}
+		case BUTTON_FCR:
+		{
+			*((uint8_t*)data) = widget->font_r;
+			break;
+		}
+		case BUTTON_FCG:
+		{
+			*((uint8_t*)data) = widget->font_g;
+			break;
+		}
+		case BUTTON_FCB:
+		{
+			*((uint8_t*)data) = widget->font_b;
+			break;
+		}
 		default:
 			KU_ERRQ(KE_INVALID);
 	}
@@ -263,12 +405,7 @@ gui_event_st button_mon( gui_obj_t *obj, int x, int y, int z )
 	pstart();
 
 	if ( !widget->st_mdown && !widget->st_mon )
-	{
 		button_ch_state(obj, BUTTON_MON);
-
-		pstop();
-		return GUIE_DRAW;
-	}
 
 	widget->st_mon = 1;
 
@@ -281,15 +418,10 @@ gui_event_st button_moff( gui_obj_t *obj, int x, int y, int z )
 	gui_button_t *const widget = (gui_button_t*)obj->widget;
 	pstart();
 
-	widget->st_mon = 0;
-
 	if ( !widget->st_mdown )
-	{
 		button_ch_state(obj, BUTTON_NORM);
 
-		pstop();
-		return GUIE_DRAW;
-	}
+	widget->st_mon = 0;
 
 	pstop();
 	return GUIE_EAT;
@@ -300,34 +432,28 @@ gui_event_st button_mdown( gui_obj_t *obj, int x, int y, int z )
 	gui_button_t *const widget = (gui_button_t*)obj->widget;
 	pstart();
 
+	button_ch_state(obj, BUTTON_MDN);
 	widget->st_mdown = 1;
 
-	button_ch_state(obj, BUTTON_MDN);
-
-
 	pstop();
-	return GUIE_DRAW;
+	return GUIE_EAT;
 }
 
 gui_event_st button_mup( gui_obj_t *obj, int x, int y, int z )
 {
 	gui_button_t *const widget = (gui_button_t*)obj->widget;
-	gui_event_st status;
 	pstart();
 
-	plog("%d\n", widget->st_mon);
-
 	widget->st_mdown = 0;
-	widget->st_mon = 1-widget->st_mon;
 	if ( widget->st_mon )
-		status = button_moff(obj, x, y, z); else
-		status = button_mon(obj, x, y, z);
+		button_ch_state(obj, BUTTON_MON); else
+		button_ch_state(obj, BUTTON_NORM);
 
 	if ( widget->click && (widget->click(obj, (void*)z) != KE_NONE) )
 		return GUIE_ERROR;
 
 	pstop();
-	return status;
+	return GUIE_EAT;
 }
 
 kucode_t button_draw( gui_obj_t *obj, int x, int y )
@@ -336,6 +462,9 @@ kucode_t button_draw( gui_obj_t *obj, int x, int y )
 	pstart();
 
 	if ( gfx_draw(widget->face, x, y) != KE_NONE )
+		return kucode;
+
+	if ( widget->fontface && (gfx_draw(widget->fontface, x+widget->font_rx, y+widget->font_ry) != KE_NONE) )
 		return kucode;
 
 	pstop();

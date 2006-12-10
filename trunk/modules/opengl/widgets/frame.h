@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-#include "SDL.h"
+#include "modules/opengl/gfx/image.h"
 #include "modules/opengl/gui/gui.h"
 #include "ku2/ecode.h"
 
@@ -34,7 +34,7 @@ struct STRUCT_GUI_FRAME_OBJ
 					//!< Widget name ('frame`).
 	char *background_name;
 					//!< Background image name.
-	SDL_Surface *background;
+	gfx_image_t *background;
 					//!< Backgdound image surface.
 }	gui_frame_t;
 

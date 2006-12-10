@@ -10,11 +10,11 @@
 	\file
 	\brief Button widget.
 
-	Graphical button, no text. Thee images: normal state, "mouse-on" state and
-	"mouse-down" state.
+	Button with the text. Thee images: normal state, "mouse-on" state and
+	"mouse-down" state. Font, font colour and caption.
 	\author J. Anton
-	\date Thu Aug 31 21:35:22 2006
-	\version 1.0.0
+	\date Sun Dec 10 2006
+	\version 1.1.0
 */
 
 #ifndef KU__GUI_BUTTON_H__
@@ -24,6 +24,7 @@ extern "C" {
 #endif
 
 #include "modules/opengl/gfx/image.h"
+#include "modules/opengl/gfx/font.h"
 #include "modules/opengl/gui/gui.h"
 #include "ku2/ecode.h"
 
@@ -57,15 +58,21 @@ struct STRUCT_GUI_BUTTON_OBJ
 		*face,		//!< Current image surface.
 		*fontface;	//!< Rendered text.
 
+	int font_rx,	//!< Relative caption X.
+		font_ry;	//!< Relative caption Y.
+
 	gfx_font_t
 		*font;		//!< Font.
 	gfx_font_style_t
 		font_style;	//!< Font style.
+	uint8_t font_r;	//!< Font colour (red).
+	uint8_t font_g;	//!< Font colour (green).
+	uint8_t font_b;	//!< Font colour (blue).
 
 	char *caption;	//!< Button caption.
 }	gui_button_t;
 
-//! Button parameters for gfxbut_set() and gfxbut_get().
+//! Button parameters for button_set() and button_get().
 enum BUTTON_PARAMS
 {
 	BUTTON_NORM,	//!< Change the normal image. Set/Get: data are (char*/char**) image name (\ref res.h).
@@ -74,106 +81,107 @@ enum BUTTON_PARAMS
 	BUTTON_CLICK,	//!< Change the "click" callback function. Data are pointer to function.
 	BUTTON_CAPTION,	//!< Change the title of the button (button text).
 	BUTTON_FONT,	//!< Change the font.
-	BUTTON_FSTYLE
+	BUTTON_FSTYLE,	//!< Change the font style.
+	BUTTON_FCR,		//!< Change the font colour (red).
+	BUTTON_FCG,		//!< Change the font colour (green).
+	BUTTON_FCB		//!< Change the font colour (blue).
 };
 
-//! Initialize a graphical button object.
+//! Initialize a button object.
 /*!
-	This function should be passed to gui_obj_create() to create a graphical button.
+	This function should be passed to gui_obj_create() to create a button.
 	It should set up all gui_obj_t variables to work correctly.
 	\return Always \a KE_NONE.
-	\sa gui_load_f(), gfxbut_destroy() and gui_obj_create().
+	\sa gui_load_f(), button_destroy() and gui_obj_create().
 */
 kucode_t button_init( gui_obj_t *obj );
 
-//! Destroy a graphical button object.
+//! Destroy a button object.
 /*!
 	Frees all button related data and attributes.
 	It is called in gui_obj_delete().
 	\return Always \a KE_NONE.
-	\sa gui_load_f(), gfxbut_init() and gui_obj_delete().
+	\sa gui_load_f(), button_init() and gui_obj_delete().
 */
 kucode_t button_destroy( gui_obj_t *obj );
 
-//! Load a graphical button.
+//! Load button related data.
 /*!
-	Loads button data.
+	Loads button related data data (images, fonts).
+	\ref BUTTON_NORM should be set previously. Other settings are optional, if
+	they are not set then additional feachures are diabled.
 	\retval KE_NONE No error.
 	\retval KE_* res_aceess() errors.
-	\sa gui_status_f(), gfxbut_set() and gfxbut_uload().
+	\note Only BUTTON_NORM errors are returned, others are not critical and will only be logged.
+	\sa gui_status_f(), button_set() and button_uload().
 */
 kucode_t button_load( gui_obj_t *obj );
 
-//! Unload a graphical button.
+//! Unload button related data.
 /*!
-	Unloads button data.
+	Unloads button related data.
 	\return Always \a KE_NONE.
-	\sa gui_status_f() and gfxbut_load().
+	\note All res_release() errors are logged if occured.
+	\sa gui_status_f() and button_load().
 */
 kucode_t button_uload( gui_obj_t *obj );
 
-//! Change the button dimentions
-/*!
-	Changes the button dimentions to normal image dimentions.
-	\return Always \a KE_NONE.
-	\sa gui_dim_f().
-*/
-kucode_t button_dim( gui_obj_t *obj );
-
-//! Set the attribute of the graphical button.
+//! Set the attribute of the button.
 /*!
 	Sets a button attribute.
 	\retval KE_NONE No error.
 	\retval KE_MEMORY Memory allocation has failed.
 	\retval KE_INVALID Invalid attribute.
-	\sa gui_sg_f() and gfxbut_get().
+	\note If \a KE_MEMORY occured then old value is keeped unchanged.
+	\sa gui_sg_f() and button_get().
 */
 kucode_t button_set( gui_obj_t *obj, int param, void *data );
 
-//! Get the attribute of the graphical button.
+//! Get the attribute of the button.
 /*!
 	Gets a button attribute.
 	\retval KE_NONE No error.
 	\retval KE_INVALID Invalid attribute.
-	\sa gui_sg_f() and gfxbut_set().
+	\sa gui_sg_f() and button_set().
 */
 kucode_t button_get( gui_obj_t *obj, int param, void *data );
 
 //! Mouse-On event handler.
 /*!
 	Handles "Mouse-On" events.
-	\return Possible \a GUIE_ERROR with \ref kucode set to gfx_draw() errors.
-	\sa gui_mouse_f(), gfxbut_moff(), gfxbut_mdown() and gfxbut_mup().
+	\return Always \a GUIE_EAT.
+	\sa gui_mouse_f(), button_moff(), button_mdown() and button_mup().
 */
 gui_event_st button_mon( gui_obj_t *obj, int x, int y, int z );
 
 //! Mouse-Off event handler.
 /*!
 	Handles "Mouse-Off" events.
-	\return Possible \a GUIE_ERROR with \ref kucode set to gfx_draw() errors.
-	\sa gui_mouse_f(), gfxbut_mon(), gfxbut_mdown() and gfxbut_mup().
+	\return Always \a GUIE_EAT.
+	\sa gui_mouse_f(), button_mon(), button_mdown() and button_mup().
 */
 gui_event_st button_moff( gui_obj_t *obj, int x, int y, int z );
 
 //! Mouse-Down event handler.
 /*!
 	Handles "Mouse-Down" events.
-	\return Possible \a GUIE_ERROR with \ref kucode set to gfx_draw() errors.
-	\sa gui_mouse_f(), gfxbut_mon(), gfxbut_moff() and gfxbut_mup().
+	\return Always \a GUIE_EAT.
+	\sa gui_mouse_f(), button_mon(), button_moff() and button_mup().
 */
 gui_event_st button_mdown( gui_obj_t *obj, int x, int y, int z );
 
 //! Mouse-Up event handler.
 /*!
 	Handles 'Mouse-Up` events.
-	\return The same as gfxbut_mon() and gfxbut_moff().
-	\sa gui_mouse_f(), gfxbut_mon(), gfxbut_moff() and gfxbut_mdown().
+	\retval GUIE_EAT Everything is OK.
+	\retval GUIE_ERROR Click callback function has failed.
+	\sa gui_mouse_f(), gui_cb_f(), button_mon(), button_moff() and button_mdown().
 */
 gui_event_st button_mup( gui_obj_t *obj, int x, int y, int z );
 
-//! Draw the graphical button.
+//! Draw the button.
 /*!
-	Draws a button.
+	Draws a button with the text if it is set.
 	\retval KE_NONE No error.
 	\retval KE_* gfx_draw() errors.
 	\sa gui_draw_f().
