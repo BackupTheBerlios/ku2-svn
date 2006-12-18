@@ -22,25 +22,28 @@
 extern "C" {
 #endif
 
-#include "SDL.h"
-#include "SDL_ttf.h"
-#include "gui/gui.h"
+#include "modules/opengl/gfx/image.h"
+#include "modules/opengl/gfx/font.h"
+#include "modules/opengl/gui/gui.h"
 #include "ku2/ecode.h"
 
 //! Graphical button GUI object.
 typedef
 struct STRUCT_GUI_TEXT_OBJ
 {
-	char wname[9];	//!< Widget name.
+	char wname[5];	//!< Widget name. ('text')
 
 	char
 		*font_name;	//!< Font name.
-	ku_flag32_t
-		flags;		//!< Font flags.
 
-	SDL_Surface
-		*back;		//!< Normal image.
-	TTF_Font *font;	//!< Font.
+	gfx_image_t *face;
+	gfx_font_t *font;
+
+	gfx_font_style_t
+		font_style;	//!< Font style.
+	uint8_t font_r;	//!< Font colour (red).
+	uint8_t font_g;	//!< Font colour (green).
+	uint8_t font_b;	//!< Font colour (blue).
 
 	char *text;		//!< Text of an object.
 }	gui_text_t;
@@ -48,9 +51,12 @@ struct STRUCT_GUI_TEXT_OBJ
 //! Text parameters for text_set() and text_get().
 enum TEXT_PARAMS
 {
+	TEXT_TEXT,
 	TEXT_FONT,		//!< Change the font. Set/Get: data are (char*/char**) font name.
-	TEXT_FLAGS,		//!< Change the font flags.
-	TEXT_TEXT		//!< Change the text.
+	TEXT_FSTYLE,
+	TEXT_FCR,
+	TEXT_FCG,
+	TEXT_FCB
 };
 
 //! Initialize a graphical button object.
@@ -116,7 +122,7 @@ kucode_t text_get( gui_obj_t *obj, int param, void *data );
 	\retval KE_* gfx_draw() errors.
 	\sa gui_draw_f().
 */
-kucode_t text_draw( gui_obj_t *obj, int x, int y, int w, int h );
+kucode_t text_draw( gui_obj_t *obj, int x, int y );
 
 #ifdef __cplusplus
 }

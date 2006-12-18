@@ -13,28 +13,29 @@
 #include "ku2/debug.h"
 #include "ku2/memory.h"
 #include "ku2/gettext.h"
-#include "log/log.h"
-#include "resmanager/res.h"
-#include "gfx/gfx.h"
-#include "gui/gui.h"
+#include "io/log/log.h"
+#include "dp/resmanager/res.h"
+#include "modules/opengl/gfx/gfx.h"
+#include "modules/opengl/gui/gui.h"
 
 kucode_t text_init( gui_obj_t *obj )
 {
 	gui_text_t *const widget = (gui_text_t*)obj->widget;
 	pstart();
-	
-	strcpy(widget->wname, "textline");
+
+	strcpy(widget->wname, "text");
+
 	widget->font_name = NULL;
-	widget->flags = GUI_FONT_ZERO;
+	widget->font_style = GFX_NORMAL;
+	widget->font_r = \
+	widget->font_g = \
+	widget->font_b = 0;
+
+	widget->text = NULL;
 
 	obj->destroyf = text_destroy;
 	obj->load = text_load;
 	obj->uload = text_uload;
-	obj->enable = NULL;
-	obj->disable = NULL;
-	obj->hide = NULL;
-
-	//obj->dim = text_dim;
 
 	obj->set = text_set;
 	obj->get = text_get;
@@ -56,6 +57,9 @@ kucode_t text_destroy( gui_obj_t *obj )
 	if ( widget->font_name )
 		dfree(widget->font_name);
 
+	if ( widget->text )
+		dfree(widget->text);
+
 	pstop();
 	return KE_NONE;
 }
@@ -65,16 +69,24 @@ kucode_t text_load( gui_obj_t *obj )
 	gui_text_t *const widget = (gui_text_t*)obj->widget;
 	pstart();
 
+	ku_avoid( widget->font_name == NULL );
+	ku_avoid( widget->text == NULL );
+
 	widget->font = res_access(widget->font_name);
 	if ( widget->font == NULL )
 	{
-		plog(gettext("Object 'textline` %u font '%s` was not loaded: %d\n"), \
+		plogfn(gettext("Object %u font '%s` was not loaded: %d\n"), \
 			obj->id, widget->font_name, kucode);
 		return kucode;
 	}
-
-	//!!!!!!!
-	widget->back = NULL;
+	widget->face = gfx_font_render(widget->text, widget->font, \
+		widget->font_style, widget->font_r, widget->font_g, widget->font_b);
+	if ( widget->face == NULL )
+	{
+		plogfn(gettext("Object %u text cannot be rendered: %d\n"), obj->id, kucode);
+		res_release(widget->font_name);
+		return kucode;
+	}
 
 	pstop();
 	return KE_NONE;
@@ -85,11 +97,15 @@ kucode_t text_uload( gui_obj_t *obj )
 	gui_text_t *const widget = (gui_text_t*)obj->widget;
 	pstart();
 
+	ku_avoid( obj->status == GUI_NOTLOADED );
+	ku_avoid( widget->font_name == NULL );
+
 	if ( res_release(widget->font_name) != KE_NONE )
 		plog(gettext("Note: Object 'gfxbutton` %u failed to release " \
 			"a font '%s`: %d\n"), obj->id, widget->font_name, kucode);
 
-	SDL_FreeSurface(widget->back);
+	if ( widget->face )
+		dfree(widget->face);
 
 	pstop();
 	return KE_NONE;
@@ -99,9 +115,20 @@ kucode_t text_set( gui_obj_t *obj, int param, void *data )
 {
 	gui_text_t *const widget = (gui_text_t*)obj->widget;
 	pstart();
-	
+
 	switch ( param )
 	{
+		case TEXT_TEXT:
+		{
+			char *text = dmalloc(sizeof(char)*(strlen((char*)data)+1));
+			if ( text == NULL )
+				KU_ERRQ(KE_MEMORY);
+			strcpy(text, (char*)data);
+			if ( widget->text )
+				dfree(widget->text);
+			widget->text = text;
+			break;
+		}
 		case TEXT_FONT:
 		{
 			char *name = dmalloc(sizeof(char)*(strlen((char*)data)+1));
@@ -113,20 +140,25 @@ kucode_t text_set( gui_obj_t *obj, int param, void *data )
 			widget->font_name = name;
 			break;
 		}
-		case TEXT_FLAGS:
+		case TEXT_FSTYLE:
 		{
-			widget->flags = (ku_flag32_t)data;
+			widget->font_style = (gfx_font_style_t)data;
 			break;
 		}
-		case TEXT_TEXT:
+		case TEXT_FCR:
 		{
-			char *text = dmalloc(sizeof(char)*(strlen((char*)data)+1));
-			if ( text == NULL )
-				KU_ERRQ(KE_MEMORY);
-			strcpy(text, (char*)data);
-			if ( widget->text )
-				dfree(widget->text);
-			widget->text = text;
+			widget->font_r = (uint8_t)data;
+			break;
+		}
+		case TEXT_FCG:
+		{
+			widget->font_g = (uint8_t)data;
+			break;
+		}
+		case TEXT_FCB:
+		{
+			widget->font_b = (uint8_t)data;
+			break;
 		}
 		default:
 			KU_ERRQ(KE_INVALID);
@@ -171,14 +203,12 @@ kucode_t text_get( gui_obj_t *obj, int param, void *data )
 	return KE_NONE;
 }
 
-kucode_t text_draw( gui_obj_t *obj, int x, int y, int w, int h )
+kucode_t text_draw( gui_obj_t *obj, int x, int y )
 {
 	gui_text_t *const widget = (gui_text_t*)obj->widget;
 	pstart();
 
-	if ( gfx_draw(widget->back, NULL, GFX_IMG_REAL, obj->rx, \
-		obj->ry, x, y, w, h) != KE_NONE )
-		return kucode;
+	gfx_draw(widget->face, x, y);
 
 	pstop();
 	return KE_NONE;

@@ -38,7 +38,7 @@ else:
 ###
 conf = Configure(env)
 if not conf.CheckCHeader("ctype.h"):
-	Exit()	
+	Exit()
 if not conf.CheckCHeader("errno.h"):
 	Exit()
 if not conf.CheckCHeader("libintl.h"):
@@ -125,7 +125,7 @@ ku2lib = env.Library("ku2", sources)
 
 ###
 #	Kane Utilities 2 SDL/OpenGL GUI and multimedia module
-###	
+###
 mm_sources = Split("""
 	modules/opengl/gfx/gfx.c
 	modules/opengl/gfx/image.c
@@ -133,6 +133,8 @@ mm_sources = Split("""
 	modules/opengl/gui/gui.c
 	modules/opengl/widgets/frame.c
 	modules/opengl/widgets/button.c
+	modules/opengl/widgets/texed.c
+	modules/opengl/widgets/textline.c
 	""")
 
 env4mm = env.Copy()

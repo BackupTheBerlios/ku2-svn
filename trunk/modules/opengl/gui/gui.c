@@ -80,7 +80,8 @@ static uint gui_w,	//!< Screen width.
 static gui_obj_t
 	*obj_root,		//!< Root object.
 	*obj_mon,		//!< Object, where the mouse is.
-	*obj_mdown;		//!< Object, where the mouse button was pressed.
+	*obj_mdown,		//!< Object, where the mouse button was pressed.
+	*obj_focus;		//!< Object, where the keyboard focus is.
 
 static int gui_lrx,	//!< Real X of the found object.
 	gui_lry,		//!< Real Y of the found object.
@@ -101,6 +102,7 @@ kucode_t gui_init( uint w, uint h )
 	obj_root = NULL;
 	obj_mon = NULL;
 	obj_mdown = NULL;
+	obj_focus = NULL;
 
 	pstop();
 	return KE_NONE;
@@ -133,7 +135,31 @@ gui_obj_t *gui_obj_create( gui_load_f initf, uint widget_sz, ku_flag32_t flags )
 	obj->status = GUI_NOTLOADED;
 	obj->flags = flags;
 	obj->widget_sz = widget_sz;
+
 	obj->initf = initf;
+	obj->destroyf = NULL;
+
+	obj->load = \
+	obj->uload = \
+	obj->enable = \
+	obj->disable = \
+	obj->hide = NULL;
+
+	obj->dim = NULL;
+
+	obj->set = \
+	obj->get = NULL;
+
+	obj->mon = \
+	obj->moff = \
+	obj->mdown = \
+	obj->mup = NULL;
+
+	obj->kdown = \
+	obj->kup = NULL;
+
+	obj->draw = NULL;
+
 	obj->widget = (int8_t*)obj+sizeof(gui_obj_t);
 
 	if ( initf(obj) != KE_NONE )
@@ -248,6 +274,21 @@ kucode_t gui_ch_host( gui_obj_t *obj, gui_obj_t *host )
 	obj->parent = host;
 
 	pdebug("Object '%s` %u changed host!\n", (char*)obj->widget, obj->id);
+	pstop();
+	return KE_NONE;
+}
+
+kucode_t gui_focus( gui_obj_t *obj )
+{
+	pstart();
+
+	ku_avoid( obj == obj_focus );
+
+	if ( obj_focus && obj_focus->defocus && (obj_focus->defocus(obj_focus) != KE_NONE) )
+		return kucode;
+	obj_focus = obj;
+
+	pdebug("Object '%s` %u has become focused!\n", (char*)obj->widget, obj->id);
 	pstop();
 	return KE_NONE;
 }
@@ -399,7 +440,10 @@ kucode_t gui_draw( void )
 		GUI_PROJ_BOTTOM, -GUI_PROJ_BOTTOM, 0.1, 2);
 	glOrtho(-4, 4, -3, 3, 1, -1);
 	glMatrixMode(GL_MODELVIEW);
-	return gui_obj_draw(obj_root, 0, 0);
+
+	if ( obj_root )
+		return gui_obj_draw(obj_root, 0, 0); else
+		return KE_NONE;
 }
 
 static gui_obj_t *gui_search_by_coord( int x, int y )

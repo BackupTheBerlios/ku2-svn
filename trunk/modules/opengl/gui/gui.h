@@ -9,7 +9,7 @@
 /*!
 	\file
 	\brief GUI library.
-	
+
 	Functions for GUI management.
 	\author J. Anton
 	\date Mon Nov 13 18:49:31 2006
@@ -98,7 +98,6 @@ typedef
 enum
 {
 	GUIE_CRITICAL,	//!< A major error has accured. Break the procession.
-	GUIE_DRAW,		//!< Event is managed end screen needs to be updated.
 	GUIE_EAT,		//!< "Eat" an event (event is managed).
 	GUIE_ERROR,		//!< A minor error has accured (event stays unmanaged).
 	GUIE_LEAVE		//!< Leave an event (event is unmanaged).
@@ -111,6 +110,10 @@ gui_event_st (*gui_mouse_f)( gui_obj_t *obj, int x, int y, int z );
 //! Keyboard event function.
 typedef
 gui_event_st (*gui_keyb_f)( gui_obj_t *obj, char ch );
+
+//! Defocus event function.
+typedef
+gui_event_st (*gui_defocus_f)( gui_obj_t *obj );
 
 //! GUI object status.
 typedef
@@ -131,7 +134,7 @@ enum GUI_FLAGS
 };
 
 //! Flags for fonts and text in the objects.
-enum GUI_FONT_FLAGS
+/*enum GUI_FONT_FLAGS
 {
 	GUI_FONT_ZERO = 0,
 					//!< Zero flag.
@@ -155,7 +158,7 @@ enum GUI_FONT_FLAGS
 					//!< Expand text to the object width, unless the last line.
 	GUI_FONT_SPLIT = 512
 					//!< Split text into lines even at the middle of the words.
-};
+};*/
 
 //! GUI object.
 struct STRUCT_GUI_OBJ
@@ -178,6 +181,10 @@ struct STRUCT_GUI_OBJ
 
 	uint widget_sz;	//!< Size of the widget related information.
 
+	gui_load_f
+		initf,		//!< Function for initializing a widget.
+		destroyf;	//!< Function for destroying a widget.
+
 	gui_status_f
 		load,		//!< Load a widget.
 		uload,		//!< Unload a widget.
@@ -192,19 +199,18 @@ struct STRUCT_GUI_OBJ
 		set,		//!< Set the attribute of a widget.
 		get;		//!< Get the attribute of a widget.
 
-	gui_load_f
-		initf,		//!< Function for initializing a widget.
-		destroyf;	//!< Function for destroying a widget.
-
 	gui_mouse_f
 		mon,		//!< Mouse move event handler.
 		moff,		//!< Mouse off widget handler.
 		mdown,		//!< Mouse button press handler.
 		mup;		//!< Mouse button release handler.
-	
+
 	gui_keyb_f
 		kdown,		//!< Key press handler.
 		kup;		//!< Key release handler.
+
+	gui_defocus_f
+		defocus;	//!< Defocus event handler.
 
 	gui_draw_f
 		draw;		//!< Draw a widget.
@@ -275,6 +281,8 @@ void gui_root( gui_obj_t *obj );
 kucode_t gui_move( gui_obj_t *obj, int x, int y );
 kucode_t gui_resize( gui_obj_t *obj, int w, int h );
 kucode_t gui_ch_host( gui_obj_t *obj, gui_obj_t *host );
+
+kucode_t gui_focus( gui_obj_t *obj );
 
 //! Set the widget attribute.
 /*!

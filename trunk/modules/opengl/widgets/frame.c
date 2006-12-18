@@ -5,7 +5,7 @@
  *  Copyright  2006  J. Anton
  *  kane@mail.berlios.de
  ****************************************************************************/
- 
+
 #include <string.h>
 
 #include "frame.h"
@@ -22,7 +22,7 @@ kucode_t frame_init( gui_obj_t *obj )
 {
 	gui_frame_t *const frame = (gui_frame_t*)obj->widget;
 	pstart();
-	
+
 	strcpy(frame->wname, "frame");
 	frame->background_name = NULL;
 	frame->background = NULL;
@@ -74,7 +74,7 @@ kucode_t frame_load( gui_obj_t *obj )
 	pstart();
 
 	ku_avoid( frame->background_name == NULL );
-	
+
 	frame->background = res_access(frame->background_name);
 	if ( frame->background == NULL )
 	{
@@ -82,6 +82,8 @@ kucode_t frame_load( gui_obj_t *obj )
 			obj->id, frame->background_name, kucode);
 		return kucode;
 	}
+	obj->width = frame->background->w;
+	obj->height = frame->background->h;
 
 	pstop();
 	return KE_NONE;
@@ -107,7 +109,7 @@ kucode_t frame_set( gui_obj_t *obj, int param, void *data )
 {
 	gui_frame_t *const frame = (gui_frame_t*)obj->widget;
 	pstart();
-	
+
 	switch ( param )
 	{
 		case FRAME_BACKGROUND:
