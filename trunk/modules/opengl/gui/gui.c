@@ -134,6 +134,7 @@ gui_obj_t *gui_obj_create( gui_load_f initf, uint widget_sz, ku_flag32_t flags )
 	obj->children = NULL;
 	obj->status = GUI_NOTLOADED;
 	obj->flags = flags;
+	obj->updated = 0;
 	obj->widget_sz = widget_sz;
 
 	obj->initf = initf;
@@ -190,8 +191,7 @@ kucode_t gui_obj_delete( gui_obj_t *obj )
 	recursion_lvl++;
 
 	// выгружаем подобъект
-	if ( obj->status > GUI_NOTLOADED )
-		obj->uload(obj);
+	gui_ch_status(obj, GUI_NOTLOADED);
 
 	// удаляем подобъект
 	obj->destroyf(obj);
@@ -200,7 +200,7 @@ kucode_t gui_obj_delete( gui_obj_t *obj )
 	if ( obj->children )
 	{
 		if ( dl_list_first(obj->children) == KE_NONE )
-			do gui_obj_delete(dl_list_cur(obj->children));
+			do gui_obj_delete(dl_list_next(obj->children));
 				while ( !dl_list_offside(obj->children) );
 		dl_list_free(obj->children, NULL);
 	}
@@ -227,8 +227,11 @@ void gui_root( gui_obj_t *obj )
 	pstart();
 
 	obj_root = obj;
+	obj_mon = NULL;
+	obj_mdown = NULL;
+	obj_focus = NULL;
 
-	pdebug("Object '%s` %u became a root!\n", (char*)obj->widget, obj->id);
+	pdebug("Object '%s` %u became a root!\n", obj ? (char*)obj->widget : "NULL", obj ? obj->id : -1);
 	pstop();
 }
 

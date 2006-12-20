@@ -13,24 +13,36 @@ mm_defines = []
 com_defines = []
 
 ###
+#	System settings
+##
+sysset = ARGUMENTS.get("system", "auto")
+
+###
 #	Platform depended variables and actions
 ###
-if env["PLATFORM"] == "win32":
+if env["PLATFORM"] == "win32" and (sysset == "vc" or sysset == "auto"):
 	env.Append(CCFLAGS = ["/W3", "/MD", "/Wp64"], \
 		CPPDEFINES = ["_CRT_SECURE_NO_DEPRECATE", "WIN32", "VCPP"])
 		#LINKFLAGS = ["/SUBSYSTEM:WINDOWS"])
 	debug_ccflags = ["/ZI"]
 	release_ccflags = ["/O2"]
 	release_linkflags = []
-	sdl_includes = ["D:\devel\Microsoft Visual Studio 8\VC\include\SDL"]
-elif env["PLATFORM"] == "posix":
+	sdl_includes = ["C:\Devel\Microsoft Visual Studio 8\VC\include\SDL"]
+elif env["PLATFORM"] == "win32" and sysset == "mingw":
+	env.Tool("mingw")
+	env.Append(CCFLAGS = ["-Wall"])
+	debug_ccflags = ["-g"]
+	release_ccflags = ["-O2"]
+	release_linkflags = ["-s"]
+	sdl_includes = ["C:\Devel\MSYS\mingw\include\SDL"]
+elif env["PLATFORM"] == "posix" and sysset == "auto":
 	env.Append(CCFLAGS = ["-Wall"])
 	debug_ccflags = ["-g"]
 	release_ccflags = ["-O2"]
 	release_linkflags = ["-s"]
 	sdl_includes = ["/usr/include/SDL"]
 else:
-	print "Unsupported platform: " + env["PLATFORM"]
+	print "Unsupported platform: " + env["PLATFORM"] + " (" + sysset + ")"
 	Exit()
 
 ###

@@ -133,33 +133,6 @@ enum GUI_FLAGS
 					//!< Do not delete a children list even if it becomes empty.
 };
 
-//! Flags for fonts and text in the objects.
-/*enum GUI_FONT_FLAGS
-{
-	GUI_FONT_ZERO = 0,
-					//!< Zero flag.
-	GUI_FONT_ALLIG_RIGHT = 1,
-					//!< Right alligment, else left alligment.
-	GUI_FONT_ALLIG_HCENTRE = 3,
-					//!< Horizontal centre alligment.
-	GUI_FONT_ALLIG_BOTTOM = 4,
-					//!< Bottom alligment, else top alligment.
-	GUI_FONT_ALLIG_VCENTRE = 12,
-					//!< Vertical centre alligment.
-	GUI_FONT_BOLD = 16,
-					//!< Bold font.
-	GUI_FONT_ITALIC = 32,
-					//!< Italic font.
-	GUI_FONT_ULINED = 64,
-					//!< Underlined font.
-	GUI_FONT_MULTILINE = 128,
-					//!< Use multiline text, if needed.
-	GUI_FONT_EXPAND = 256,
-					//!< Expand text to the object width, unless the last line.
-	GUI_FONT_SPLIT = 512
-					//!< Split text into lines even at the middle of the words.
-};*/
-
 //! GUI object.
 struct STRUCT_GUI_OBJ
 {
@@ -172,7 +145,8 @@ struct STRUCT_GUI_OBJ
 	gui_status_t
 		status;		//!< Object status.
 	ku_flag32_t
-		flags;		//!< Object flags.
+		flags,		//!< Object flags.
+		updated;	//!< List of updated fields for widget.
 
 	int x,			//!< Relative object left side \a x.
 		y,			//!< Relative object top size \a y.
