@@ -61,6 +61,8 @@ struct STRUCT_GUI_TEXED_OBJ
 	uint8_t font_g;	//!< Font colour (green).
 	uint8_t font_b;	//!< Font colour (blue).
 
+	int textlen,	//!< Maximum length of the text.
+		textpos;	//!< Current text length.
 	char *text;		//!< Button caption.
 }	gui_texed_t;
 
@@ -70,6 +72,7 @@ enum TEXED_PARAMS
 	TEXED_NORM,		//!< Change the normal image. Set/Get: data are (char*/char**) image name (\ref res.h).
 	TEXED_FOCUS,	//!< Change the "focus" image. Data are image name.
 	TEXED_KP,		//!< Change the "key press" callback function. Data are pointer to function.
+	TEXED_TEXTLEN,	//!< Change the text maximum length.
 	TEXED_TEXT,		//!< Change the title of the button (button text).
 	TEXED_FONT,		//!< Change the font.
 	TEXED_FSTYLE,	//!< Change the font style.
@@ -117,6 +120,8 @@ kucode_t texed_load( gui_obj_t *obj );
 */
 kucode_t texed_uload( gui_obj_t *obj );
 
+kucode_t texed_update( gui_obj_t *obj );
+
 //! Set the attribute of the button.
 /*!
 	Sets a button attribute.
@@ -146,7 +151,7 @@ kucode_t texed_get( gui_obj_t *obj, int param, void *data );
 gui_event_st texed_mdown( gui_obj_t *obj, int x, int y, int z );
 
 gui_event_st texed_kdown( gui_obj_t *obj, char ch );
-
+gui_event_st texed_defocus( gui_obj_t *obj );
 //! Draw the button.
 /*!
 	Draws a button with the text if it is set.

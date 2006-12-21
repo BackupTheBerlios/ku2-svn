@@ -18,6 +18,8 @@
 #include "modules/opengl/gfx/gfx.h"
 #include "modules/opengl/gui/gui.h"
 
+#define TEXED_UD_TEXT 1
+
 static void texed_ch_state( gui_obj_t *obj, int state )
 {
 	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
@@ -57,6 +59,8 @@ kucode_t texed_init( gui_obj_t *obj )
 	widget->font_g = \
 	widget->font_b = 0;
 
+	widget->textlen = -1;
+	widget->textpos = 0;
 	widget->text = NULL;
 
 	obj->destroyf = texed_destroy;
@@ -67,8 +71,8 @@ kucode_t texed_init( gui_obj_t *obj )
 	obj->get = texed_get;
 
 	obj->mdown = texed_mdown;
-
 	obj->kdown = texed_kdown;
+	obj->defocus = texed_defocus;
 
 	obj->draw = texed_draw;
 
@@ -148,9 +152,8 @@ kucode_t texed_load( gui_obj_t *obj )
 		//	если установлен текст кнопки..
 		if ( widget->text )
 		{
-			gfx_image_t *fontface = gfx_font_render(widget->text, widget->font, \
+			widget->fontface = gfx_font_render(widget->text, widget->font, \
 				widget->font_style, widget->font_r, widget->font_g, widget->font_b);
-			widget->fontface = fontface; //	если NULL, то текст не будет рисоваться
 		}	else
 			widget->fontface = NULL;
 	}	else
@@ -193,6 +196,20 @@ kucode_t texed_uload( gui_obj_t *obj )
 	return KE_NONE;
 }
 
+kucode_t texed_update( gui_obj_t *obj )
+{
+	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
+	if ( obj->updated&TEXED_UD_TEXT )
+	{
+		obj->updated &= ~TEXED_UD_TEXT;
+		if ( widget->fontface )
+			dfree(widget->fontface);
+		widget->fontface = gfx_font_render(widget->text, widget->font, \
+				widget->font_style, widget->font_r, widget->font_g, widget->font_b);
+	}
+	return KE_NONE;
+}
+
 kucode_t texed_set( gui_obj_t *obj, int param, void *data )
 {
 	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
@@ -227,15 +244,25 @@ kucode_t texed_set( gui_obj_t *obj, int param, void *data )
 			widget->keypress = (gui_cb_f)data;
 			break;
 		}
-		case TEXED_TEXT:
+		case TEXED_TEXTLEN:
 		{
-			char *text = dmalloc(sizeof(char)*(strlen((char*)data)+1));
+			char *text = dmalloc(sizeof(char)*((widget->textlen = (int)data)+1));
 			if ( text == NULL )
 				KU_ERRQ(KE_MEMORY);
-			strcpy(text, (char*)data);
 			if ( widget->text )
 				dfree(widget->text);
 			widget->text = text;
+			*text = 0;
+			obj->updated |= TEXED_UD_TEXT;
+			break;
+		}
+		case TEXED_TEXT:
+		{
+			widget->textpos = strlen((char*)data);
+			if ( widget->textpos > widget->textlen )
+				KU_ERRQ(KE_FULL);
+			strcpy(widget->text, (char*)data);
+			obj->updated |= TEXED_UD_TEXT;
 			break;
 		}
 		case TEXED_FONT:
@@ -247,26 +274,31 @@ kucode_t texed_set( gui_obj_t *obj, int param, void *data )
 			if ( widget->font_name )
 				dfree(widget->font_name);
 			widget->font_name = name;
+			obj->updated |= TEXED_UD_TEXT;
 			break;
 		}
 		case TEXED_FSTYLE:
 		{
 			widget->font_style = (gfx_font_style_t)data;
+			obj->updated |= TEXED_UD_TEXT;
 			break;
 		}
 		case TEXED_FCR:
 		{
 			widget->font_r = (uint8_t)data;
+			obj->updated |= TEXED_UD_TEXT;
 			break;
 		}
 		case TEXED_FCG:
 		{
 			widget->font_g = (uint8_t)data;
+			obj->updated |= TEXED_UD_TEXT;
 			break;
 		}
 		case TEXED_FCB:
 		{
 			widget->font_b = (uint8_t)data;
+			obj->updated |= TEXED_UD_TEXT;
 			break;
 		}
 		default:
@@ -279,9 +311,17 @@ kucode_t texed_set( gui_obj_t *obj, int param, void *data )
 
 kucode_t texed_get( gui_obj_t *obj, int param, void *data )
 {
-	/*gui_button_t *const widget = (gui_button_t*)obj->widget;
+	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
 	pstart();
 
+	switch ( param )
+	{
+		case TEXED_TEXT:
+		{
+			*((char**)data) = widget->text;
+			break;
+		}
+	}/*
 	switch ( param )
 	{
 		case BUTTON_NORM:
@@ -336,9 +376,9 @@ kucode_t texed_get( gui_obj_t *obj, int param, void *data )
 		}
 		default:
 			KU_ERRQ(KE_INVALID);
-	}
+	}*/
 
-	pstop();*/
+	pstop();
 	return KE_NONE;
 }
 
@@ -358,6 +398,36 @@ gui_event_st texed_mdown( gui_obj_t *obj, int x, int y, int z )
 
 gui_event_st texed_kdown( gui_obj_t *obj, char ch )
 {
+	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
+	pstart();
+
+	if ( isalnum(ch) || (ch == ' ') )
+	{
+		if ( widget->textpos < widget->textlen )
+		{
+			widget->text[widget->textpos++] = ch;
+			widget->text[widget->textpos] = 0;
+			obj->updated |= TEXED_UD_TEXT;
+			texed_update(obj);
+		}
+	}	else
+	if ( ch == SDLK_BACKSPACE )
+	{
+		if ( widget->textpos > 0 )
+		{
+			widget->text[--widget->textpos] = 0;
+			obj->updated |= TEXED_UD_TEXT;
+			texed_update(obj);
+		}
+	}
+
+	pstop();
+	return GUIE_EAT;
+}
+
+gui_event_st texed_defocus( gui_obj_t *obj )
+{
+	texed_ch_state(obj, TEXED_NORM);
 	return GUIE_EAT;
 }
 

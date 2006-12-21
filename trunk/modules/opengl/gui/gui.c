@@ -144,7 +144,8 @@ gui_obj_t *gui_obj_create( gui_load_f initf, uint widget_sz, ku_flag32_t flags )
 	obj->uload = \
 	obj->enable = \
 	obj->disable = \
-	obj->hide = NULL;
+	obj->hide = \
+	obj->update = NULL;
 
 	obj->dim = NULL;
 
@@ -158,6 +159,8 @@ gui_obj_t *gui_obj_create( gui_load_f initf, uint widget_sz, ku_flag32_t flags )
 
 	obj->kdown = \
 	obj->kup = NULL;
+
+	obj->defocus = NULL;
 
 	obj->draw = NULL;
 
@@ -194,7 +197,8 @@ kucode_t gui_obj_delete( gui_obj_t *obj )
 	gui_ch_status(obj, GUI_NOTLOADED);
 
 	// удаляем подобъект
-	obj->destroyf(obj);
+	if ( obj->destroyf )
+		obj->destroyf(obj);
 
 	// удаляем потомков
 	if ( obj->children )
@@ -287,7 +291,7 @@ kucode_t gui_focus( gui_obj_t *obj )
 
 	ku_avoid( obj == obj_focus );
 
-	if ( obj_focus && obj_focus->defocus && (obj_focus->defocus(obj_focus) != KE_NONE) )
+	if ( obj_focus && obj_focus->defocus && (obj_focus->defocus(obj_focus) == GUIE_CRITICAL) )
 		return kucode;
 	obj_focus = obj;
 
@@ -319,6 +323,8 @@ kucode_t gui_set( gui_obj_t *obj, int parcnt, ... )
 				return kucode;
 			}
 		}
+		if ( obj->update && (obj->status > GUI_NOTLOADED) )
+			obj->update(obj);
 	}	else
 	{
 		va_end(ap);
@@ -341,7 +347,7 @@ kucode_t gui_get( gui_obj_t *obj, int parcnt, ... )
 
 	va_start(ap, parcnt);
 
-	if ( obj->set )
+	if ( obj->get )
 	{
 		for ( i = 0; i < parcnt; i++ )
 		{
@@ -497,6 +503,7 @@ gui_event_st gui_process( SDL_Event *event )
 			if ( obj != obj_mon )
 			{
 				// сменился фокус мышки
+				pdebug("Mouse focus: '%s` %u (%d,%d :: %d,%d)\n", obj->widget, obj->id, obj->x, obj->y, obj->width, obj->height);
 				if ( obj_mon && obj_mon->moff )
 					status[0] = obj_mon->moff(obj_mon, 0, 0, 0);
 				obj_mon = obj;
@@ -532,6 +539,14 @@ gui_event_st gui_process( SDL_Event *event )
 				}
 			}
 			obj_mdown = NULL;
+			break;
+		}
+		case SDL_KEYDOWN:
+		{
+			if ( obj_focus && (obj_focus->status < GUI_DISABLED) )
+			{
+				status[0] = obj_focus->kdown(obj_focus, event->key.keysym.sym);
+			}
 			break;
 		}
 	}

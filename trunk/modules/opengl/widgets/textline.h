@@ -94,6 +94,8 @@ kucode_t text_load( gui_obj_t *obj );
 */
 kucode_t text_uload( gui_obj_t *obj );
 
+kucode_t text_update( gui_obj_t *obj );
+
 //kucode_t text_dim( gui_obj_t *obj );
 
 //! Set the attribute of the graphical button.

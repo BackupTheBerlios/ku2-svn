@@ -164,7 +164,8 @@ struct STRUCT_GUI_OBJ
 		uload,		//!< Unload a widget.
 		enable,		//!< Enable a widget.
 		disable,	//!< Disable a widget.
-		hide;		//!< Hide a widget.
+		hide,		//!< Hide a widget.
+		update;		//!< Update a widget.
 
 	gui_dim_f
 		dim;		//!< Change the dimensions of a widget.

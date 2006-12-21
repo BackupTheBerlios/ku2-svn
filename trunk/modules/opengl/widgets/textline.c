@@ -18,6 +18,8 @@
 #include "modules/opengl/gfx/gfx.h"
 #include "modules/opengl/gui/gui.h"
 
+#define TEXT_UD_TEXT 1
+
 kucode_t text_init( gui_obj_t *obj )
 {
 	gui_text_t *const widget = (gui_text_t*)obj->widget;
@@ -36,6 +38,7 @@ kucode_t text_init( gui_obj_t *obj )
 	obj->destroyf = text_destroy;
 	obj->load = text_load;
 	obj->uload = text_uload;
+	obj->update = text_update;
 
 	obj->set = text_set;
 	obj->get = text_get;
@@ -88,6 +91,9 @@ kucode_t text_load( gui_obj_t *obj )
 		return kucode;
 	}
 
+	obj->width = widget->face->w;
+	obj->height = widget->face->h;
+
 	pstop();
 	return KE_NONE;
 }
@@ -111,6 +117,22 @@ kucode_t text_uload( gui_obj_t *obj )
 	return KE_NONE;
 }
 
+kucode_t text_update( gui_obj_t *obj )
+{
+	gui_text_t *const widget = (gui_text_t*)obj->widget;
+	if ( obj->updated&TEXT_UD_TEXT )
+	{
+		obj->updated &= ~TEXT_UD_TEXT;
+		if ( widget->face )
+			dfree(widget->face);
+		widget->face = gfx_font_render(widget->text, widget->font, \
+				widget->font_style, widget->font_r, widget->font_g, widget->font_b);
+		obj->width = widget->face->w;
+		obj->height = widget->face->h;
+	}
+	return KE_NONE;
+}
+
 kucode_t text_set( gui_obj_t *obj, int param, void *data )
 {
 	gui_text_t *const widget = (gui_text_t*)obj->widget;
@@ -127,6 +149,7 @@ kucode_t text_set( gui_obj_t *obj, int param, void *data )
 			if ( widget->text )
 				dfree(widget->text);
 			widget->text = text;
+			obj->updated |= TEXT_UD_TEXT;
 			break;
 		}
 		case TEXT_FONT:
