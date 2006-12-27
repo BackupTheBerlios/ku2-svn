@@ -34,7 +34,8 @@ static int gui_compf( void *obj1, void *obj2 )
 //! Freeing function.
 static int gui_freef( void *obj )
 {
-	((gui_obj_t*)obj)->destroyf(obj);
+	if ( ((gui_obj_t*)obj)->destroyf )
+		((gui_obj_t*)obj)->destroyf(obj);
 	if ( ((gui_obj_t*)obj)->children )
 		dl_list_free(((gui_obj_t*)obj)->children, NULL);
 	dfree(obj);
@@ -455,10 +456,17 @@ kucode_t gui_draw( void )
 		return KE_NONE;
 }
 
-static gui_obj_t *gui_search_by_coord( int x, int y )
+static inline gui_obj_t *gui_search_by_coord( int x, int y )
 {
-	gui_obj_t *obj = obj_root;
+	/*static gui_obj_t *last_obj = NULL;*/
+	gui_obj_t *obj;
 
+	/*if ( last_obj && !last_obj->children && \
+		(last_obj->x <= x) && (last_obj->x+last_obj->width >= x) && \
+		(last_obj->y <= y) && (last_obj->y+last_obj->height >= y) )
+		return last_obj;*/
+
+	obj = obj_root;
 	if ( (!obj) || (obj->status == GUI_HIDDEN) || (obj->x > x) || \
 		(obj->x+obj->width < x) || (obj->y > y) || (obj->y+obj->height < y ) )
 		return NULL;
@@ -481,11 +489,11 @@ static gui_obj_t *gui_search_by_coord( int x, int y )
 				break;
 			}
 			if  ( dl_list_offside(obj->children) )
-				return obj;
+				return /*last_obj = */obj;
 		}
 	}
 
-	return obj;
+	return /*last_obj = */obj;
 }
 
 gui_event_st gui_process( SDL_Event *event )

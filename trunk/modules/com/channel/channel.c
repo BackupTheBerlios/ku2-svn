@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
 
 #include "ku2/debug.h"
 #include "ku2/memory.h"
@@ -44,9 +46,9 @@ channel_t *channel_assign( int fd, uint streams, uint bufsz, ku_flag32_t flags )
 	chan->orpos = (uint*)((int8_t*)chan->owpos+sizeof(uint)*streams);
 	chan->iwpos = (uint*)((int8_t*)chan->orpos+sizeof(uint)*streams);
 	chan->irpos = (uint*)((int8_t*)chan->iwpos+sizeof(uint)*streams);
-	
-	chan->outbuf = (int8_t*)(chan)+offset;
-	chan->inbuf = (int8_t*)(chan)+offset+bufsz*streams;
+
+	chan->outbuf = (char*)((int8_t*)(chan)+offset);
+	chan->inbuf = (char*)((int8_t*)(chan)+offset+bufsz*streams);
 
 	for ( i = 0; i < streams; i++ )
 		chan->owpos[i] = chan->orpos[i] = chan->iwpos[i] = chan->irpos[i] = 0;

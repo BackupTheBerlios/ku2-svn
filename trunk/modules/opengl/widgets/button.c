@@ -56,66 +56,6 @@ static void button_ch_state( gui_obj_t *obj, int state )
 		widget->font_rx = (obj->width-widget->fontface->w)/2;
 		widget->font_ry = (obj->height-widget->fontface->h)/2;
 	}
-
-}
-
-static kucode_t button_update( gui_obj_t *obj )
-{
-	gui_button_t *const widget = (gui_button_t*)obj->widget;
-
-	if ( obj->updated&BUTTON_UD_NORM )
-	{
-		obj->updated &= ~BUTTON_UD_NORM;
-		widget->back_nor = res_access(widget->back_nor_name);
-		if ( widget->back_nor == NULL )
-		{
-			plogfn(gettext("Object %u background '%s` was not loaded: %d\n"), \
-				obj->id, widget->back_nor_name, kucode);
-			return kucode;
-		}
-	}
-
-	if ( obj->updated&BUTTON_UD_MON )
-	{
-		obj->updated &= ~BUTTON_UD_MON;
-		widget->back_mon = res_access(widget->back_mon_name);
-		if ( widget->back_mon == NULL )
-		{
-			plogfn(gettext("Object %u mouse-on background '%s` was not loaded: %d\n"), \
-				obj->id, widget->back_mon_name, kucode);
-		}
-	}
-
-	if ( obj->updated&BUTTON_UD_MDN )
-	{
-		obj->updated &= ~BUTTON_UD_MDN;
-		widget->back_mdn = res_access(widget->back_mdn_name);
-		if ( widget->back_mdn == NULL )
-		{
-			plogfn(gettext("Object %u mouse-down background '%s` was not loaded: %d\n"), \
-				obj->id, widget->back_mdn_name, kucode);
-		}
-	}
-
-	if ( obj->updated&BUTTON_UD_FONT )
-	{
-		obj->updated &= ~BUTTON_UD_FONT;
-		widget->font = res_access(widget->font_name);
-		if ( widget->font == NULL )
-		{
-			plogfn(gettext("Object %u font '%s` was not loaded: %d\n"), \
-				obj->id, widget->font_name, kucode);
-		}
-	}
-
-	if ( obj->updated&BUTTON_UD_CAPTION )
-	{
-		obj->updated &= ~BUTTON_UD_CAPTION;
-		widget->fontface = gfx_font_render(widget->caption, widget->font, \
-			widget->font_style, widget->font_r, widget->font_g, widget->font_b);
-	}
-
-	return KE_NONE;
 }
 
 kucode_t button_init( gui_obj_t *obj )
@@ -133,6 +73,8 @@ kucode_t button_init( gui_obj_t *obj )
 	widget->back_mdn_name = NULL;
 	widget->font_name = NULL;
 
+	widget->fontface = NULL;
+
 	widget->font_r = \
 	widget->font_g = \
 	widget->font_b = 0;
@@ -142,6 +84,7 @@ kucode_t button_init( gui_obj_t *obj )
 	obj->destroyf = button_destroy;
 	obj->load = button_load;
 	obj->uload = button_uload;
+	obj->update = button_update;
 
 	obj->set = button_set;
 	obj->get = button_get;
@@ -269,6 +212,72 @@ kucode_t button_uload( gui_obj_t *obj )
 	return KE_NONE;
 }
 
+kucode_t button_update( gui_obj_t *obj )
+{
+	gui_button_t *const widget = (gui_button_t*)obj->widget;
+
+	if ( obj->updated&BUTTON_UD_NORM )
+	{
+		obj->updated &= ~BUTTON_UD_NORM;
+		widget->back_nor = res_access(widget->back_nor_name);
+		if ( widget->back_nor == NULL )
+		{
+			plogfn(gettext("Object %u background '%s` was not loaded: %d\n"), \
+				obj->id, widget->back_nor_name, kucode);
+			return kucode;
+		}
+	}
+
+	if ( obj->updated&BUTTON_UD_MON )
+	{
+		obj->updated &= ~BUTTON_UD_MON;
+		widget->back_mon = res_access(widget->back_mon_name);
+		if ( widget->back_mon == NULL )
+		{
+			plogfn(gettext("Object %u mouse-on background '%s` was not loaded: %d\n"), \
+				obj->id, widget->back_mon_name, kucode);
+		}
+	}
+
+	if ( obj->updated&BUTTON_UD_MDN )
+	{
+		obj->updated &= ~BUTTON_UD_MDN;
+		widget->back_mdn = res_access(widget->back_mdn_name);
+		if ( widget->back_mdn == NULL )
+		{
+			plogfn(gettext("Object %u mouse-down background '%s` was not loaded: %d\n"), \
+				obj->id, widget->back_mdn_name, kucode);
+		}
+	}
+
+	if ( obj->updated&BUTTON_UD_FONT )
+	{
+		obj->updated &= ~BUTTON_UD_FONT;
+		widget->font = res_access(widget->font_name);
+		if ( widget->font == NULL )
+		{
+			plogfn(gettext("Object %u font '%s` was not loaded: %d\n"), \
+				obj->id, widget->font_name, kucode);
+		}
+	}
+
+	if ( obj->updated&BUTTON_UD_CAPTION )
+	{
+		obj->updated &= ~BUTTON_UD_CAPTION;
+		if ( widget->fontface )
+			dfree(widget->fontface);
+		widget->fontface = gfx_font_render(widget->caption, widget->font, \
+			widget->font_style, widget->font_r, widget->font_g, widget->font_b);
+		if ( widget->fontface )
+		{
+			widget->font_rx = (obj->width-widget->fontface->w)/2;
+			widget->font_ry = (obj->height-widget->fontface->h)/2;
+		}
+	}
+
+	return KE_NONE;
+}
+
 kucode_t button_set( gui_obj_t *obj, int param, void *data )
 {
 	gui_button_t *const widget = (gui_button_t*)obj->widget;
@@ -323,12 +332,7 @@ kucode_t button_set( gui_obj_t *obj, int param, void *data )
 			if ( widget->caption )
 				dfree(widget->caption);
 			widget->caption = caption;
-			if ( obj->status > GUI_NOTLOADED )
-			{
-				obj->updated |= BUTTON_UD_CAPTION;
-				if ( button_update(obj) != KE_NONE )
-					return kucode;
-			}
+			obj->updated |= BUTTON_UD_CAPTION;
 			break;
 		}
 		case BUTTON_FONT:
@@ -340,6 +344,7 @@ kucode_t button_set( gui_obj_t *obj, int param, void *data )
 			if ( widget->font_name )
 				dfree(widget->font_name);
 			widget->font_name = name;
+			obj->updated |= BUTTON_UD_CAPTION|BUTTON_UD_FONT;
 			break;
 		}
 		case BUTTON_FSTYLE:

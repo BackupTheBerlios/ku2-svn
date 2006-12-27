@@ -1,5 +1,5 @@
 /***************************************************************************
- *            gui.h
+ *            mm.h
  *
  *  Tue Aug  29 11:51:31 2006
  *  Copyright  2006  J. Anton
@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 #define KU2MM_VER_MAJOR 1
-#define KU2MM_VER_MINOR 1
+#define KU2MM_VER_MINOR 2
 #define KU2MM_VER_PATCH 0
 #define KU2MM_VERSION KU2MM_VER_MAJOR.KU2MM_VER_MINOR.KU2MM_VER_PATCH
 

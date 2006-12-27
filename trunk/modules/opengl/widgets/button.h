@@ -126,6 +126,8 @@ kucode_t button_load( gui_obj_t *obj );
 */
 kucode_t button_uload( gui_obj_t *obj );
 
+kucode_t button_update( gui_obj_t *obj );
+
 //! Set the attribute of the button.
 /*!
 	Sets a button attribute.
