@@ -35,7 +35,7 @@ gfx_image_t *gfx_img_fromSDL( SDL_Surface *src )
 
 	SDL_LockSurface(src);
 	img = dmalloc(sizeof(gfx_image_t)+ \
-		src->format->BytesPerPixel*src->w*src->h);
+		src->pitch*src->h);
 	if ( img == NULL )
 	{
 		plogfn(gettext("Out of memory.\n"));
@@ -68,9 +68,10 @@ gfx_image_t *gfx_img_fromSDL( SDL_Surface *src )
 	img->pixels = (int8_t*)img+sizeof(gfx_image_t);
 
 	for ( oldy = img->h-1, newy = 0; newy < img->h; oldy--, newy++ )
-		memmove(img->pixels+newy*src->format->BytesPerPixel*img->w, \
-			src->pixels+oldy*src->format->BytesPerPixel*img->w, \
-			src->format->BytesPerPixel*img->w);
+		memmove((int8_t*)(img->pixels)+newy*src->pitch, \
+			(int8_t*)(src->pixels)+oldy*src->pitch, \
+			src->pitch);
+
 	SDL_UnlockSurface(src);
 
 	pstop();
