@@ -439,7 +439,7 @@ kucode_t texed_draw( gui_obj_t *obj, int x, int y )
 	if ( gfx_draw(widget->face, x, y) != KE_NONE )
 		return kucode;
 
-	if ( widget->fontface && (gfx_draw(widget->fontface, x+10, y+10) != KE_NONE) )
+	if ( widget->fontface && (gfx_draw(widget->fontface, x+10, y+(widget->face->h-widget->fontface->h)/2) != KE_NONE) )
 		return kucode;
 
 	pstop();

@@ -258,6 +258,7 @@ kucode_t button_update( gui_obj_t *obj )
 		{
 			plogfn(gettext("Object %u font '%s` was not loaded: %d\n"), \
 				obj->id, widget->font_name, kucode);
+			obj->updated &= ~BUTTON_UD_CAPTION;
 		}
 	}
 
