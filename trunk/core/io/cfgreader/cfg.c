@@ -37,23 +37,23 @@ static int qtree_free( void *data )
 kucode_t cfg_open( const char *file )
 {
 	pstart();
-	
+
 	if ( cfgf != NULL )
 		KU_ERRQ(KE_DOUBLE);
-	
+
 	cfgf = fopen(file, "r");
 	if ( cfgf == NULL )
 		KU_ERRQ(KE_IO);
-	
+
 	qtree = abtree_create(cfg_cmpf, 0);
 	if ( qtree == NULL )
 	{
 		fclose(cfgf);
 		return kucode;
 	}
-	
+
 	cfg_line = 0;
-	
+
 	pstop();
 	return KE_NONE;
 }
@@ -61,15 +61,15 @@ kucode_t cfg_open( const char *file )
 kucode_t cfg_close( void )
 {
 	pstart();
-	
+
 	if ( cfgf == NULL )
 		KU_ERRQ(KE_EMPTY);
-	
+
 	fclose(cfgf);
 	cfgf = NULL;
-	
+
 	abtree_free(qtree, qtree_free);
-	
+
 	pstop();
 	return KE_NONE;
 }
@@ -83,7 +83,7 @@ kucode_t cfg_query( const char *id, const char *fmt, ... )
 		*c_fmt = fmt, *b_fmt;
 	int cont = 1;
 	pstart();
-	
+
 	va_start(va, fmt);
 	for ( cont = 1; cont; c_id++, c_fmt++ )
 	{
@@ -91,42 +91,42 @@ kucode_t cfg_query( const char *id, const char *fmt, ... )
 		while ( (*c_id != ',') && *c_id ) c_id++;
 		if ( !*c_id )
 			cont = 0;
-		
+
 		b_fmt = c_fmt;
 		while ( (*c_fmt != ',') && *c_fmt ) c_fmt++;
 		if ( !*c_fmt )
 			cont = 0;
-		
+
 		q = dmalloc(sizeof(cfg_query_t)+ \
 				sizeof(char)*(c_id-b_id+c_fmt-b_fmt+2)+ \
 				sizeof(void**)*(c_fmt-b_fmt));
 		if ( q == NULL )
 			KU_ERRQ(KE_MEMORY);
-		
+
 		q->id = ((char*)q)+sizeof(cfg_query_t);
 		q->fmt = ((char*)q->id)+sizeof(char)*(c_id-b_id+1);
 		q->ptr = (void**)(((char*)q->fmt)+sizeof(char)*(c_fmt-b_fmt+1));
-		
+
 		strncpy(q->id, b_id, c_id-b_id);
 		q->id[c_id-b_id] = 0;
 		strncpy(q->fmt, b_fmt, c_fmt-b_fmt);
 		q->fmt[c_fmt-b_fmt] = 0;
-		
-		
+
+
 		for ( i = 0; i < c_fmt-b_fmt; i++ )
 			q->ptr[i] = va_arg(va, void*);
-		
+
 		if ( abtree_ins(qtree, q) != KE_NONE )
 		{
 			dfree(q);
 			return kucode;
-		}	
+		}
 	}
 	va_end(va);
-	
+
 	if ( *(c_id-1) || *(c_fmt-1) )
 		KU_ERRQ(KE_SYNTAX);
-	
+
 	pstop();
 	return KE_NONE;
 }
@@ -140,7 +140,7 @@ static char *cfg_readnext( char **p )
 {
 	static char buf[CFG_BUFFER];
 	char *c = buf;
-	
+
 	cfg_sksp(p);
 	if ( **p == '"' )
 	{
@@ -151,7 +151,7 @@ static char *cfg_readnext( char **p )
 	{
 		while ( isalnum(**p) || (**p == '_') ) *(c++) = *((*p)++);
 	}
-	
+
 	cfg_sksp(p);
 	*c = 0;
 	return buf;
@@ -163,14 +163,14 @@ kucode_t cfg_process( ku_flag32_t flags )
 	cfg_query_t sq, *q;
 	int quota = 0;
 	pstart();
-	
+
 	while ( fgets(buf, CFG_BUFFER, cfgf) != NULL )
 	{
 		char *c = buf, *cur;
 		uint i, wassign;
-		
+
 		cfg_line++;
-		
+
 		cfg_sksp(&c);
 		if ( *c == 0 ) continue;
 		if ( *c == '#' )
@@ -178,13 +178,13 @@ kucode_t cfg_process( ku_flag32_t flags )
 			if ( c[1] == '#' ) quota = 1-quota;
 			continue;
 		}
-		
+
 		if ( quota ) continue;
-		
+
 		cur = cfg_readnext(&c);
 		if ( cur == NULL )
 			KU_ERRQ(KE_SYNTAX);
-		
+
 		sq.id = cur;
 		q = abtree_search(qtree, &sq);
 		if ( q == NULL )
@@ -193,15 +193,15 @@ kucode_t cfg_process( ku_flag32_t flags )
 				KU_ERRQ(KE_NOTFOUND) else
 				continue;
 		}
-		
+
 		if ( *c != '=' )
 			KU_ERRQ(KE_SYNTAX);
 		wassign = 1;
-		
+
 		for ( i = 0; i < strlen(q->fmt); i++ )
 		{
 			char *p;
-			
+
 			if ( *c == 0 )
 				KU_ERRQ(KE_SYNTAX);
 			if ( (wassign || (*c == ',')) && !(wassign && (*c == ',')) )
@@ -213,7 +213,7 @@ kucode_t cfg_process( ku_flag32_t flags )
 			cur = cfg_readnext(&c);
 			if ( cur == NULL )
 				KU_ERRQ(KE_SYNTAX);
-			
+
 			switch ( q->fmt[i] )
 			{
 				case 'i':
@@ -242,7 +242,7 @@ kucode_t cfg_process( ku_flag32_t flags )
 		}
 		if ( *c != 0 )
 			KU_ERRQ(KE_SYNTAX);
-		
+
 		if ( flags&CFG_STEP )
 		{
 			cfg_stepid = sq.id;
@@ -250,10 +250,10 @@ kucode_t cfg_process( ku_flag32_t flags )
 			return KE_SIGNAL;
 		}
 	}
-	
+
 	if ( quota )
 		KU_ERRQ(KE_SYNTAX);
-	
+
 	pstop();
 	return KE_NONE;
 }

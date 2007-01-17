@@ -1,0 +1,109 @@
+#
+#	SConstruct file for Kane Utilities 2 (tool ku2project)
+#		J. Anton, Copyright 2007
+#
+
+###
+#	Initialisation
+##
+env = Environment(CPPPATH = [".", "#core"])
+
+###
+#	System settings
+##
+sysset = ARGUMENTS.get("system", "auto")
+
+###
+#	Platform depended variables and actions
+###
+if env["PLATFORM"] == "win32" and (sysset == "vc" or sysset == "auto"):
+	env.Append(CCFLAGS = ["/W3", "/MD", "/Wp64"], \
+		CPPDEFINES = ["_CRT_SECURE_NO_DEPRECATE", "WIN32", "VCPP"])
+		#LINKFLAGS = ["/SUBSYSTEM:WINDOWS"])
+	debug_ccflags = ["/ZI"]
+	release_ccflags = ["/O2"]
+	release_linkflags = []
+elif env["PLATFORM"] == "win32" and sysset == "mingw":
+	env.Tool("mingw")
+	env.Append(CCFLAGS = ["-Wall"])
+	debug_ccflags = ["-g"]
+	release_ccflags = ["-O2"]
+	release_linkflags = ["-s"]
+elif env["PLATFORM"] == "posix" and sysset == "auto":
+	env.Append(CCFLAGS = ["-Wall"])
+	debug_ccflags = ["-g"]
+	release_ccflags = ["-O2"]
+	release_linkflags = ["-s"]
+else:
+	print "Unsupported platform: " + env["PLATFORM"] + " (" + sysset + ")"
+	Exit()
+
+###
+#	Checking header files
+###
+conf = Configure(env)
+if not conf.CheckCHeader("ctype.h"):
+	Exit()
+if not conf.CheckCHeader("errno.h"):
+	Exit()
+if not conf.CheckCHeader("libintl.h"):
+	env.Append(CPPDEFINES = ["NO_LIBINTL_H"])
+if not conf.CheckCHeader("limits.h"):
+	Exit()
+if not conf.CheckCHeader("stdarg.h"):
+	Exit()
+if not conf.CheckCHeader("stdint.h"):
+	env.Append(CPPDEFINES = ["NO_STDINT_H"])
+	if not conf.CheckCHeader("inttypes.h"):
+		env.Append(CPPDEFINES = ["NO_INTTYPES_H"])
+if not conf.CheckCHeader("stdio.h"):
+	Exit()
+if not conf.CheckCHeader("stdlib.h"):
+	Exit()
+if not conf.CheckCHeader("string.h"):
+	Exit()
+if not conf.CheckCHeader("sys/timeb.h"):
+	Exit()
+if not conf.CheckCHeader("time.h"):
+	Exit()
+env = conf.Finish()
+
+###
+#	Getting building mode
+#	Possible modes:
+#		debug - build with debugging
+#		release - build with optimisations and witout debuggin
+###
+mode = ARGUMENTS.get("mode", "debug")
+if mode == "debug":
+	env.Append(CCFLAGS = debug_ccflags, CPPDEFINES = ["DEBUG"])
+	debug = ARGUMENTS.get("debug", "memory,log")
+	if "memory" in debug:
+		env.Append(CPPDEFINES = ["DEBUG_MEMORY"])
+	if "log" in debug:
+		env.Append(CPPDEFINES = ["DEBUG_LOG"])
+elif mode == "release":
+	env.Append(CCFLAGS = release_ccflags)
+	env.Append(LINKFLAGS = release_linkflags)
+	debug = ""
+else:
+	print "Invalid mode ( debug|release )"
+	Exit()
+
+###
+#	Getting list of add-ons to build with.
+#	Possible add-ons:
+#		gettext - use libintl support
+###
+use = ARGUMENTS.get("use", "")
+notuse = ARGUMENTS.get("notuse", "")
+if "gettext" in use and not "gettext" in notuse:
+	env.Append(CPPDEFINES = ["USE_GETTEXT"])
+
+
+sources = Split("""
+	ku2project.c
+	""")
+
+ku2project = env.Program("ku2project", sources)
+Default(ku2project)

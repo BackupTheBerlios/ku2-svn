@@ -1,0 +1,15 @@
+#
+#	SConstruct file for Kane Utilities 2
+#		J. Anton, Copyright 2007
+#
+
+scenarios = []
+
+build = ARGUMENTS.get("build", "opengl")
+notbuild = ARGUMENTS.get("notbuild", "")
+if "opengl" in build and not "opengl" in notbuild:
+	scenarios += ["opengl/SConstruct"]
+if "com" in build and not "com" in notbuild:
+	scenarios += ["com/SConstruct"]
+
+SConscript(scenarios)

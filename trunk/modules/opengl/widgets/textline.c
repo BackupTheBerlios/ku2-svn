@@ -15,8 +15,8 @@
 #include "ku2/gettext.h"
 #include "io/log/log.h"
 #include "dp/resmanager/res.h"
-#include "modules/opengl/gfx/gfx.h"
-#include "modules/opengl/gui/gui.h"
+#include "gfx/gfx.h"
+#include "gui/gui.h"
 
 #define TEXT_UD_TEXT 1
 

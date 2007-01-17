@@ -1,0 +1,15 @@
+#
+#	SConstruct file for Kane Utilities 2 (tools)
+#		J. Anton, Copyright 2007
+#
+
+scenarios = []
+
+build = ARGUMENTS.get("build", "ku2project,im2cc")
+notbuild = ARGUMENTS.get("notbuild", "")
+if "ku2project" in build and not "ku2project" in notbuild:
+	scenarios += ["ku2project/SConstruct"]
+if "im2cc" in build and not "im2cc" in notbuild:
+	scenarios += ["im2cc/SConstruct"]
+
+SConscript(scenarios)

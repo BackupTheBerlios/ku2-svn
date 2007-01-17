@@ -23,9 +23,9 @@
 extern "C" {
 #endif
 
-#include "modules/opengl/gfx/image.h"
-#include "modules/opengl/gfx/font.h"
-#include "modules/opengl/gui/gui.h"
+#include "gfx/image.h"
+#include "gfx/font.h"
+#include "gui/gui.h"
 #include "ku2/ecode.h"
 
 //! Button GUI object.

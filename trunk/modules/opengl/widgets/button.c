@@ -16,8 +16,8 @@
 
 #include "io/log/log.h"
 #include "dp/resmanager/res.h"
-#include "modules/opengl/gfx/gfx.h"
-#include "modules/opengl/gui/gui.h"
+#include "gfx/gfx.h"
+#include "gui/gui.h"
 
 #define BUTTON_UD_NORM 1
 #define BUTTON_UD_MON 2
