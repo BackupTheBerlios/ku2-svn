@@ -46,7 +46,7 @@ struct STRUCT_STACK
 	set to the valid value.
 	\retval KE_MEMORY Memory allocation has failed.
 	\note Parameter \a flags is not used.
-	\note If \ref elements is 0 (zero) then the default stack size is used.
+	\note If \e elements is 0 (zero) then the default stack size is used.
 	\sa stack_free().
 */
 stack_t *stack_create( uint elements, ku_flag32_t flags );

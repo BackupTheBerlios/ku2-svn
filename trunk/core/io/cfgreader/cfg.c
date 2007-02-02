@@ -18,11 +18,6 @@
 #include "ku2/memory.h"
 #include "ds/abtree/abtree.h"
 
-FILE *cfgf = NULL;
-tree_t *qtree;
-int cfg_line;
-const char *cfg_stepid;
-
 static int cfg_cmpf( void *data1, void *data2 )
 {
 	return strcmp(((cfg_query_t*)data1)->id, ((cfg_query_t*)data2)->id);
@@ -34,69 +29,82 @@ static int qtree_free( void *data )
 	return 0;
 }
 
-kucode_t cfg_open( const char *file )
+cfg_session_t *cfg_open( const char *file, ku_flag32_t flags )
 {
+	cfg_session_t *session;
 	pstart();
 
-	if ( cfgf != NULL )
-		KU_ERRQ(KE_DOUBLE);
-
-	cfgf = fopen(file, "r");
-	if ( cfgf == NULL )
-		KU_ERRQ(KE_IO);
-
-	qtree = abtree_create(cfg_cmpf, 0);
-	if ( qtree == NULL )
+	session = dmalloc(sizeof(cfg_session_t));
+	if ( session == NULL )
 	{
-		fclose(cfgf);
-		return kucode;
+		kucode = KE_MEMORY;
+		return NULL;
 	}
 
-	cfg_line = 0;
+	session->cfgf = fopen(file, "r");
+	if ( session->cfgf == NULL )
+	{
+		dfree(session);
+		kucode = KE_IO;
+		return NULL;
+	}
+
+	session->qtree = abtree_create(cfg_cmpf, 0);
+	if ( session->qtree == NULL )
+	{
+		fclose(session->cfgf);
+		dfree(session);
+		return NULL;
+	}
+
+	session->cfg_line = 0;
+	session->flags = flags;
 
 	pstop();
-	return KE_NONE;
+	return session;
 }
 
-kucode_t cfg_close( void )
+kucode_t cfg_close( cfg_session_t *session )
 {
 	pstart();
 
-	if ( cfgf == NULL )
-		KU_ERRQ(KE_EMPTY);
-
-	fclose(cfgf);
-	cfgf = NULL;
-
-	abtree_free(qtree, qtree_free);
+	fclose(session->cfgf);
+	abtree_free(session->qtree, qtree_free);
+	dfree(session);
 
 	pstop();
 	return KE_NONE;
 }
 
-kucode_t cfg_query( const char *id, const char *fmt, ... )
+kucode_t cfg_query( cfg_session_t *session, const char *id, const char *fmt, ... )
 {
 	cfg_query_t *q;
 	uint i;
 	va_list va;
-	const char *c_id = id, *b_id ,
-		*c_fmt = fmt, *b_fmt;
-	int cont = 1;
+	const char
+		*c_id = id,		// конец текущего идентификатора
+		*b_id,			// начало текущего идентификатора
+		*c_fmt = fmt,	// конец текущего формата
+		*b_fmt;			// начало текущего формата
+	int cont = 1;		// нужно ли обрабатывать дальше (continue?)
 	pstart();
 
 	va_start(va, fmt);
 	for ( cont = 1; cont; c_id++, c_fmt++ )
 	{
+		// поиск текущего идентификатора
 		b_id = c_id;
 		while ( (*c_id != ',') && *c_id ) c_id++;
 		if ( !*c_id )
 			cont = 0;
 
+		// поиск текущего формата
 		b_fmt = c_fmt;
 		while ( (*c_fmt != ',') && *c_fmt ) c_fmt++;
 		if ( !*c_fmt )
 			cont = 0;
 
+		// создание и добавление запроса в сессию
 		q = dmalloc(sizeof(cfg_query_t)+ \
 				sizeof(char)*(c_id-b_id+c_fmt-b_fmt+2)+ \
 				sizeof(void**)*(c_fmt-b_fmt));
@@ -112,11 +120,10 @@ kucode_t cfg_query( const char *id, const char *fmt, ... )
 		strncpy(q->fmt, b_fmt, c_fmt-b_fmt);
 		q->fmt[c_fmt-b_fmt] = 0;
 
-
 		for ( i = 0; i < c_fmt-b_fmt; i++ )
 			q->ptr[i] = va_arg(va, void*);
 
-		if ( abtree_ins(qtree, q) != KE_NONE )
+		if ( abtree_ins(session->qtree, q) != KE_NONE )
 		{
 			dfree(q);
 			return kucode;
@@ -124,6 +131,7 @@ kucode_t cfg_query( const char *id, const char *fmt, ... )
 	}
 	va_end(va);
 
+	// если количество форматов не равно количеству идентификаторов, то..
 	if ( *(c_id-1) || *(c_fmt-1) )
 		KU_ERRQ(KE_SYNTAX);
 
@@ -131,12 +139,14 @@ kucode_t cfg_query( const char *id, const char *fmt, ... )
 	return KE_NONE;
 }
 
-static void cfg_sksp( char **p )
+// пропустить пробелы
+static inline void cfg_sksp( char **p )
 {
 	while ( isspace(**p) && (**p != 0) ) (*p)++;
 }
 
-static char *cfg_readnext( char **p )
+// прочитать следующее слово
+static inline char *cfg_readnext( char **p )
 {
 	static char buf[CFG_BUFFER];
 	char *c = buf;
@@ -157,19 +167,19 @@ static char *cfg_readnext( char **p )
 	return buf;
 }
 
-kucode_t cfg_process( ku_flag32_t flags )
+kucode_t cfg_process( cfg_session_t *session )
 {
 	char buf[CFG_BUFFER];
 	cfg_query_t sq, *q;
 	int quota = 0;
 	pstart();
 
-	while ( fgets(buf, CFG_BUFFER, cfgf) != NULL )
+	while ( fgets(buf, CFG_BUFFER, session->cfgf) != NULL )
 	{
 		char *c = buf, *cur;
 		uint i, wassign;
 
-		cfg_line++;
+		session->cfg_line++;
 
 		cfg_sksp(&c);
 		if ( *c == 0 ) continue;
@@ -186,10 +196,10 @@ kucode_t cfg_process( ku_flag32_t flags )
 			KU_ERRQ(KE_SYNTAX);
 
 		sq.id = cur;
-		q = abtree_search(qtree, &sq);
+		q = abtree_search(session->qtree, &sq);
 		if ( q == NULL )
 		{
-			if ( flags&CFG_STRICT )
+			if ( session->flags&CFG_STRICT )
 				KU_ERRQ(KE_NOTFOUND) else
 				continue;
 		}
@@ -243,9 +253,9 @@ kucode_t cfg_process( ku_flag32_t flags )
 		if ( *c != 0 )
 			KU_ERRQ(KE_SYNTAX);
 
-		if ( flags&CFG_STEP )
+		if ( session->flags&CFG_STEP )
 		{
-			cfg_stepid = sq.id;
+			session->cfg_stepid = sq.id;
 			pstop();
 			return KE_SIGNAL;
 		}
