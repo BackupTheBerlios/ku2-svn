@@ -10,8 +10,8 @@
 	\file
 	\brief Type definitions.
 	\author J. Anton
-	\date Tue Aug 22 21:17:10 2006
-	\version 1.1.0
+	\date Wed Feb 07 10:33 2007
+	\version 1.2.0
 */
 
 #ifndef KU__TYPES_H__
@@ -38,8 +38,7 @@ extern "C" {
 #elif !defined(NO_INTTYPES_H)
 #include <inttypes.h>
 
-#elif !defined(DO_NOT_NEED_INTTYPES)
-#ifdef WIN32
+#elif defined(WIN32) && defined(VCPP)
 //! Integer type definitions for VC++.
 /*!
 	Integer types for VC++.
@@ -56,11 +55,9 @@ typedef unsigned __int64 uint64_t;
 /*!
 	\}
 */
-#else	// WIN32
+#else	// WIN32 && VCPP
 	#error No integer types was found.
-#endif	// WIN32
-
-#endif	// No integer types
+#endif	// WIN32 && VCPP
 
 //! Unsigned integer.
 typedef
@@ -81,7 +78,24 @@ uint32_t ku_flag32_t;
 	\note \ref kucode should not be changed.
 */
 typedef
-int (*ku_comp_f)( void *a, void *b );
+int (*ku_comp_f)( const void *a, const void *b );
+
+//! Interval function.
+/*!
+	This function type is used to calulate the intervals between data and left
+	limit, and data and right limit.
+	\param left Left limit.
+	\param data Data.
+	\param right Right limit.
+	\param [out] interval Two integer`s array: \n
+	\b interval[0] between data and left limit. \n
+	\b interval[1] between data and right limit.
+	\note For [3, 6, 12] function should return [2, 5].
+	\note \ref kucode should not be changed.
+*/
+typedef
+void (*ku_interval_f)( const void *left, const void *data, const void *right, \
+					   int *interval );
 
 //! Action function.
 /*!

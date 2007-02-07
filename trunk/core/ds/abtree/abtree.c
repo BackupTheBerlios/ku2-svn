@@ -202,7 +202,7 @@ kucode_t abtree_clear( tree_t *tree, ku_act_f freef )
 	return KE_NONE;
 }
 
-kucode_t abtree_ins( tree_t *tree, void *data )
+kucode_t abtree_ins( tree_t *tree, const void *data )
 {
 	tree_node_t *cur = tree->root;
 	tree_node_t *p = NULL, *newnode;
@@ -213,7 +213,7 @@ kucode_t abtree_ins( tree_t *tree, void *data )
 	if ( newnode==NULL )
 		KU_ERRQ(KE_MEMORY);
 	newnode->left = newnode->right = NULL;
-	newnode->data = data;
+	newnode->data = (void*)data;
 	newnode->lcnt = newnode->rcnt = 0;
 	
 	//	поиск места
@@ -403,7 +403,7 @@ kucode_t abtree_rem( tree_t *tree, void *data, ku_act_f freef )
 	return KE_NONE;
 }
 
-void *abtree_search( tree_t *tree, void *data )
+void *abtree_search( tree_t *tree, const void *data )
 {
 	tree_node_t *cur = tree->root;
 	pstart();

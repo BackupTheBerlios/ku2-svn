@@ -18,7 +18,7 @@
 #include "ku2/memory.h"
 #include "ds/abtree/abtree.h"
 
-static int cfg_cmpf( void *data1, void *data2 )
+static int cfg_cmpf( const void *data1, const void *data2 )
 {
 	return strcmp(((cfg_query_t*)data1)->id, ((cfg_query_t*)data2)->id);
 }

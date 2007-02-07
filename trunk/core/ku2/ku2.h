@@ -13,8 +13,8 @@ extern "C" {
 #endif
 
 #define KU2_VER_MAJOR 1
-#define KU2_VER_MINOR 5
-#define KU2_VER_PATCH 1
+#define KU2_VER_MINOR 6
+#define KU2_VER_PATCH 0
 #define KU2_VERSION KU2_VER_MAJOR.KU2_VER_MINOR.KU2_VER_PATCH
 
 #ifdef __cplusplus

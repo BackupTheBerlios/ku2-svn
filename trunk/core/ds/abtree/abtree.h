@@ -12,8 +12,8 @@
 	
 	This is the realization of Auto-Balanced tree.
 	\author J. Anton
-	\date Fri Aug 25 20:14:36 2006
-	\version 1.1.0
+	\date Wed Feb 07 10:06 2007
+	\version 1.2.0
 */
 
 #ifndef KU__ABTREE_H__
@@ -29,7 +29,11 @@ extern "C" {
 typedef
 struct STRUCT_TREE_NODE
 {
-	void *data;		//!< Data.
+	union
+	{
+		void *data;	//!< Data pointer.
+		int int_d;	//!< Integer data.
+	};
 	struct STRUCT_TREE_NODE
 		*left,		//!< Left child.
 		*right,		//!< Right child.
@@ -90,7 +94,7 @@ kucode_t abtree_clear( tree_t *tree, ku_act_f freef );
 	\retval KE_DOUBLE Element with the selected data already exists.
 	\sa abtree_rem().
 */
-kucode_t abtree_ins( tree_t *tree, void *data );
+kucode_t abtree_ins( tree_t *tree, const void *data );
 
 //! Remove data from the tree.
 /*!
@@ -112,7 +116,7 @@ kucode_t abtree_rem( tree_t *tree, void *data, ku_act_f freef );
 	\return Data, if found, else \e NULL.
 	\note \ref kucode is not affected.
 */
-void *abtree_search( tree_t *tree, void *data );
+void *abtree_search( tree_t *tree, const void *data );
 
 //! Move the current position to the smallest element (first one).
 /*!
@@ -137,6 +141,19 @@ kucode_t abtree_goto_first( tree_t *tree );
 	\sa abtree_goto_first().
 */
 void *abtree_goto_next( tree_t *tree );
+
+//! Get the first unused index in the tree.
+/*!
+	Gets the first unused index in the tree.
+	\param tree Tree to deal with.
+	\param intf Interval function for determining the possible indexes.
+	\param [out] pos Unused index position: \n
+	\e <0 Unused index is left to the returned element. \n
+	\e >=0 Unused index is right to the returned element.
+	\return Data of the border element.
+	\note \ref kucode is not affected.
+*/
+void *abtree_unused_index( tree_t *tree, ku_interval_f intf, int *pos );
 
 #ifdef __cplusplus
 }

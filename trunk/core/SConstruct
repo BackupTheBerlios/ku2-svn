@@ -5,12 +5,12 @@
 
 ###
 #	Initialisation
-##
+###
 env = Environment(CPPPATH = ["."])
 
 ###
 #	System settings
-##
+###
 sysset = ARGUMENTS.get("system", "auto")
 
 ###
