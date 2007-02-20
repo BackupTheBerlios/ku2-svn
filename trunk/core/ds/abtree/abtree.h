@@ -149,8 +149,10 @@ void *abtree_goto_next( tree_t *tree );
 	\param intf Interval function for determining the possible indexes.
 	\param [out] pos Unused index position: \n
 	\e <0 Unused index is left to the returned element. \n
-	\e >=0 Unused index is right to the returned element.
-	\return Data of the border element.
+	\e >0 Unused index is right to the returned element. \n
+	\e UNCHANGED No unused index is available.
+	\return Data of the border element or \e NULL if no unused index is
+	available.
 	\note \ref kucode is not affected.
 */
 void *abtree_unused_index( tree_t *tree, ku_interval_f intf, int *pos );

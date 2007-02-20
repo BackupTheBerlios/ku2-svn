@@ -480,3 +480,33 @@ void *abtree_goto_next( tree_t *tree )
 	pstop();
 	return tree->cur->data;
 }
+
+void *abtree_unused_index( tree_t *tree, ku_interval_f intf, int *pos )
+{
+	tree_node_t *cur = tree->root;
+	void *left = NULL, *right = NULL;
+	uint available[2];
+	pstart();
+	
+	for (;;)
+	{
+		intf(left, cur->data, right, available);
+		if ( cur->lcnt < available[0] )
+		{
+			if ( cur->lcnt )
+				cur = cur->left; else
+				break;
+		}	else
+		if ( cur->rcnt < available[1] )
+		{
+			if ( cur->rcnt )
+				cur = cur->right; else
+				break;
+		}	else
+			return NULL;
+	}
+	
+	*pos = available[0] ? -1 : 1;
+	pstop();
+	return cur->data;
+}

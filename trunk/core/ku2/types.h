@@ -95,7 +95,7 @@ int (*ku_comp_f)( const void *a, const void *b );
 */
 typedef
 void (*ku_interval_f)( const void *left, const void *data, const void *right, \
-					   int *interval );
+					   uint *interval );
 
 //! Action function.
 /*!
