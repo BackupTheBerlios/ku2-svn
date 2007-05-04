@@ -138,7 +138,7 @@ static void ab_rotate_right( tree_t *tree, tree_node_t *node )
 	pstop();
 }
 
-tree_t *abtree_create( ku_comp_f func, ku_flag32_t flags )
+tree_t *abtree_create( ku_comp_f func, ku_flag32_t flags __attribute__((unused)))
 {
 	tree_t *tree;
 	pstart();
@@ -152,9 +152,8 @@ tree_t *abtree_create( ku_comp_f func, ku_flag32_t flags )
 	
 	tree->root = tree->cur = NULL;
 	tree->cmpf = func;
-	
-	pstop();
-	return tree;
+
+	preturn tree;
 }
 
 kucode_t abtree_free( tree_t *tree, ku_act_f freef )
@@ -164,8 +163,7 @@ kucode_t abtree_free( tree_t *tree, ku_act_f freef )
 	abtree_clear(tree, freef);
 	dfree(tree);
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t abtree_clear( tree_t *tree, ku_act_f freef )
@@ -197,9 +195,8 @@ kucode_t abtree_clear( tree_t *tree, ku_act_f freef )
 	}
 	
 	tree->root = NULL;
-	
-	pstop();
-	return KE_NONE;
+
+	preturn KE_NONE;
 }
 
 kucode_t abtree_ins( tree_t *tree, const void *data )
@@ -275,8 +272,7 @@ kucode_t abtree_ins( tree_t *tree, const void *data )
 		p = p->parent;
 	}
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t abtree_rem( tree_t *tree, void *data, ku_act_f freef )
@@ -398,9 +394,8 @@ kucode_t abtree_rem( tree_t *tree, void *data, ku_act_f freef )
 		cur = p;
 		p = p->parent;
 	}
-	
-	pstop();
-	return KE_NONE;
+
+	preturn KE_NONE;
 }
 
 void *abtree_search( tree_t *tree, const void *data )
@@ -419,12 +414,11 @@ void *abtree_search( tree_t *tree, const void *data )
 			cur = cur->left;
 		}	else
 		{
-			pstop();
-			return cur->data;
+			preturn cur->data;
 		}
 	}
 	
-	return NULL;
+	preturn NULL;
 }
 
 kucode_t abtree_goto_first( tree_t *tree )
@@ -441,12 +435,11 @@ kucode_t abtree_goto_first( tree_t *tree )
 				a = a->right;
 		}
 	}	else
-		return KE_EMPTY;
+		preturn KE_EMPTY;
 	
 	tree->cur = a;
-	
-	pstop();
-	return KE_NONE;
+
+	preturn KE_NONE;
 }
 
 void *abtree_goto_next( tree_t *tree )
@@ -474,11 +467,10 @@ void *abtree_goto_next( tree_t *tree )
 		tree->cur = b;
 	}	else
 	{
-		return NULL;
+		preturn NULL;
 	}
 	
-	pstop();
-	return tree->cur->data;
+	preturn tree->cur->data;
 }
 
 void *abtree_unused_index( tree_t *tree, ku_interval_f intf, int *pos )
@@ -503,10 +495,9 @@ void *abtree_unused_index( tree_t *tree, ku_interval_f intf, int *pos )
 				cur = cur->right; else
 				break;
 		}	else
-			return NULL;
+			preturn NULL;
 	}
 	
 	*pos = available[0] ? -1 : 1;
-	pstop();
-	return cur->data;
+	preturn cur->data;
 }

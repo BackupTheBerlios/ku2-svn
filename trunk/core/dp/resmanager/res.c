@@ -68,15 +68,14 @@ kucode_t res_init( void )
 	pstart();
 
 	if ( (reses = abtree_create(res_cmpf, 0)) == NULL )
-		return kucode;
+		preturn kucode;
 	if ( (restypes = abtree_create(res_type_cmpf, 0)) == NULL )
 	{
 		abtree_free(reses, NULL);
-		return kucode;
+		preturn kucode;
 	}
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t res_halt( void )
@@ -86,8 +85,7 @@ kucode_t res_halt( void )
 	abtree_free(reses, res_freef);
 	abtree_free(restypes, res_type_freef);
 
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t res_assign( int type, ku_flag32_t flags, rescontrol_f control )
@@ -102,15 +100,14 @@ kucode_t res_assign( int type, ku_flag32_t flags, rescontrol_f control )
 	rtype->type = type;
 	rtype->flags = flags;
 	rtype->control = control;
-	
+
 	if ( abtree_ins(restypes, rtype) != KE_NONE )
 	{
 		dfree(rtype);
-		return kucode;
+		preturn kucode;
 	}
-	
-	pstop();
-	return KE_NONE;
+
+	preturn KE_NONE;
 }
 
 kucode_t res_add( const char *path, const char *name, int type, void *param,
@@ -142,11 +139,10 @@ kucode_t res_add( const char *path, const char *name, int type, void *param,
 	if ( abtree_ins(reses, res) != KE_NONE )
 	{
 		dfree(res);
-		return kucode;
+		preturn kucode;
 	}
-	
-	pstop();
-	return KE_NONE;
+
+	preturn KE_NONE;
 }
 
 void *res_access( const char *name )
@@ -158,7 +154,7 @@ void *res_access( const char *name )
 	if ( res == NULL )
 	{
 		kucode = KE_NOTFOUND;
-		return NULL;
+		preturn NULL;
 	}
 	
 	if ( (res->loadcnt == 0) || (res->type->flags&RESTYPE_UNIQ) )
@@ -168,7 +164,7 @@ void *res_access( const char *name )
 		if ( res->data == NULL )
 		{
 			kucode = KE_EXTERNAL;
-			return NULL;
+			preturn NULL;
 		}
 		res->loadcnt = 1;
 	}	else
@@ -176,8 +172,7 @@ void *res_access( const char *name )
 		res->loadcnt++;
 	}
 	
-	pstop();
-	return res->data;
+	preturn res->data;
 }
 
 void *res_access_adv( const char *name, void *param )
@@ -189,7 +184,7 @@ void *res_access_adv( const char *name, void *param )
 	if ( res == NULL )
 	{
 		kucode = KE_NOTFOUND;
-		return NULL;
+		preturn NULL;
 	}
 	
 	if ( (res->loadcnt == 0) || (res->type->flags&RESTYPE_UNIQ) )
@@ -199,7 +194,7 @@ void *res_access_adv( const char *name, void *param )
 		if ( res->data == NULL )
 		{
 			kucode = KE_EXTERNAL;
-			return NULL;
+			preturn NULL;
 		}
 		res->loadcnt = 1;
 	}	else
@@ -207,8 +202,7 @@ void *res_access_adv( const char *name, void *param )
 		res->loadcnt++;
 	}
 	
-	pstop();
-	return res->data;
+	preturn res->data;
 }
 
 kucode_t res_release( const char *name )
@@ -228,10 +222,9 @@ kucode_t res_release( const char *name )
 	{
 		//	выгрузка ресурса
 		if ( res_uload(res) != KE_NONE )
-			return kucode;
+			preturn kucode;
 	}
 	res->loadcnt--;
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }

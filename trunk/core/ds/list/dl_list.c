@@ -11,7 +11,7 @@
 #include "ku2/memory.h"
 #include "ku2/ecode.h"
 
-list_t *dl_list_create( ku_comp_f func, ku_flag32_t flags )
+list_t *dl_list_create( ku_comp_f func, ku_flag32_t flags __attribute__((unused)))
 {
 	list_t *ls;
 	pstart();
@@ -28,8 +28,7 @@ list_t *dl_list_create( ku_comp_f func, ku_flag32_t flags )
 	ls->head = ls->tail = NULL;
 	ls->cmpf = func;
 	
-	pstop();
-	return ls;
+	preturn ls;
 }
 
 kucode_t dl_list_free( list_t *list, ku_act_f freef )
@@ -49,19 +48,18 @@ kucode_t dl_list_free( list_t *list, ku_act_f freef )
 	
 	dfree(list);
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t dl_list_ins( list_t *list, void *data )
 {
 	ls_node_t *node;
 	pstart();
-	
+
 	node = (ls_node_t*)dmalloc(sizeof(ls_node_t));
 	if ( node == NULL )
 		KU_ERRQ(KE_MEMORY);
-	
+
 	node->data = data;
 	
 	if ( list->ptr )
@@ -78,12 +76,11 @@ kucode_t dl_list_ins( list_t *list, void *data )
 		node->prev = NULL;
 		list->head = list->tail = node;
 	}
-	
+
 	list->ptr = node;
 	list->size++;
-	
-	pstop();
-	return KE_NONE;
+
+	preturn KE_NONE;
 }
 
 kucode_t dl_list_ins_after( list_t *list, void *data )
@@ -115,8 +112,7 @@ kucode_t dl_list_ins_after( list_t *list, void *data )
 	list->ptr = node;
 	list->size++;
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t dl_list_ins_last( list_t *list, void *data )
@@ -145,8 +141,7 @@ kucode_t dl_list_ins_last( list_t *list, void *data )
 	list->tail = node;
 	list->size++;
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t dl_list_rem( list_t *list, ku_act_f freef )
@@ -176,8 +171,7 @@ kucode_t dl_list_rem( list_t *list, ku_act_f freef )
 	dfree(node);
 	list->size--;
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t dl_list_search( list_t *list, void *data )
@@ -196,8 +190,7 @@ kucode_t dl_list_search( list_t *list, void *data )
 	
 	list->ptr = cur;
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 void *dl_list_cur( list_t *list )
@@ -277,8 +270,7 @@ kucode_t dl_list_move_fwd( list_t *list )
 	node->data = node->next->data;
 	node->next->data = data;
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t dl_list_move_back( list_t *list )
@@ -296,8 +288,7 @@ kucode_t dl_list_move_back( list_t *list )
 	node->data = node->prev->data;
 	node->prev->data = data;
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t dl_list_move_first( list_t *list )
@@ -319,8 +310,7 @@ kucode_t dl_list_move_first( list_t *list )
 		list->head = node;
 	}
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t dl_list_move_last( list_t *list )
@@ -342,8 +332,7 @@ kucode_t dl_list_move_last( list_t *list )
 		list->tail = node;
 	}
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t dl_list_delete_n( list_t *list, uint cnt, ku_act_f freef )
@@ -375,6 +364,5 @@ kucode_t dl_list_delete_n( list_t *list, uint cnt, ku_act_f freef )
 	}	else
 		list->ptr = list->tail = pre_node;
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }

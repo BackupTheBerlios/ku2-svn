@@ -23,6 +23,8 @@
 extern "C" {
 #endif
 
+#include "ku2/debug.h"
+
 //! Valid error codes.
 /*!	
 	A list of the valid error codes for the Kane Utilities.
@@ -57,7 +59,7 @@ extern kucode_t kucode;
 #define KU_ERRQ( __ecode ) \
 { \
 	kucode = __ecode; \
-	return __ecode; \
+	preturn __ecode; \
 }
 
 #ifdef __cplusplus

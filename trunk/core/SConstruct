@@ -25,13 +25,13 @@ if env["PLATFORM"] == "win32" and (sysset == "vc" or sysset == "auto"):
 	release_linkflags = []
 elif env["PLATFORM"] == "win32" and sysset == "mingw":
 	env.Tool("mingw")
-	env.Append(CCFLAGS = ["-Wall"])
-	debug_ccflags = ["-g"]
+	env.Append(CCFLAGS = ["-Wall", "-Wextra"])
+	debug_ccflags = ["-g3", "-ggdb3", "-pg", "-dm"]
 	release_ccflags = ["-O2"]
 	release_linkflags = ["-s"]
 elif env["PLATFORM"] == "posix" and sysset == "auto":
-	env.Append(CCFLAGS = ["-Wall"])
-	debug_ccflags = ["-g"]
+	env.Append(CCFLAGS = ["-Wall", "-Wextra", "-Werror-implicit-function-declaration"])
+	debug_ccflags = ["-g3", "-ggdb3", "-pg"]
 	release_ccflags = ["-O2"]
 	release_linkflags = ["-s"]
 else:
@@ -113,6 +113,7 @@ sources = Split("""
 	ds/abtree/abtree.c
 	ds/stack/stack.c
 	dp/resmanager/res.c
+	dp/var/var.c
 	""")
 
 ku2lib = env.Library("ku2", sources)

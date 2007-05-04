@@ -123,8 +123,7 @@ kucode_t dlgue_ask( const char *question, void *answer, dlgue_t type )
 		isok = 1;
 	}	while ( !isok );
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 void dlgue_claim( const char *text, ... )

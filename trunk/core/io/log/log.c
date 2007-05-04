@@ -41,8 +41,7 @@ kucode_t openlog_adv( const char *file, ku_flag32_t flags )
 		plog(gettext("Logging has been started\n"));
 	}
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t closelog( void )
@@ -68,8 +67,7 @@ kucode_t closelog_adv( ku_flag32_t flags )
 	
 	logstream = NULL;
 	
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 void flushlog( void )

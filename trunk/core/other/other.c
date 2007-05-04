@@ -101,7 +101,7 @@ kucode_t ku_strtolong( const char *str, long int *i )
 kucode_t ku_strtoulong( const char *str, unsigned long int *i )
 {
 	char *ep;
-	long int res = strtoul(str, &ep, 10);
+	unsigned long int res = strtoul(str, &ep, 10);
 
 	if ( (*str == 0) || (*ep != 0) || (res == ULONG_MAX) )
 	    KU_ERRQ(KE_INVALID);

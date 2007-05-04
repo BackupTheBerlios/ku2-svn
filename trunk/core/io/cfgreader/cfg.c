@@ -38,7 +38,7 @@ cfg_session_t *cfg_open( const char *file, ku_flag32_t flags )
 	if ( session == NULL )
 	{
 		kucode = KE_MEMORY;
-		return NULL;
+		preturn NULL;
 	}
 
 	session->cfgf = fopen(file, "r");
@@ -46,7 +46,7 @@ cfg_session_t *cfg_open( const char *file, ku_flag32_t flags )
 	{
 		dfree(session);
 		kucode = KE_IO;
-		return NULL;
+		preturn NULL;
 	}
 
 	session->qtree = abtree_create(cfg_cmpf, 0);
@@ -54,14 +54,13 @@ cfg_session_t *cfg_open( const char *file, ku_flag32_t flags )
 	{
 		fclose(session->cfgf);
 		dfree(session);
-		return NULL;
+		preturn NULL;
 	}
 
 	session->cfg_line = 0;
 	session->flags = flags;
 
-	pstop();
-	return session;
+	preturn session;
 }
 
 kucode_t cfg_close( cfg_session_t *session )
@@ -72,8 +71,7 @@ kucode_t cfg_close( cfg_session_t *session )
 	abtree_free(session->qtree, qtree_free);
 	dfree(session);
 
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t cfg_query( cfg_session_t *session, const char *id, const char *fmt, ... )
@@ -120,13 +118,13 @@ kucode_t cfg_query( cfg_session_t *session, const char *id, const char *fmt, ...
 		strncpy(q->fmt, b_fmt, c_fmt-b_fmt);
 		q->fmt[c_fmt-b_fmt] = 0;
 
-		for ( i = 0; i < c_fmt-b_fmt; i++ )
+		for ( i = 0; i < (uint)(c_fmt-b_fmt); i++ )
 			q->ptr[i] = va_arg(va, void*);
 
 		if ( abtree_ins(session->qtree, q) != KE_NONE )
 		{
 			dfree(q);
-			return kucode;
+			preturn kucode;
 		}
 	}
 	va_end(va);
@@ -135,8 +133,7 @@ kucode_t cfg_query( cfg_session_t *session, const char *id, const char *fmt, ...
 	if ( *(c_id-1) || *(c_fmt-1) )
 		KU_ERRQ(KE_SYNTAX);
 
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 // пропустить пробелы
@@ -256,14 +253,12 @@ kucode_t cfg_process( cfg_session_t *session )
 		if ( session->flags&CFG_STEP )
 		{
 			session->cfg_stepid = sq.id;
-			pstop();
-			return KE_SIGNAL;
+			preturn KE_SIGNAL;
 		}
 	}
 
 	if ( quota )
 		KU_ERRQ(KE_SYNTAX);
 
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }

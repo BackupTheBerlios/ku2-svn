@@ -53,6 +53,7 @@ if ( expr ) \
 
 #define pstart() pstart_debug(__FUNCTION__)
 #define pstop() pstop_debug(__FUNCTION__)
+#define preturn pstop_debug(__FUNCTION__); return
 
 #else	//	DEBUG
 
@@ -92,7 +93,7 @@ if ( expr ) \
 /*!
 	If function debug watch is enabled then a message informing that the function
 	has started is sent to the \e stdout.
-	\sa pstop().
+	\sa pstop() and preturn().
 */
 #define pstart()
 
@@ -100,9 +101,19 @@ if ( expr ) \
 /*!
 	If function debug watch is enabled then a message informing that the function
 	has stopped is sent to the \e stdout.
-	\sa pstart().
+	\sa pstart() and preturn().
 */
 #define pstop()
+
+//! Seclare the function end and return from it.
+/*!
+	If function debug watch is enabled then a message informing that the function
+	has stopped is sent to the \e stdout.
+	And function returnes.
+	\param __retval Returned value.
+	\sa pstart() and pstop().
+*/
+#define preturn return
 
 #endif	//	DEBUG
 
