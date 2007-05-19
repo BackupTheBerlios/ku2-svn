@@ -53,9 +53,11 @@ extern "C" {
 	\param s2 Second string.
 	\return Pointer to the concatinated string.
 	\note Concatinated string does not need to be freed.
+	\note Concatinated string should be shorter then \ref QSTR_STRSIZE.
+	\note Function is not thread-safe.
 	\warning Function does not perform any buffer overflow check. If \b DEBUG is
 	defined then the warning will be sent to the \e stdout.
-	\sa vstr().
+	\sa vstr() and vstr_adv().
 */
 char *qstr( const char *s1, const char *s2 );
 
@@ -65,17 +67,32 @@ char *qstr( const char *s1, const char *s2 );
 	\param fmt Format.
 	\return Pointer to the created string.
 	\note Created string does not need to be freed.
+	\note Created string should be shorter then \ref QSTR_STRSIZE.
+	\note Function is not thread-safe.
 	\warning Function does not perform any buffer overflow check. If \b DEBUG is
 	defined then the warning will be sent to the \e stdout.
-	\sa qstr().
+	\sa vstr_adv() and qstr().
 */
 char *vstr( const char *fmt, ... );
+
+//! Create a string from the format (advanced).
+/*!
+	Creates a string using the specified format, like the printf() function.
+	\param dst Place to store the created string.
+	\param fmt Format.
+	\return Pointer to \e dst.
+	\warning Function does not perform any buffer overflow check. If there is
+	no enough space in \e dst, then buffer overflow is occured.
+	\sa vstr() and qstr().
+*/
+char *vstr_adv( char *dst, const char *fmt, ... );
 
 //! Convert a string to the path string.
 /*!
 	Adds \b / to the end of the string if there is no \b /.
 	\param path String to be converted.
-	\sa qdir2().
+	\note Memory which is refered by \e path should have place for additional \b /.
+	In other case, buffer overflow is occured.
 */
 void qdir( char *path );
 
@@ -91,6 +108,7 @@ uint ku_mtime( void );
 /*!
 	Gets the time in form DD.MM.YYYY HH:MM:SS.
 	\return Time string.
+	\note Function is not thread-safe.
 	\sa ku_mtime().
 */
 char *ku_ttime( void );

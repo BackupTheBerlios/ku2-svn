@@ -275,7 +275,14 @@ kucode_t abtree_ins( tree_t *tree, const void *data )
 	preturn KE_NONE;
 }
 
-kucode_t abtree_rem( tree_t *tree, void *data, ku_act_f freef )
+kucode_t abtree_replace( tree_t *tree, const void *odata, const void *ndata,
+						ku_act_f freef )
+{
+	pstart();
+	preturn KE_NONE;
+}
+
+kucode_t abtree_rem( tree_t *tree, const void *data, ku_act_f freef )
 {
 	tree_node_t *cur = tree->root;
 	tree_node_t *p;

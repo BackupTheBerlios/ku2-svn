@@ -30,24 +30,111 @@ extern "C" {
 #include "ku2/ecode.h"
 #include "ku2/types.h"
 
+	//! DESCRIPTION.
 typedef
 struct STRUCT_VAR
 {
-	char *name;
+	char *data;
 	uint size;
 }	var_t;
 
+//! DESCRIPTION.
+/*!
+	DESCRIPTION.
+	\param NAME DESC.
+	\return DESC.
+	\retval VAL DESC.
+	\note NOTE.
+	\sa SEE_ASLO.
+*/
 kucode_t var_init( ku_flag32_t flags );
+
+//! DESCRIPTION.
+/*!
+	DESCRIPTION.
+	\param NAME DESC.
+	\return DESC.
+	\retval VAL DESC.
+	\note NOTE.
+	\sa SEE_ASLO.
+*/
 void var_done( void );
 
+//! DESCRIPTION.
+/*!
+	DESCRIPTION.
+	\param NAME DESC.
+	\return DESC.
+	\retval VAL DESC.
+	\note NOTE.
+	\sa SEE_ASLO.
+*/
 kucode_t var_define( const char *name );
+
+//! DESCRIPTION.
+/*!
+	DESCRIPTION.
+	\param NAME DESC.
+	\return DESC.
+	\retval VAL DESC.
+	\note NOTE.
+	\sa SEE_ASLO.
+*/
 kucode_t var_define_val( const char *name, uint size, const void *data );
+
+//! DESCRIPTION.
+/*!
+	DESCRIPTION.
+	\param NAME DESC.
+	\return DESC.
+	\retval VAL DESC.
+	\note NOTE.
+	\sa SEE_ASLO.
+*/
 kucode_t var_redefine( const char *name, uint size, const void *data );
+
+//! DESCRIPTION.
+/*!
+	DESCRIPTION.
+	\param NAME DESC.
+	\return DESC.
+	\retval VAL DESC.
+	\note NOTE.
+	\sa SEE_ASLO.
+*/
 kucode_t var_undef( const char *name );
 
+//! DESCRIPTION.
+/*!
+	DESCRIPTION.
+	\param NAME DESC.
+	\return DESC.
+	\retval VAL DESC.
+	\note NOTE.
+	\sa SEE_ASLO.
+*/
 int var_defined( const char *name );
 
+//! DESCRIPTION.
+/*!
+	DESCRIPTION.
+	\param NAME DESC.
+	\return DESC.
+	\retval VAL DESC.
+	\note NOTE.
+	\sa SEE_ASLO.
+*/
 kucode_t var_get( const char *name, void *data );
+
+//! DESCRIPTION.
+/*!
+	DESCRIPTION.
+	\param NAME DESC.
+	\return DESC.
+	\retval VAL DESC.
+	\note NOTE.
+	\sa SEE_ASLO.
+*/
 void *var_addr( const char *name );
 
 //! Assign flags and a control function for a resource type.

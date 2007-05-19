@@ -92,21 +92,39 @@ kucode_t abtree_clear( tree_t *tree, ku_act_f freef );
 	\retval KE_NONE No error.
 	\retval KE_MEMORY Memory allocation has failed.
 	\retval KE_DOUBLE Element with the selected data already exists.
-	\sa abtree_rem().
+	\sa abtree_replace() and abtree_rem().
 */
 kucode_t abtree_ins( tree_t *tree, const void *data );
+
+//! Replace the data in the tree.
+/*!
+	Replaces the data in the tree. Old data might be freed if selected.
+	\param tree Tree to deal with.
+	\param odata Data to be searched and replaced (if exists).
+	\param ndata Data to be replaced by. If \e odata was not found, just
+	inserting is being done.
+	\param freef Function to free replaced data, \e NULL for doing nothing.
+	\retval KE_NONE No error.
+	\note Parameter \e odata is not affected and is not freed!. Only data replaced
+	in the tree can be freed: \e odata is used as a searching pattern.
+	\sa abtree_ins() and abtree_rem().
+*/
+kucode_t abtree_replace( tree_t *tree, const void *odata, const void *ndata,
+						ku_act_f freef );
 
 //! Remove data from the tree.
 /*!
 	Removes data from the tree.
 	\param tree Tree to deal with.
 	\param data Data to be deleted.
-	\param freef Function to free data, \e NULL for doing nothing.
+	\param freef Function to free found data, \e NULL for doing nothing.
 	\retval KE_NONE No error.
 	\retval KE_NOTFOUND Element was not found.
-	\sa abtree_ins().
+	\note Parameter \e data is not affected and is not freed!. Only data stored
+	in the tree can be freed: \e data is used as a searching pattern.
+	\sa abtree_ins() and abtree_replace().
 */
-kucode_t abtree_rem( tree_t *tree, void *data, ku_act_f freef );
+kucode_t abtree_rem( tree_t *tree, const void *data, ku_act_f freef );
 
 //! Search for the selected data.
 /*!

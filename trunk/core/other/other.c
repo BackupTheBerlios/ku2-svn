@@ -56,6 +56,15 @@ char *vstr( const char *fmt, ... )
 	return _vstr_[i];
 }
 
+char *vstr_adv( char *dst, const char *fmt, ... )
+{
+	va_list ap;
+	va_start(ap, fmt);
+	vsprintf(dst, fmt, ap);
+	va_end(ap);
+	return dst;
+}
+
 void qdir( char *path )
 {
 	char *c = path;
