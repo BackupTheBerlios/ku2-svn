@@ -105,7 +105,7 @@ if ( expr ) \
 */
 #define pstop()
 
-//! Seclare the function end and return from it.
+//! Declare the function end and return from it.
 /*!
 	If function debug watch is enabled then a message informing that the function
 	has stopped is sent to the \e stdout.
