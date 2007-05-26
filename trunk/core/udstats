@@ -7,13 +7,15 @@ for ifile in `grep ^\#FILES: $0 | sed s/^\#FILES://`; do
 	grep ^\#RULE: $0 | sed s/^\#RULE:// | 
 	(
 		while read S_IN S_OUT; do
-			cat $ifile | sed s/$S_IN/$S_OUT/ > $ifile;
+			sed s/$S_IN/$S_OUT/ $ifile > ${ifile}.tmp &&
+			mv ${ifile}.tmp $ifile
 		done
 	)
 done
 
 #	Files and rules for stat changing.
-#FILES: ku2/ku2info.h ku2.pc ku2.spec makerpm.ku2
+##FILES: ku2/ku2info.h ku2.pc ku2.spec makerpm.ku2
+#FILES: ku2.pc
 
 #RULE: __st_VER_MAJ 1
 #RULE: __st_VER_MIN 6

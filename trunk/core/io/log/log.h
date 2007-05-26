@@ -109,6 +109,9 @@ void plog_adv( const char *topic, const char *fmt, ... );
 #define plogfn( fmt, ... ) \
 plog_adv(__FUNCTION__, fmt, ##__VA_ARGS__)
 
+//! Print a log message 'success!` with the function name.
+#define KU_LOG_SUCCESS plog_adv(__FUNCTION__, gettext("success!\n"))
+
 #ifdef __cplusplus
 }
 #endif
