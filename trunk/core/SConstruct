@@ -3,6 +3,8 @@
 #		J. Anton, Copyright 2007
 #
 
+import os
+
 ###
 #	Initialisation
 ###
@@ -95,27 +97,67 @@ else:
 #	Possible add-ons:
 #		gettext - use libintl support
 ###
-use = ARGUMENTS.get("use", "")
-notuse = ARGUMENTS.get("notuse", "")
-if "gettext" in use and not "gettext" in notuse:
+enable = ARGUMENTS.get("enable", "")
+disable = ARGUMENTS.get("disable", "")
+if "gettext" in enable and not "gettext" in disable:
 	env.Append(CPPDEFINES = ["USE_GETTEXT"])
 
 ###
-#	Kane Utilities 2
+#	Getting the install root and prefix
+###
+install_root = ARGUMENTS.get("root", "/")
+install_prefix = ARGUMENTS.get("prefix", "/usr/")
+
+###
+#	Kane Utilities 2 sources and includes
 ###
 sources = Split("""
 	ku2/ku2.c
-	other/other.c
-	io/log/log.c
-	io/cfgreader/cfg.c
-	io/dialogue/dialogue.c
-	ds/list/dl_list.c
-	ds/abtree/abtree.c
 	ds/stack/stack.c
+	ds/arrseq/arrseq.c
+	ds/graph/graph.c
+	ds/abtree/abtree.c
+	ds/list/dl_list.c
 	dp/resmanager/res.c
 	dp/var/var.c
+	other/other.c
+	io/cfgreader/cfg.c
+	io/dialogue/dialogue.c
+	io/log/log.c
 	""")
 
-ku2lib = env.Library("ku2", sources)
-Default(ku2lib)
+includes = Split("""
+	ku2/ku2info.h
+	ku2/host.h
+	ku2/debug.h
+	ku2/memory.h
+	ku2/gettext.h
+	ku2/directives.h
+	ku2/ecode.h
+	ku2/types.h
+	ds/stack/stack.h
+	ds/arrseq/arrseq.h
+	ds/graph/graph.h
+	ds/abtree/abtree.h
+	ds/list/list.h
+	dp/resmanager/res.h
+	dp/var/var.h
+	other/other.h
+	io/cfgreader/cfg.h
+	io/dialogue/dialogue.h
+	io/log/log.h
+""")
 
+###
+#	Building and Installing
+###
+ku2lib = env.Library("ku2", sources)
+
+env.Alias("install", install_root+install_prefix)
+env.Install(install_root+install_prefix+"/lib/", ku2lib)
+env.Install(install_root+install_prefix+"/lib/pkgconfig/", File("ku2.pc"))
+for c_inc in includes:
+	c_inc_f = File(c_inc)
+	env.Install(install_root+install_prefix+"/include/ku2/core/"+os.path.dirname(c_inc_f.path), c_inc_f)
+
+Default(ku2lib)

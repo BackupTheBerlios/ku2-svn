@@ -1,0 +1,33 @@
+#
+#		RPM 'spec` file for Kane Utilities 2 (core)
+#				J. Anton, Copyright 2007
+#
+
+%define ku_ver __st_VER_MAJ.__st_VER_MIN
+%define ku_rel __st_RELEASE
+
+Name:			kaneutil2
+Version:		%{ku_ver}
+Release:		%{ku_rel}
+Summary:		Development utilities and commonly used functions
+Url:			http://developer.berlios.de/projects/ku2/
+Group:			Applications
+License:		LGPL
+
+BuildRoot:		/tmp/ku2
+Source:			ku2-%{ku_ver}-%{ku_rel}.tar.bz2
+
+%description
+descr
+
+%prep
+%setup
+
+%build
+scons mode=release enable=gettext
+
+%install
+scons mode=release enable=gettext root=$RPM_BUILD_ROOT prefix=/usr/local install
+
+%files
+$RPM_BUILD_ROOT

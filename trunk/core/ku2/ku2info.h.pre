@@ -1,0 +1,28 @@
+/*
+		ku2info.h
+		Sat May 26 11:46:05 2007
+
+	This file is the part of Kane Utilities 2.
+	See licencing agreement in a root direcory for more details.
+	http://developer.berlios.de/projects/ku2/
+
+	Copyright, 2007
+		J. Anton (Jeļkins Antons) aka Kane
+		kane@mail.berlios.de
+*/
+
+#ifndef KU__KU2INFO_H__
+#define KU__KU2INFO_H__
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define KU2_VER_MAJOR __st_VER_MAJ
+#define KU2_VER_MINOR __st_VER_MIN
+#define KU2_VER_PATCH __st_RELEASE
+#define KU2_VERSION KU2_VER_MAJOR.KU2_VER_MINOR.KU2_VER_PATCH
+
+#ifdef __cplusplus
+}
+#endif
+#endif

@@ -1,0 +1,11 @@
+prefix=/usr/local/
+
+version=__st_VER_MAJ.__st_VER_MIN.__st_RELEASE
+include_dir=${prefix}/include/ku2/core
+lib_dir=${prefix}/lib
+
+Name: Kane Utilities 2
+Description: Development utilities and commonly used functions
+Version: ${version}
+Libs: -L${lib_dir} -lku2
+Cflags: -I${include_dir}

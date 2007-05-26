@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ .$1. == .. ]; then
+	echo A single parameter: stats.in file is required!
+	exit
+fi
+
+for ifile in `grep ^:FILES: $1 | sed s/^:FILES://`; do
+	cp -f ${ifile}.pre $ifile &&
+	grep ^:RULE: $1 | sed s/^:RULE:// | 
+	(
+		while read S_IN S_OUT; do
+			echo -e ",s/$S_IN/$S_OUT/g\nwq\n" | ed -s $ifile;
+		done
+	)
+done
