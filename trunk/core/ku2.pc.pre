@@ -1,4 +1,4 @@
-prefix=/usr/local/
+prefix=__st_PREFIX
 
 version=__st_VER_MAJ.__st_VER_MIN.__st_RELEASE
 include_dir=${prefix}/include/ku2/core

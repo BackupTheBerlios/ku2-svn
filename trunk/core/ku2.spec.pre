@@ -6,6 +6,9 @@
 %define ku_ver __st_VER_MAJ.__st_VER_MIN
 %define ku_rel __st_RELEASE
 
+%define ku_broot /tmp/ku2
+%define ku_prefix __st_PREFIX
+
 Name:			kaneutil2
 Version:		%{ku_ver}
 Release:		%{ku_rel}
@@ -21,13 +24,19 @@ Source:			ku2-%{ku_ver}-%{ku_rel}.tar.bz2
 descr
 
 %prep
-%setup
+%setup -n ku2-%{ku_ver}-%{ku_rel}
 
 %build
+./udstats
 scons mode=release enable=gettext
 
 %install
-scons mode=release enable=gettext root=$RPM_BUILD_ROOT prefix=/usr/local install
+scons mode=release enable=gettext root=%{ku_broot} prefix=%{ku_prefix} install
 
 %files
-$RPM_BUILD_ROOT
+%{ku_prefix}/lib/libku2.a
+%{ku_prefix}/lib/pkgconfig/ku2.pc
+%{ku_prefix}/include/ku2/core
+
+%clean
+rm -rf %{ku_broot}
