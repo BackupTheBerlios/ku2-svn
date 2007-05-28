@@ -17,7 +17,7 @@ Url:			http://developer.berlios.de/projects/ku2/
 Group:			Applications
 License:		LGPL
 
-BuildRoot:		/tmp/ku2
+BuildRoot:		%{ku_broot}
 Source:			ku2-%{ku_ver}-%{ku_rel}.tar.bz2
 
 %description
@@ -32,6 +32,7 @@ scons mode=release enable=gettext
 
 %install
 scons mode=release enable=gettext root=%{ku_broot} prefix=%{ku_prefix} install
+rm -f `find %{ku_broot} -name ".sconsign"`
 
 %files
 %{ku_prefix}/lib/libku2.a

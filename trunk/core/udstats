@@ -14,8 +14,7 @@ for ifile in `grep ^\#FILES: $0 | sed s/^\#FILES://`; do
 done
 
 #	Files and rules for stat changing.
-##FILES: ku2/ku2info.h ku2.pc ku2.spec makerpm.ku2
-#FILES: ku2.pc
+#FILES: ku2/ku2info.h ku2.pc ku2.spec makerpm.ku2
 
 #RULE: __st_VER_MAJ 1
 #RULE: __st_VER_MIN 6
