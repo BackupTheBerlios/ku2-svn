@@ -13,6 +13,8 @@ for ifile in `grep ^\#FILES: $0 | sed s/^\#FILES://`; do
 	)
 done
 
+chmod a+x makerpm.ku2
+
 #	Files and rules for stat changing.
 #FILES: ku2/ku2info.h ku2.pc ku2.spec makerpm.ku2
 

@@ -9,35 +9,82 @@
 %define ku_broot /tmp/ku2
 %define ku_prefix __st_PREFIX
 
+%define ku_debug 0
+%define ku_with_doc 1
+%define ku_with_gettext 1
+
 Name:			kaneutil2
 Version:		%{ku_ver}
 Release:		%{ku_rel}
 Summary:		Development utilities and commonly used functions
 Url:			http://developer.berlios.de/projects/ku2/
-Group:			Applications
+Group:			Development
 License:		LGPL
+
+Requires:		glibc
+BuildRequires:	scons, glibc-headers
+%if %{ku_with_doc}
+BuildRequires:	doxygen
+%endif
 
 BuildRoot:		%{ku_broot}
 Source:			ku2-%{ku_ver}-%{ku_rel}.tar.bz2
 
 %description
-descr
+Development utilities and commonly used functions. This library contents
+data containers, input-output functions (e.g. logging), some other helpfull
+routines.
 
+###
+#	Preparation
+###
 %prep
 %setup -n ku2-%{ku_ver}-%{ku_rel}
 
+###
+#	Building
+###
 %build
-./udstats
-scons mode=release enable=gettext
+bash udstats
 
+%if %{ku_debug}
+%define scons_mode mode=debug
+%else
+%define scons_mode mode=release
+%endif
+
+%if %{ku_with_gettext}
+%define scons_enable enable=gettext
+%else
+%define scons_enable disable=gettext
+%endif
+
+%if %{ku_with_doc}
+doxygen Doxyfile
+%endif
+
+scons -Q %{scons_mode} %{scons_enable}
+
+###
+#	Installation
+###
 %install
-scons mode=release enable=gettext root=%{ku_broot} prefix=%{ku_prefix} install
+scons -Q %{scons_mode} %{scons_enable} root=%{ku_broot} prefix=%{ku_prefix} install
 rm -f `find %{ku_broot} -name ".sconsign"`
+
+%if %{ku_with_doc}
+mkdir -p %{ku_broot}/%{ku_prefix}/doc/ku2-%{ku_ver}-%{ku_rel}/
+cp -R docs/html/ %{ku_broot}/%{ku_prefix}/doc/ku2-%{ku_ver}-%{ku_rel}/
+%endif
 
 %files
 %{ku_prefix}/lib/libku2.a
 %{ku_prefix}/lib/pkgconfig/ku2.pc
 %{ku_prefix}/include/ku2/core
+
+%if %{ku_with_doc}
+%{ku_prefix}/doc/ku2-%{ku_ver}-%{ku_rel}
+%endif
 
 %clean
 rm -rf %{ku_broot}
