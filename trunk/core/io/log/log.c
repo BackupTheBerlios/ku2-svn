@@ -17,106 +17,97 @@
 #include "ku2/debug.h"
 #include "ku2/gettext.h"
 
-FILE *logstream;
+ku_log *deflog;
 
-kucode_t openlog( const char *file )
+kucode_t ku_openlog( ku_log *thelog, const char *file, ku_flag32_t flags )
 {
-	return openlog_adv(file, LOG_ZFL);
-}
-
-kucode_t openlog_adv( const char *file, ku_flag32_t flags )
-{
-	FILE *f;
 	pstart();
 	
-	f = fopen(file, "a");
-	if ( f == NULL )
+	thelog->logstream = fopen(file, "a");
+	if ( thelog->logstream == NULL )
 		KU_ERRQ(KE_IO);
 	
-	logstream = f;
+	if ( flags&LOG_DEFAULT )
+		deflog = thelog;
 
 	if ( !(flags&LOG_NHEAD) )
 	{
-		fprintf(logstream, "========\n");
-		plog(gettext("Logging has been started\n"));
+		fprintf(thelog->logstream, "========\n");
+		ku_plog(thelog, 0, NULL, NULL, gettext("Logging has been started\n"));
 	}
+	
+	thelog->flags = flags;
 	
 	preturn KE_NONE;
 }
 
-kucode_t closelog( void )
-{
-	return closelog_adv(LOG_ZFL);
-}
-
-kucode_t closelog_adv( ku_flag32_t flags )
+kucode_t ku_closelog( ku_log *thelog, ku_flag32_t flags )
 {
 	pstart();
 	
+	if ( thelog == NULL )
+		thelog = deflog;
+	
 	if ( !(flags&LOG_NHEAD) )
 	{
-		plog(gettext("Logging is being stopped\n"));
-		fprintf(logstream, "========\n\n");
+		ku_plog(thelog, 0, NULL, NULL, gettext("Logging is being stopped\n"));
+		fprintf(thelog->logstream, "========\n\n");
 	}
 	
-	if ( fclose(logstream) != 0 )
-	{
-		logstream = NULL;
+	if ( thelog->flags&LOG_DEFAULT )
+		deflog = NULL;
+	
+	if ( fclose(thelog->logstream) != 0 )
 		KU_ERRQ(KE_IO);
-	}
-	
-	logstream = NULL;
 	
 	preturn KE_NONE;
 }
 
-void flushlog( void )
+kucode_t ku_toutchlog( ku_log *thelog )
 {
-	fflush(logstream);
+	if ( thelog == NULL )
+		thelog = deflog;
+	fflush(thelog->logstream);
+	return KE_NONE;
 }
 
-void plog( const char *fmt, ... )
+void ku_plog( ku_log *thelog, uint16_t code, const char *function, const char *info, const char *fmt, ... )
 {
 	va_list ap;
 	time_t t;
 	struct tm *tm;
 	time(&t);
 	
+	if ( thelog == NULL )
+		thelog = deflog;
+	
 	tm = localtime(&t);
 	
 	va_start(ap, fmt);
-	fprintf(logstream, "[%.2d.%.2d.%.4d %.2d:%.2d:%.2d] ", \
+	
+	fprintf(thelog->logstream, "[%.2d.%.2d.%.4d %.2d:%.2d:%.2d] ", \
 		tm->tm_mday, tm->tm_mon+1, tm->tm_year+1900, \
 		tm->tm_hour, tm->tm_min, tm->tm_sec);
-	vfprintf(logstream, fmt, ap);
+	if ( code != 0 )
+		fprintf(thelog->logstream, "[%.4u] ", code);
+	if ( function != NULL )
+		fprintf(thelog->logstream, "[%s] ", function);
+	if ( info != NULL )
+		fprintf(thelog->logstream, "[%s] ", info);
+	vfprintf(thelog->logstream, fmt, ap);
+	
 	#ifdef DEBUG_LOG
 	printf("=== LOG === [%.2d.%.2d.%.4d %.2d:%.2d:%.2d] ", \
 		tm->tm_mday, tm->tm_mon+1, tm->tm_year+1900, \
 		tm->tm_hour, tm->tm_min, tm->tm_sec);
+	if ( code != 0 )
+		printf("[%.4u] ", code);
+	if ( function != NULL )
+		printf("[%s] ", function);
+	if ( info != NULL )
+		printf("[%s] ", info);
 	vprintf(fmt, ap);
 	#endif
-	va_end(ap);
-}
-
-void plog_adv( const char *topic, const char *fmt, ... )
-{
-	va_list ap;
-	time_t t;
-	struct tm *tm;
-	time(&t);
 	
-	tm = localtime(&t);
-	
-	va_start(ap, fmt);
-	fprintf(logstream, "[%.2d.%.2d.%.4d %.2d:%.2d:%.2d] %s: ", \
-		tm->tm_mday, tm->tm_mon+1, tm->tm_year+1900, \
-		tm->tm_hour, tm->tm_min, tm->tm_sec, topic);
-	vfprintf(logstream, fmt, ap);
-	#ifdef DEBUG_LOG
-	printf("=== LOG === [%.2d.%.2d.%.4d %.2d:%.2d:%.2d] %s: ", \
-		tm->tm_mday, tm->tm_mon+1, tm->tm_year+1900, \
-		tm->tm_hour, tm->tm_min, tm->tm_sec, topic);
-	vprintf(fmt, ap);
-	#endif
 	va_end(ap);
 }

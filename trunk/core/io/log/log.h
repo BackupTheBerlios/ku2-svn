@@ -22,6 +22,8 @@
 extern "C" {
 #endif
 
+#include <stdio.h>
+
 #include "ku2/ecode.h"
 #include "ku2/types.h"
 
@@ -29,8 +31,22 @@ extern "C" {
 enum LOG_FLAGS
 {
 	LOG_ZFL = 0,	//!< Zero flag.
-	LOG_NHEAD = 1	//!< No header and footer of the logging session.
+	LOG_DEFAULT = 1,
+					//!< Make the created stream as default log destination.
+	LOG_NHEAD = 2,	//!< No header and footer of the logging session.
+	
+	LOG_FLUSH = 4	//!< Flush the stream after every write.
 };
+
+//! The log.
+typedef
+struct STRUCT_LOG
+{
+	ku_flag32_t flags;
+					//!< Default logging flags.
+	FILE *logstream;
+					//!< Log output stream.
+}	ku_log;
 
 //! Open a log file.
 /*!
@@ -40,18 +56,7 @@ enum LOG_FLAGS
 	\retval KE_IO Cannot open a file.
 	\sa closelog(), flushlog() and plog().
 */
-kucode_t openlog( const char *file );
-
-//! Open a log file (advanced).
-/*!
-	Opens a file for appending a log messages. Starts the logging session.
-	\param file A log filename.
-	\param flags Logging flags (options).
-	\retval KE_NONE No error.
-	\retval KE_IO Cannot open a file.
-	\sa closelog(), flushlog() and plog().
-*/
-kucode_t openlog_adv( const char *file, ku_flag32_t flags );
+kucode_t ku_openlog( ku_log *thelog, const char *file, ku_flag32_t flags );
 
 //! Close a log file.
 /*!
@@ -60,24 +65,14 @@ kucode_t openlog_adv( const char *file, ku_flag32_t flags );
 	\retval KE_IO Cannot close a file.
 	\sa openlog(), flushlog() and plog().
 */
-kucode_t closelog( void );
-
-//! Close a log file (advanced).
-/*!
-	Closes the log file. Stops the logging session.
-	\param flags Logging flags (options).
-	\retval KE_NONE No error.
-	\retval KE_IO Cannot close a file.
-	\sa openlog(), flushlog() and plog().
-*/
-kucode_t closelog_adv( ku_flag32_t flags );
+kucode_t ku_closelog( ku_log *thelog, ku_flag32_t flags );
 
 //! Flush the log file.
 /*!
 	Writes all buffered data to the disk.
 	\sa openlog(), closelog() and plog().
 */
-void flushlog( void );
+kucode_t ku_toutchlog( ku_log *thelog );
 
 //! Print a log message.
 /*!
@@ -87,18 +82,7 @@ void flushlog( void );
 	\note No newline symbol at the end of the message is added.
 	\sa openlog(), closelog(), plog_adv() and flushlog().
 */
-void plog( const char *fmt, ... );
-
-//! Print a log message (advanced).
-/*!
-	Prints to a file a formated log message. Before the message date, time
-	and topic are printed.
-	\param topic Message topic.
-	\param fmt Formated message.
-	\note No newline symbol at the end of the message is added.
-	\sa openlog(), closelog(), plog() and flushlog().
-*/
-void plog_adv( const char *topic, const char *fmt, ... );
+void ku_plog( ku_log *thelog, uint16_t code, const char *function, const char *info, const char *fmt, ... );
 
 //! Print a log message with the function name.
 /*!
@@ -106,11 +90,23 @@ void plog_adv( const char *topic, const char *fmt, ... );
 	and the current function are printed.
 	\param fmt Formated message.
 */
+#define plog( fmt, ... ) \
+ku_plog(NULL, 0, NULL, NULL, fmt, ##__VA_ARGS__)
+
 #define plogfn( fmt, ... ) \
-plog_adv(__FUNCTION__, fmt, ##__VA_ARGS__)
+ku_plog(NULL, 0, __FUNCTION__, NULL, fmt, ##__VA_ARGS__)
+
+#define plogfn_c( code, fmt, ... ) \
+ku_plog(NULL, code, __FUNCTION__, NULL, fmt, ##__VA_ARGS__)
+
+#define plogfn_i( info, ftm, ... ) \
+ku_plog(NULL, 0, __FUNCTION__, info, fmt, ##__VA_ARGS__)
+
+#define plogfn_ci( code, info, fmt, ... ) \
+ku_plog(NULL, code, __FUNCTION__, info, fmt, ##__VA_ARGS__)
 
 //! Print a log message 'success!` with the function name.
-#define KU_LOG_SUCCESS plog_adv(__FUNCTION__, gettext("success!\n"))
+#define KU_LOG_SUCCESS plogfn(gettext("success!\n"))
 
 #ifdef __cplusplus
 }

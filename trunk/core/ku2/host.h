@@ -35,6 +35,13 @@ extern "C" {
 #define UNUSED
 #endif
 
+//! Declare the function as DLL exportable.
+#ifdef __GNUC__
+#define DLLEXPORT( __func ) __func __attribute__((dllexport))
+#else
+#define DLLEXPORT( __func ) __declspec(dllexport)
+#endif
+
 #ifdef __cplusplus
 }
 #endif
