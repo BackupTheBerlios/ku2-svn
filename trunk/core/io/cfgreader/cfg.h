@@ -62,7 +62,7 @@ struct STRUCT_CFG_SESSION
 	tree_t *qtree;	//!< Query tree.
 	int cfg_line;	//!< Current file line.
 	const char *cfg_stepid;
-					//!< Last step id (see \see CFG_STEP).
+					//!< Last step id (see \ref CFG_STEP).
 }	cfg_session_t;
 
 //! Query.

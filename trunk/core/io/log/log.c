@@ -34,6 +34,7 @@ kucode_t ku_openlog( ku_log *thelog, const char *file, ku_flag32_t flags )
 	{
 		fprintf(thelog->logstream, "========\n");
 		ku_plog(thelog, 0, NULL, NULL, gettext("Logging has been started\n"));
+		fflush(thelog->logstream);
 	}
 	
 	thelog->flags = flags;
@@ -52,6 +53,7 @@ kucode_t ku_closelog( ku_log *thelog, ku_flag32_t flags )
 	{
 		ku_plog(thelog, 0, NULL, NULL, gettext("Logging is being stopped\n"));
 		fprintf(thelog->logstream, "========\n\n");
+		fflush(thelog->logstream);
 	}
 	
 	if ( thelog->flags&LOG_DEFAULT )
@@ -88,24 +90,27 @@ void ku_plog( ku_log *thelog, uint16_t code, const char *function, const char *i
 	fprintf(thelog->logstream, "[%.2d.%.2d.%.4d %.2d:%.2d:%.2d] ", \
 		tm->tm_mday, tm->tm_mon+1, tm->tm_year+1900, \
 		tm->tm_hour, tm->tm_min, tm->tm_sec);
-	if ( code != 0 )
+	if ( code <= 9999 )
 		fprintf(thelog->logstream, "[%.4u] ", code);
-	if ( function != NULL )
-		fprintf(thelog->logstream, "[%s] ", function);
 	if ( info != NULL )
 		fprintf(thelog->logstream, "[%s] ", info);
+	if ( function != NULL )
+		fprintf(thelog->logstream, "[%s] ", function);
 	vfprintf(thelog->logstream, fmt, ap);
+	
+	if ( thelog->flags&LOG_FLUSH )
+		fflush(thelog->logstream);
 	
 	#ifdef DEBUG_LOG
 	printf("=== LOG === [%.2d.%.2d.%.4d %.2d:%.2d:%.2d] ", \
 		tm->tm_mday, tm->tm_mon+1, tm->tm_year+1900, \
 		tm->tm_hour, tm->tm_min, tm->tm_sec);
-	if ( code != 0 )
+	if ( code <= 9999 )
 		printf("[%.4u] ", code);
-	if ( function != NULL )
-		printf("[%s] ", function);
 	if ( info != NULL )
 		printf("[%s] ", info);
+	if ( function != NULL )
+		printf("[%s] ", function);
 	vprintf(fmt, ap);
 	#endif
 	
