@@ -99,7 +99,7 @@ ku_plog(NULL, 0, __FUNCTION__, NULL, fmt, ##__VA_ARGS__)
 #define plogfn_c( code, fmt, ... ) \
 ku_plog(NULL, code, __FUNCTION__, NULL, fmt, ##__VA_ARGS__)
 
-#define plogfn_i( info, ftm, ... ) \
+#define plogfn_i( info, fmt, ... ) \
 ku_plog(NULL, 0, __FUNCTION__, info, fmt, ##__VA_ARGS__)
 
 #define plogfn_ci( code, info, fmt, ... ) \
