@@ -22,6 +22,8 @@
 extern "C" {
 #endif
 
+#include <stdio.h>
+
 #include "ku2/ecode.h"
 #include "ku2/types.h"
 #include "ds/abtree/abtree.h"
