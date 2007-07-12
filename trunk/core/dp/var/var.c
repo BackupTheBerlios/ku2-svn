@@ -5,142 +5,186 @@
 	Copyright J. Anton, 2007
 */
 
-#include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 
 #include "ku2/ecode.h"
-#include "ku2/types.h"
-#include "ku2/debug.h"
+#include "dp/var/var.h"
 #include "ku2/memory.h"
 
-#include "ds/abtree/abtree.h"
+// Буфер для кэша
+#define VAR_ENABLE_BUFFERING
 
-#include "dp/var/var.h"
+#ifdef VAR_ENABLE_BUFFERING
+#define VAR_BUFSIZE		15
+static char var_buffer[VAR_BUFSIZE];
+static int var_bpos;
 
-static tree_t *var_tree;
+#define PARSE_SCALAR_VALUE( __ret, __type ) \
+__ret = va_arg(ap, __type); \
+size += sizeof(__type); \
+if ( var_bpos+sizeof(__type) > VAR_BUFSIZE ) \
+{ \
+	if ( buffed_pars == -1 ) \
+	{ \
+		buffed_pars = i; \
+		va_copy(buffed_ap, ap); \
+	} \
+}	else \
+{ \
+	*((__type*)(var_buffer+var_bpos)) = __ret; \
+	((int*)var_buffer)[i] = var_bpos; \
+	var_bpos += sizeof(__type); \
+}
+#else	// VAR_ENABLE_BUFFERING
+#define PARSE_SCALAR_VALUE( __ret, __type ) \
+__ret = va_arg(ap, __type); \
+size += sizeof(__type);
+#endif	// VAR_ENABLE_BUFFERING
 
-static int var_cmpf( const void *a, const void *b )
+var_t *var_define( const char *name, const char *val_types, ... )
 {
-	return strcmp((char*)a+sizeof(var_t), (char*)b+sizeof(var_t));
+	var_t *var;
+	int i, params = strlen(val_types),
+		namelen = strlen(name);
+	#ifdef VAR_ENABLE_BUFFERING
+	int buffed_pars = -1;
+	va_list buffed_ap;
+	#endif
+	uint size = sizeof(var_t)+namelen+params+params*sizeof(void*)+2;
+	char *p;
+	union
+	{
+		int i;
+		long int I;
+		double f;
+		char *s;
+	}	ret;
+	va_list ap;
+	pstart();
+	
+	// Рачёт размера переменной + буфферизация
+	va_start(ap, val_types);
+	for ( var_bpos = sizeof(void*)*params, i = 0; i < params; i++ )
+	{
+		switch ( val_types[i] )
+		{
+			case VAL_INTEGER:
+			case VAL_BOOLEAN:
+				PARSE_SCALAR_VALUE(ret.i, int);
+				break;
+			case VAL_LONGINT:
+				PARSE_SCALAR_VALUE(ret.I, long int);
+				break;
+			case VAL_DOUBLE:
+				PARSE_SCALAR_VALUE(ret.f, double);
+				break;
+			case VAL_STRING:
+			{
+				int len;
+				
+				ret.s = va_arg(ap, char*);
+				len = strlen(ret.s)+1;
+				size += sizeof(char)*len;
+				#ifdef VAR_ENABLE_BUFFERING
+				if ( var_bpos+len > VAR_BUFSIZE )
+				{
+					if ( buffed_pars == -1 )
+					{
+						buffed_pars = i;
+						va_copy(buffed_ap, ap);
+					}
+				}	else
+				{
+					strcpy(var_buffer+var_bpos, ret.s);
+					((int*)var_buffer)[i] = var_bpos;
+					var_bpos += len;
+				}
+				#endif
+				break;
+			}
+			default:
+				KU_SET_ERROR(KE_INVALID);
+				preturn NULL;
+		}
+	}
+	va_end(ap);
+	
+	// Выделение памяти под переменную и заполнение метаданными
+	var = dmalloc(size);
+	if ( var == NULL )
+	{
+		KU_SET_ERROR(KE_MEMORY);
+		preturn NULL;
+	}
+	var->name = (char*)var+sizeof(var_t);
+	strcpy(var->name, name);
+	var->val_types = var->name+namelen+1;
+	strcpy(var->val_types, val_types);
+	var->values = (void**)(var->val_types+params+1);
+	
+	// Заполнение данными
+	p = (char*)(var->values+params);
+	i = 0;
+	#ifdef VAR_ENABLE_BUFFERING
+	memmove(var->values, var_buffer, var_bpos);
+	for ( ; i < buffed_pars; i++ )
+		((void**)var_buffer)[i] += (int)p;
+	
+	if ( buffed_pars < params )
+	{
+		va_copy(ap, buffed_ap);
+		p = (char*)var->values+var_bpos;
+	#else
+		va_start(ap, val_types);
+	#endif
+		
+		for ( ; i < params; i++ )
+		{
+			var->values[i] = p;
+			switch ( val_types[i] )
+			{
+				case VAL_INTEGER:
+				case VAL_BOOLEAN:
+				{
+					*((int*)p) = va_arg(ap, int);
+					p += sizeof(int);
+					break;
+				}
+				case VAL_LONGINT:
+				{
+					*((long int*)p) = va_arg(ap, long int);
+					p += sizeof(long int);
+					break;
+				}
+				case VAL_DOUBLE:
+				{
+					*((double*)p) = va_arg(ap, double);
+					p += sizeof(double);
+					break;
+				}
+				case VAL_STRING:
+				{
+					ret.s = va_arg(ap, char*);
+					strcpy(p, ret.s);
+					p += strlen(ret.s)+1;
+					break;
+				}
+			}
+		}
+		
+		va_end(ap);
+	#ifdef VAR_ENABLE_BUFFERING
+		va_end(buffed_ap);
+	}
+	#endif
+	
+	preturn var;
 }
 
-static int var_freef( void *var )
+kucode_t var_undef( var_t *var )
 {
+	pstart();
 	dfree(var);
-	return 0;
-}
-
-kucode_t var_init( ku_flag32_t flags __attribute__((unused)))
-{
-	pstart();
-	
-	var_tree = abtree_create(var_cmpf, 0);
-	if ( var_tree == NULL )
-		preturn kucode;
-	
 	preturn KE_NONE;
-}
-
-void var_done( void )
-{
-	pstart();
-	
-	abtree_free(var_tree, var_freef);
-	
-	pstop();
-}
-
-kucode_t var_define( const char *name )
-{
-	var_t *var;
-	pstart();
-	
-	var = dmalloc(sizeof(var_t)+(strlen(name)+1)*sizeof(char));
-	if ( var == NULL )
-		KU_ERRQ(KE_MEMORY);
-	strcpy((char*)var+sizeof(var_t), name);
-	var->size = 0;
-	var->data = NULL;
-	
-	if ( abtree_ins(var_tree, var) != KE_NONE )
-	{
-		dfree(var);
-		preturn kucode;
-	}
-	
-	preturn KE_NONE;
-}
-
-kucode_t var_define_val( const char *name, uint size, const void *data )
-{
-	var_t *var;
-	uint name_len = strlen(name)+1;
-	pstart();
-	
-	var = dmalloc(sizeof(var_t)+name_len*sizeof(char)+size);
-	if ( var == NULL )
-		KU_ERRQ(KE_MEMORY);
-	strcpy((char*)var+sizeof(var_t), name);
-	var->size = size;
-	var->data = (char*)var+sizeof(var_t)+name_len;
-	memcpy(var->data, data, size);
-	
-	if ( abtree_ins(var_tree, var) != KE_NONE )
-	{
-		dfree(var);
-		preturn kucode;
-	}
-	
-	preturn KE_NONE;
-}
-
-kucode_t var_redefine( const char *name, uint size, const void *data )
-{
-	var_t *var;
-	uint name_len = strlen(name)+1;
-	pstart();
-	
-	var = dmalloc(sizeof(var_t)+name_len*sizeof(char)+size);
-	if ( var == NULL )
-		KU_ERRQ(KE_MEMORY);
-	strcpy((char*)var+sizeof(var_t), name);
-	var->size = size;
-	var->data = (char*)var+sizeof(var_t)+name_len;
-	memcpy(var->data, data, size);
-	
-	if ( abtree_replace(var_tree, var, var, var_freef) != KE_NONE )
-	{
-		dfree(var);
-		preturn kucode;
-	}
-	
-	preturn KE_NONE;
-}
-
-kucode_t var_undef( const char *name )
-{
-	pstart();
-	pstop();
-	preturn KE_NONE;
-}
-
-int var_defined( const char *name )
-{
-	pstart();
-	pstop();
-	preturn 0;
-}
-
-kucode_t var_get( const char *name, void *data )
-{
-	pstart();
-	pstop();
-	preturn KE_NONE;
-}
-
-void *var_addr( const char *name )
-{
-	pstart();
-	pstop();
-	preturn NULL;
 }

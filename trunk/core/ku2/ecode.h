@@ -55,6 +55,10 @@ enum
 */
 extern kucode_t kucode;
 
+//! Set the error code.
+#define KU_SET_ERROR( __ecode ) \
+kucode = __ecode;
+
 //! Set the error code and return it from the function.
 #define KU_ERRQ( __ecode ) \
 { \

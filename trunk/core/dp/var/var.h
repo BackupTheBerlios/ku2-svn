@@ -30,124 +30,26 @@ extern "C" {
 #include "ku2/ecode.h"
 #include "ku2/types.h"
 
-	//! DESCRIPTION.
+#define VAL_INTEGER		'i'
+#define VAL_LONGINT		'I'
+#define VAL_DOUBLE		'f'
+#define VAL_BOOLEAN		'b'
+#define VAL_STRING		's'
+
 typedef
 struct STRUCT_VAR
 {
-	char *data;
-	uint size;
+	char *name;
+	char *val_types;
+	void **values;
+	uint vals, size;
 }	var_t;
 
-//! DESCRIPTION.
-/*!
-	DESCRIPTION.
-	\param NAME DESC.
-	\return DESC.
-	\retval VAL DESC.
-	\note NOTE.
-	\sa SEE_ASLO.
-*/
-kucode_t var_init( ku_flag32_t flags );
+// Define and allocate the memory for new variable
+var_t *var_define( const char *name, const char *val_types, ... );
 
-//! DESCRIPTION.
-/*!
-	DESCRIPTION.
-	\param NAME DESC.
-	\return DESC.
-	\retval VAL DESC.
-	\note NOTE.
-	\sa SEE_ASLO.
-*/
-void var_done( void );
-
-//! DESCRIPTION.
-/*!
-	DESCRIPTION.
-	\param NAME DESC.
-	\return DESC.
-	\retval VAL DESC.
-	\note NOTE.
-	\sa SEE_ASLO.
-*/
-kucode_t var_define( const char *name );
-
-//! DESCRIPTION.
-/*!
-	DESCRIPTION.
-	\param NAME DESC.
-	\return DESC.
-	\retval VAL DESC.
-	\note NOTE.
-	\sa SEE_ASLO.
-*/
-kucode_t var_define_val( const char *name, uint size, const void *data );
-
-//! DESCRIPTION.
-/*!
-	DESCRIPTION.
-	\param NAME DESC.
-	\return DESC.
-	\retval VAL DESC.
-	\note NOTE.
-	\sa SEE_ASLO.
-*/
-kucode_t var_redefine( const char *name, uint size, const void *data );
-
-//! DESCRIPTION.
-/*!
-	DESCRIPTION.
-	\param NAME DESC.
-	\return DESC.
-	\retval VAL DESC.
-	\note NOTE.
-	\sa SEE_ASLO.
-*/
-kucode_t var_undef( const char *name );
-
-//! DESCRIPTION.
-/*!
-	DESCRIPTION.
-	\param NAME DESC.
-	\return DESC.
-	\retval VAL DESC.
-	\note NOTE.
-	\sa SEE_ASLO.
-*/
-int var_defined( const char *name );
-
-//! DESCRIPTION.
-/*!
-	DESCRIPTION.
-	\param NAME DESC.
-	\return DESC.
-	\retval VAL DESC.
-	\note NOTE.
-	\sa SEE_ASLO.
-*/
-kucode_t var_get( const char *name, void *data );
-
-//! DESCRIPTION.
-/*!
-	DESCRIPTION.
-	\param NAME DESC.
-	\return DESC.
-	\retval VAL DESC.
-	\note NOTE.
-	\sa SEE_ASLO.
-*/
-void *var_addr( const char *name );
-
-//! Assign flags and a control function for a resource type.
-/*!
-	Assigns flags and a control function for a resource type.
-	\param type Resource type to deal with.
-	\param flags Resource type flags.
-	\param control Control function.
-	\retval KE_NONE No error.
-	\retval KE_MEMORY Memory allocation error.
-	\retval KE_* abtree_ins() errors.
-*/
-
+// Undefine the variable
+kucode_t var_undef( var_t *var );
 
 #ifdef __cplusplus
 }
