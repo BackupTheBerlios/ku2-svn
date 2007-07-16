@@ -12,11 +12,12 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#include "cfg.h"
+#include "io/cfgreader/cfg.h"
 #include "ku2/ecode.h"
 #include "ku2/debug.h"
 #include "ku2/memory.h"
 #include "ds/abtree/abtree.h"
+#include "other/other.h"
 
 static int cfg_cmpf( const void *data1, const void *data2 )
 {
@@ -37,7 +38,7 @@ cfg_session_t *cfg_open( const char *file, ku_flag32_t flags )
 	session = dmalloc(sizeof(cfg_session_t));
 	if ( session == NULL )
 	{
-		kucode = KE_MEMORY;
+		KU_SET_ERROR(KE_MEMORY);
 		preturn NULL;
 	}
 
@@ -45,7 +46,7 @@ cfg_session_t *cfg_open( const char *file, ku_flag32_t flags )
 	if ( session->cfgf == NULL )
 	{
 		dfree(session);
-		kucode = KE_IO;
+		KU_SET_ERROR(KE_IO);
 		preturn NULL;
 	}
 
@@ -74,64 +75,130 @@ kucode_t cfg_close( cfg_session_t *session )
 	preturn KE_NONE;
 }
 
-kucode_t cfg_query( cfg_session_t *session, const char *id, const char *fmt, ... )
+kucode_t cfg_query( cfg_session_t *session, const char *rules, ... )
 {
-	cfg_query_t *q;
-	uint i;
 	va_list va;
 	const char
-		*c_id = id,		// конец текущего идентификатора
-		*b_id,			// начало текущего идентификатора
-		*c_fmt = fmt,	// конец текущего формата
-		*b_fmt;			// начало текущего формата
-	int cont = 1;		// нужно ли обрабатывать дальше (continue?)
+		*cur = rules;	// текущий символ
+	int cont;			// нужно ли обрабатывать дальше (continue?)
 	pstart();
 
-	va_start(va, fmt);
-	for ( cont = 1; cont; c_id++, c_fmt++ )
+	va_start(va, rules);
+	for ( cont = 1; cont; cur++ )
 	{
+		cfg_query_t *q;
+		uint i;
+		const char
+			*b_id,		// начало идентификатора
+			*b_fmt;		// начала формата
+		int	len_id,		// длина идентификатора
+			len_fmt;	// длина формата
+		uint8_t comp;	// кол-во обязательных параметров
+		char mode;		// режим обработки
+		
 		// поиск текущего идентификатора
-		b_id = c_id;
-		while ( (*c_id != ',') && *c_id ) c_id++;
-		if ( !*c_id )
-			cont = 0;
-
+		b_id = cur;
+		while ( (*cur != '=') && *cur ) cur++;
+		if ( *cur == 0 )
+		{
+			va_end(va);
+			KU_ERRQ(KE_SYNTAX);
+		}
+		len_id = (cur++)-b_id;
+		
 		// поиск текущего формата
-		b_fmt = c_fmt;
-		while ( (*c_fmt != ',') && *c_fmt ) c_fmt++;
-		if ( !*c_fmt )
+		b_fmt = cur;
+		while ( (*cur != '/') && (*cur != ',') && *cur ) cur++;
+		if ( *cur == 0 )
+			cont = 0;
+		len_fmt = cur-b_fmt;
+		if ( len_fmt > 255 )
+		{
+			va_end(va);
+			KU_ERRQ(KE_FULL);
+		}
+		
+		// поиск текущих опций
+		if ( *cur == '/' )
+		{
+			unsigned long int l;
+			
+			// режим обработки
+			switch ( cur[1] )
+			{
+				case 'd':
+				case 'r':
+				{
+					mode = cur[1];
+					break;
+				}
+				case 0:
+				{
+					va_end(va);
+					KU_ERRQ(KE_SYNTAX);
+				}
+				default:
+				{
+					mode = 0;
+					break;
+				}
+			}
+			
+			// кол-во обязательных параметров
+			if ( ku_strtoulong(cur+2, &l) != KE_NONE )
+			{
+				va_end(va);
+				preturn KU_GET_ERROR();
+			}
+			if ( l > (unsigned long int)len_fmt )
+			{
+				va_end(va);
+				KU_ERRQ(KE_SYNTAX);
+			}
+			comp = l;
+		}	else
+		{
+			mode = 0;
+			comp = len_fmt;
+		}
+		
+		// поиск конца правила
+		for ( cur++; (*cur != ',' ) && *cur; cur++ );
+		if ( *cur == 0 )
 			cont = 0;
 
 		// создание и добавление запроса в сессию
-		q = dmalloc(sizeof(cfg_query_t)+ \
-				sizeof(char)*(c_id-b_id+c_fmt-b_fmt+2)+ \
-				sizeof(void**)*(c_fmt-b_fmt));
+		q = (cfg_query_t*)dmalloc(sizeof(cfg_query_t) + \
+								  sizeof(char)*(len_id+len_fmt+2) + \
+								  sizeof(void**)*comp);
 		if ( q == NULL )
+		{
+			va_end(va);
 			KU_ERRQ(KE_MEMORY);
+		}
 
 		q->id = ((char*)q)+sizeof(cfg_query_t);
-		q->fmt = ((char*)q->id)+sizeof(char)*(c_id-b_id+1);
-		q->ptr = (void**)(((char*)q->fmt)+sizeof(char)*(c_fmt-b_fmt+1));
+		q->fmt = ((char*)q->id)+sizeof(char)*(len_id+1);
+		q->ptr = (void**)(((char*)q->fmt)+sizeof(char)*(len_fmt+1));
 
-		strncpy(q->id, b_id, c_id-b_id);
-		q->id[c_id-b_id] = 0;
-		strncpy(q->fmt, b_fmt, c_fmt-b_fmt);
-		q->fmt[c_fmt-b_fmt] = 0;
+		strncpy(q->id, b_id, len_id);
+		q->id[len_id] = 0;
+		strncpy(q->fmt, b_fmt, len_fmt);
+		q->fmt[len_fmt] = 0;
+		q->comp = comp;
+		q->mode = mode;
 
-		for ( i = 0; i < (uint)(c_fmt-b_fmt); i++ )
+		for ( i = 0; i < (uint)(len_fmt); i++ )
 			q->ptr[i] = va_arg(va, void*);
 
 		if ( abtree_ins(session->qtree, q) != KE_NONE )
 		{
 			dfree(q);
-			preturn kucode;
+			va_end(va);
+			preturn KU_GET_ERROR();
 		}
 	}
 	va_end(va);
-
-	// если количество форматов не равно количеству идентификаторов, то..
-	if ( *(c_id-1) || *(c_fmt-1) )
-		KU_ERRQ(KE_SYNTAX);
 
 	preturn KE_NONE;
 }

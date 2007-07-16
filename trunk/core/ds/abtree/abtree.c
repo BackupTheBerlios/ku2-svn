@@ -6,11 +6,12 @@
  *  kane@mail.berlios.de
  ****************************************************************************/
 
-#include "abtree.h"
+#include "ds/abtree/abtree.h"
 #include "ku2/debug.h"
 #include "ku2/memory.h"
 #include "ku2/ecode.h"
 #include "other/other.h"
+#include "ku2/host.h"
 
 static void ab_rotate_left( tree_t *tree, tree_node_t *node )
 {
@@ -138,7 +139,7 @@ static void ab_rotate_right( tree_t *tree, tree_node_t *node )
 	pstop();
 }
 
-tree_t *abtree_create( ku_comp_f func, ku_flag32_t flags __attribute__((unused)))
+tree_t *abtree_create( ku_comp_f func, ku_flag32_t flags UNUSED )
 {
 	tree_t *tree;
 	pstart();
@@ -146,8 +147,8 @@ tree_t *abtree_create( ku_comp_f func, ku_flag32_t flags __attribute__((unused))
 	tree = (tree_t*)dmalloc(sizeof(tree_t));
 	if ( tree == NULL )
 	{
-		kucode = KE_MEMORY;
-		return NULL;
+		KU_SET_ERROR(KE_MEMORY);
+		preturn NULL;
 	}
 	
 	tree->root = tree->cur = NULL;

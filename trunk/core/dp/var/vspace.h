@@ -23,7 +23,7 @@
 #ifndef KU__VSPACE_H__
 #define KU__VSPACE_H__
 #ifdef __cplusplus
-//extern "C" {
+extern "C" {
 #endif
 
 #include "ku2/ecode.h"
@@ -43,11 +43,13 @@ kucode_t vspace_undef( vspace_t *space );
 kucode_t vspace_addv( vspace_t *space, const char *name, const char *val_types, ... );
 kucode_t vspace_adds( vspace_t *space, const char *name );
 
+#ifdef KU__VAR_H__
 const var_t *vspace_getv( vspace_t *space, const char *path );
+#endif
+
 vspace_t *vspace_gets( vspace_t *space, const char *path );
 
 #ifdef __cplusplus
 }
 #endif
 #endif
-

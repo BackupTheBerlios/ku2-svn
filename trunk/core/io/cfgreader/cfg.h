@@ -27,8 +27,9 @@ extern "C" {
 #include "ku2/ecode.h"
 #include "ku2/types.h"
 #include "ds/abtree/abtree.h"
+#include "dp/var/vspace.h"
 
-//! Line buffer, maximum line length, can be read.
+//! Line buffer, maximum line length can be read.
 #define CFG_BUFFER 2048
 
 //! Session flags.
@@ -61,18 +62,21 @@ struct STRUCT_CFG_SESSION
 	ku_flag32_t flags;
 					//!< Session flags;
 	FILE *cfgf;		//!< File handle.
-	tree_t *qtree;	//!< Query tree.
+	tree_t *qtree;	//!< Query tree (predefined variable rules).
 	int cfg_line;	//!< Current file line.
 	const char *cfg_stepid;
 					//!< Last step id (see \ref CFG_STEP).
+	vspace_t *vsp;	//!< Variable space (see \ref CFG_DYNAMIC).
 }	cfg_session_t;
 
-//! Query.
+//! Query/predefined rule.
 typedef
 struct STRUCT_CFG_QUERY
 {
 	char *id;		//!< Data label.
 	char *fmt;		//!< Data format.
+	uint8_t comp;	//!< Number of compulsory parameters.
+	char mode;		//!< Predefined query mode.
 	void **ptr;		//!< Data.
 }	cfg_query_t;
 
@@ -114,7 +118,7 @@ kucode_t cfg_close( cfg_session_t *session );
 	\retval KE_* abtree_ins() errors.
 	\sa cfg_process().
 */
-kucode_t cfg_query( cfg_session_t *session, const char *id, const char *fmt, ... );
+kucode_t cfg_query( cfg_session_t *session, const char *rules, ... );
 
 //! Read a config file and get data.
 /*!

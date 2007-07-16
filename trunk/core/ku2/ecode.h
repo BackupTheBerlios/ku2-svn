@@ -59,10 +59,14 @@ extern kucode_t kucode;
 #define KU_SET_ERROR( __ecode ) \
 kucode = __ecode;
 
+//! Get the error code.
+#define KU_GET_ERROR() \
+kucode
+
 //! Set the error code and return it from the function.
 #define KU_ERRQ( __ecode ) \
 { \
-	kucode = __ecode; \
+	KU_SET_ERROR(__ecode); \
 	preturn __ecode; \
 }
 

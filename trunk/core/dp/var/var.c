@@ -51,6 +51,19 @@ size += sizeof(__type);
 var_t *var_define( const char *name, const char *val_types, ... )
 {
 	var_t *var;
+	va_list ap;
+	pstart();
+	
+	va_start(ap, val_types);
+	var = var_define_v(name, val_types, ap);
+	va_end(ap);
+	
+	preturn var;
+}
+
+var_t *var_define_v( const char *name, const char *val_types, va_list var_ap )
+{
+	var_t *var;
 	int i, params = strlen(val_types),
 		namelen = strlen(name);
 	#ifdef VAR_ENABLE_BUFFERING
@@ -70,7 +83,7 @@ var_t *var_define( const char *name, const char *val_types, ... )
 	pstart();
 	
 	// Рачёт размера переменной + буфферизация
-	va_start(ap, val_types);
+	va_copy(ap, var_ap);
 	for ( var_bpos = sizeof(void*)*params, i = 0; i < params; i++ )
 	{
 		switch ( val_types[i] )
@@ -88,6 +101,16 @@ var_t *var_define( const char *name, const char *val_types, ... )
 			case VAL_STRING:
 			{
 				int len;
+				#ifdef VAR_ENABLE_BUFFERING
+				va_list ap_tmp;
+				va_copy(ap_tmp, ap);
+				ret.s = va_arg(ap_tmp, char*);
+				va_end(ap_tmp);
+				#else
+				ret.s = va_arg(ap, char*);
+				#endif
+				
+				len = strlen(ret.s)+1;
 				
 				#ifdef VAR_ENABLE_BUFFERING
 				if ( var_bpos+len > VAR_BUFSIZE )
@@ -97,12 +120,8 @@ var_t *var_define( const char *name, const char *val_types, ... )
 						buffed_pars = i;
 						va_copy(buffed_ap, ap);
 					}
-					ret.s = va_arg(ap, char*);
-					len = strlen(ret.s)+1;
 				}	else
 				{
-					ret.s = va_arg(ap, char*);
-					len = strlen(ret.s)+1;
 					strcpy(var_buffer+var_bpos, ret.s);
 					((int*)var_buffer)[i] = var_bpos;
 					var_bpos += len;
@@ -148,7 +167,7 @@ var_t *var_define( const char *name, const char *val_types, ... )
 		va_copy(ap, buffed_ap);
 		p = (char*)var->values+var_bpos;
 	#else
-		va_start(ap, val_types);
+		va_copy(ap, var_ap);
 	#endif
 		
 		for ( ; i < params; i++ )
