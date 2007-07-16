@@ -120,6 +120,7 @@ sources = Split("""
 	ds/list/dl_list.c
 	dp/resmanager/res.c
 	dp/var/var.c
+	dp/var/vspace.c
 	other/other.c
 	io/cfgreader/cfg.c
 	io/dialogue/dialogue.c
@@ -142,6 +143,7 @@ includes = Split("""
 	ds/list/list.h
 	dp/resmanager/res.h
 	dp/var/var.h
+	dp/var/vspace.h
 	other/other.h
 	io/cfgreader/cfg.h
 	io/dialogue/dialogue.h

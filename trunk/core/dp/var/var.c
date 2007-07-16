@@ -1,8 +1,14 @@
 /*
-	This file is the part of Kane Utilities 2.
-	See licencing agreement in a root directory for more details.
+		var.c
+		Sat Jul 14 21:21:41 2007
 
-	Copyright J. Anton, 2007
+	This file is the part of Kane Utilities 2.
+	See licencing agreement in a root direcory for more details.
+	http://developer.berlios.de/projects/ku2/
+
+	Copyright, 2007
+		J. Anton (Jeļkins Antons) aka Kane
+		kane@mail.berlios.de
 */
 
 #include <stdarg.h>
@@ -21,7 +27,6 @@ static char var_buffer[VAR_BUFSIZE];
 static int var_bpos;
 
 #define PARSE_SCALAR_VALUE( __ret, __type ) \
-__ret = va_arg(ap, __type); \
 size += sizeof(__type); \
 if ( var_bpos+sizeof(__type) > VAR_BUFSIZE ) \
 { \
@@ -30,9 +35,10 @@ if ( var_bpos+sizeof(__type) > VAR_BUFSIZE ) \
 		buffed_pars = i; \
 		va_copy(buffed_ap, ap); \
 	} \
+	__ret = va_arg(ap, __type); \
 }	else \
 { \
-	*((__type*)(var_buffer+var_bpos)) = __ret; \
+	*((__type*)(var_buffer+var_bpos)) = va_arg(ap, __type); \
 	((int*)var_buffer)[i] = var_bpos; \
 	var_bpos += sizeof(__type); \
 }
@@ -83,9 +89,6 @@ var_t *var_define( const char *name, const char *val_types, ... )
 			{
 				int len;
 				
-				ret.s = va_arg(ap, char*);
-				len = strlen(ret.s)+1;
-				size += sizeof(char)*len;
 				#ifdef VAR_ENABLE_BUFFERING
 				if ( var_bpos+len > VAR_BUFSIZE )
 				{
@@ -94,13 +97,18 @@ var_t *var_define( const char *name, const char *val_types, ... )
 						buffed_pars = i;
 						va_copy(buffed_ap, ap);
 					}
+					ret.s = va_arg(ap, char*);
+					len = strlen(ret.s)+1;
 				}	else
 				{
+					ret.s = va_arg(ap, char*);
+					len = strlen(ret.s)+1;
 					strcpy(var_buffer+var_bpos, ret.s);
 					((int*)var_buffer)[i] = var_bpos;
 					var_bpos += len;
 				}
 				#endif
+				size += sizeof(char)*len;
 				break;
 			}
 			default:
@@ -108,6 +116,10 @@ var_t *var_define( const char *name, const char *val_types, ... )
 				preturn NULL;
 		}
 	}
+	#ifdef VAR_ENABLE_BUFFERING
+	if ( buffed_pars == -1 )
+		buffed_pars = params;
+	#endif
 	va_end(ap);
 	
 	// Выделение памяти под переменную и заполнение метаданными
@@ -124,12 +136,12 @@ var_t *var_define( const char *name, const char *val_types, ... )
 	var->values = (void**)(var->val_types+params+1);
 	
 	// Заполнение данными
-	p = (char*)(var->values+params);
+	p = (char*)(var->values);
 	i = 0;
 	#ifdef VAR_ENABLE_BUFFERING
-	memmove(var->values, var_buffer, var_bpos);
 	for ( ; i < buffed_pars; i++ )
 		((void**)var_buffer)[i] += (int)p;
+	memmove(var->values, var_buffer, var_bpos);
 	
 	if ( buffed_pars < params )
 	{

@@ -91,16 +91,16 @@ void ku_plog( ku_log *thelog, uint16_t code, const char *function, const char *i
 	\param fmt Formated message.
 */
 #define plog( fmt, ... ) \
-ku_plog(NULL, 9999, NULL, NULL, fmt, ##__VA_ARGS__)
+ku_plog(NULL, 10000, NULL, NULL, fmt, ##__VA_ARGS__)
 
 #define plogfn( fmt, ... ) \
-ku_plog(NULL, 9999, __FUNCTION__, NULL, fmt, ##__VA_ARGS__)
+ku_plog(NULL, 10000, __FUNCTION__, NULL, fmt, ##__VA_ARGS__)
 
 #define plogfn_c( code, fmt, ... ) \
 ku_plog(NULL, code, __FUNCTION__, NULL, fmt, ##__VA_ARGS__)
 
 #define plogfn_i( info, fmt, ... ) \
-ku_plog(NULL, 9999, __FUNCTION__, info, fmt, ##__VA_ARGS__)
+ku_plog(NULL, 10000, __FUNCTION__, info, fmt, ##__VA_ARGS__)
 
 #define plogfn_ci( code, info, fmt, ... ) \
 ku_plog(NULL, code, __FUNCTION__, info, fmt, ##__VA_ARGS__)

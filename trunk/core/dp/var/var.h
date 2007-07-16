@@ -1,6 +1,6 @@
 /*
 		var.h
-		Sun Apr 15 15:33:50 2007
+		Sat Jul 14 21:21:59 2007
 
 	This file is the part of Kane Utilities 2.
 	See licencing agreement in a root direcory for more details.
@@ -13,12 +13,11 @@
 
 /*!
 	\file
-	\brief Variable manager.
+	\brief Variable handling routines.
 	
 	Variable handling routines.
 	\author J. Anton
-	\date Sun Apr 15 15:34:46 2007
-	\version 1.0.0
+	\version 1.6.4
 */
 
 #ifndef KU__VAR_H__
@@ -30,24 +29,48 @@ extern "C" {
 #include "ku2/ecode.h"
 #include "ku2/types.h"
 
+//! Value is 'int`.
 #define VAL_INTEGER		'i'
+//! Value is 'long int`.
 #define VAL_LONGINT		'I'
+//! Value is 'double`.
 #define VAL_DOUBLE		'f'
+//! Value is 'boolean (1/0 int)`.
 #define VAL_BOOLEAN		'b'
+//! Value is 'string (char*)`.
 #define VAL_STRING		's'
 
+//! Variable structure.
 typedef
 struct STRUCT_VAR
 {
-	char *name;
-	char *val_types;
-	void **values;
-	uint vals, size;
+	char *name;		//!< Variable name.
+	char *val_types;//!< List of variable value types.
+	void **values;	//!< List of pointers to variable values.
 }	var_t;
 
-// Define and allocate the memory for new variable
+//! Define and allocate the memory for new variable.
+/*!
+	Defines and allocates the memory for new variable.
+	\param name Variable name.
+	\param val_types List of types of variable parameters (see VAL_* defines).
+	\param ... List of parameters.
+	\return Pointer to the new allocated variable, else \e NULL and \ref kucode
+	is set to the valid value.
+	\note Possible \ref kucode values: \n
+	\ref KE_INVALID Invalid parameter type. \n
+	\ref KE_MEMORY Memory allocation has failed.
+	\sa var_undef().
+*/
 var_t *var_define( const char *name, const char *val_types, ... );
 
+//! Undefine the variable.
+/*!
+	Undefines and freed the allocated memory of the variable.
+	\param var Variable to be undefined.
+	\return Always \ref KE_NONE.
+	\sa var_define().
+*/
 // Undefine the variable
 kucode_t var_undef( var_t *var );
 
