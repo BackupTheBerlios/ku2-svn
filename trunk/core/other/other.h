@@ -113,6 +113,28 @@ uint ku_mtime( void );
 */
 char *ku_ttime( void );
 
+//! Convert string to integer.
+/*!
+	Converts string to integer.
+	\param str String to be converted.
+	\param i Integer to be saved to.
+	\retval KE_NONE No errors.
+	\retval KE_INVALID Invalid number.
+	\sa ku_strtouint(), ku_strtolong() and ku_strtoulong().
+*/
+kucode_t ku_strtoint( const char *str, int *i );
+
+//! Convert string to unsigned integer.
+/*!
+	Converts string to unsigned integer.
+	\param str String to be converted.
+	\param i Unisgned integer to be saved to.
+	\retval KE_NONE No errors.
+	\retval KE_INVALID Invalid number.
+	\sa ku_strtoint(), ku_strtolong() and ku_strtoulong().
+*/
+kucode_t ku_strtouint( const char *str, unsigned int *i );
+
 //! Convert string to long integer.
 /*!
 	Converts string to long integer.
@@ -120,7 +142,7 @@ char *ku_ttime( void );
 	\param i Long integer to be saved to.
 	\retval KE_NONE No errors.
 	\retval KE_INVALID Invalid number.
-	\sa ku_strtoulong().
+	\sa ku_strtoint(), ku_strtouint() and ku_strtoulong().
 */
 kucode_t ku_strtolong( const char *str, long int *i );
 
@@ -131,7 +153,7 @@ kucode_t ku_strtolong( const char *str, long int *i );
 	\param i Long integer to be saved to.
 	\retval KE_NONE No errors.
 	\retval KE_INVALID Invalid number.
-	\sa ku_strtolong().
+	\sa ku_strtoint(), ku_strtouint() and ku_strtolong().
 */
 kucode_t ku_strtoulong( const char *str, unsigned long int *i );
 

@@ -95,26 +95,74 @@ char *ku_ttime( void )
 		tm->tm_hour, tm->tm_min, tm->tm_sec);
 }
 
-kucode_t ku_strtolong( const char *str, long int *i )
+kucode_t ku_strtoint( const char *str, int *i )
 {
+	int old_errno;
 	char *ep;
-	long int res = strtol(str, &ep, 10);
+	long int res;
+	pstart();
 	
-	if ( (*str == 0) || (*ep != 0) || (res == LONG_MAX) || (res == LONG_MIN) )
+	old_errno = errno;
+	errno = 0;
+	res = strtol(str, &ep, 10);
+	if ( errno || (*ep != 0) || (res < INT_MIN) || (res > INT_MAX) )
 	    KU_ERRQ(KE_INVALID);
 	*i = res;
+	errno = old_errno;
 
-	return KE_NONE;
+	preturn KE_NONE;
+}
+
+kucode_t ku_strtouint( const char *str, unsigned int *i )
+{
+	int old_errno;
+	char *ep;
+	unsigned long int res;
+	pstart();
+	
+	old_errno = errno;
+	errno = 0;
+	res = strtoul(str, &ep, 10);
+	if ( errno || (*ep != 0) || (res > UINT_MAX) )
+	    KU_ERRQ(KE_INVALID);
+	*i = res;
+	errno = old_errno;
+
+	preturn KE_NONE;
+}
+
+kucode_t ku_strtolong( const char *str, long int *i )
+{
+	int old_errno;
+	char *ep;
+	long int res;
+	pstart();
+	
+	old_errno = errno;
+	errno = 0;
+	res = strtol(str, &ep, 10);
+	if ( errno || (*ep != 0) )
+	    KU_ERRQ(KE_INVALID);
+	*i = res;
+	errno = old_errno;
+
+	preturn KE_NONE;
 }
 
 kucode_t ku_strtoulong( const char *str, unsigned long int *i )
 {
+	int old_errno;
 	char *ep;
-	unsigned long int res = strtoul(str, &ep, 10);
-
-	if ( (*str == 0) || (*ep != 0) || (res == ULONG_MAX) )
+	unsigned long int res;
+	pstart();
+	
+	old_errno = errno;
+	errno = 0;
+	res = strtoul(str, &ep, 10);
+	if ( errno || (*ep != 0) )
 	    KU_ERRQ(KE_INVALID);
 	*i = res;
+	errno = old_errno;
 
-	return KE_NONE;
+	preturn KE_NONE;
 }

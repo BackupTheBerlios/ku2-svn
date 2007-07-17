@@ -22,7 +22,7 @@
 #define VAR_ENABLE_BUFFERING
 
 #ifdef VAR_ENABLE_BUFFERING
-#define VAR_BUFSIZE		15
+#define VAR_BUFSIZE		64
 static char var_buffer[VAR_BUFSIZE];
 static int var_bpos;
 

@@ -41,7 +41,6 @@ enum CFG_FLAGS
 		\brief Config file cannot content entries, which are not queried.
 
 		Otherwise, all not queried entries will be ignored.
-		\note This flag cannot be used with \ref CFG_DYNAMIC flag.
 	*/
 	CFG_STRICT = 1,
 	CFG_STEP = 2,	//!< Stop when any entry found.
@@ -50,7 +49,6 @@ enum CFG_FLAGS
 		\brief Parse entries, which are not queried.
 
 		All not queried entries will be recognised as list of text (s cfg_quert()) data format.
-		\note Flag should be used with \ref CFG_STEP and cannot be used with \ref CFG_STRICT.
 	*/
 	CFG_DYNAMIC = 4
 };
