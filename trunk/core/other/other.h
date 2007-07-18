@@ -157,6 +157,17 @@ kucode_t ku_strtolong( const char *str, long int *i );
 */
 kucode_t ku_strtoulong( const char *str, unsigned long int *i );
 
+//! Convert string to double.
+/*!
+	Converts string to double.
+	\param str String to be converted.
+	\param i Double to be saved to.
+	\retval KE_NONE No errors.
+	\retval KE_INVALID Invalid number.
+	\sa ku_strtoint(), ku_strtouint() and ku_strtolong().
+*/
+kucode_t ku_strtodouble( const char *str, double *i );
+
 #ifdef __cplusplus
 }
 #endif

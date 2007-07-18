@@ -15,6 +15,7 @@
 #include <string.h>
 
 #include "ku2/ecode.h"
+#include "dp/var/vlist.h"
 #include "dp/var/var.h"
 #include "ku2/memory.h"
 
@@ -23,8 +24,6 @@
 
 #ifdef VAR_ENABLE_BUFFERING
 #define VAR_BUFSIZE		64
-static char var_buffer[VAR_BUFSIZE];
-static int var_bpos;
 
 #define PARSE_SCALAR_VALUE( __ret, __type ) \
 size += sizeof(__type); \
@@ -67,6 +66,8 @@ var_t *var_define_v( const char *name, const char *val_types, va_list var_ap )
 	int i, params = strlen(val_types),
 		namelen = strlen(name);
 	#ifdef VAR_ENABLE_BUFFERING
+	char var_buffer[VAR_BUFSIZE];
+	int var_bpos;
 	int buffed_pars = -1;
 	va_list buffed_ap;
 	#endif
@@ -131,8 +132,7 @@ var_t *var_define_v( const char *name, const char *val_types, va_list var_ap )
 				break;
 			}
 			default:
-				KU_SET_ERROR(KE_INVALID);
-				preturn NULL;
+				KU_ERRQ_VALUE(KE_INVALID, NULL);
 		}
 	}
 	#ifdef VAR_ENABLE_BUFFERING
@@ -144,10 +144,7 @@ var_t *var_define_v( const char *name, const char *val_types, va_list var_ap )
 	// Выделение памяти под переменную и заполнение метаданными
 	var = dmalloc(size);
 	if ( var == NULL )
-	{
-		KU_SET_ERROR(KE_MEMORY);
-		preturn NULL;
-	}
+		KU_ERRQ_VALUE(KE_MEMORY, NULL);
 	var->name = (char*)var+sizeof(var_t);
 	strcpy(var->name, name);
 	var->val_types = var->name+namelen+1;
@@ -155,9 +152,9 @@ var_t *var_define_v( const char *name, const char *val_types, va_list var_ap )
 	var->values = (void**)(var->val_types+params+1);
 	
 	// Заполнение данными
-	p = (char*)(var->values);
 	i = 0;
 	#ifdef VAR_ENABLE_BUFFERING
+	p = (char*)(var->values);
 	for ( ; i < buffed_pars; i++ )
 		((void**)var_buffer)[i] += (int)p;
 	memmove(var->values, var_buffer, var_bpos);
@@ -168,6 +165,7 @@ var_t *var_define_v( const char *name, const char *val_types, va_list var_ap )
 		p = (char*)var->values+var_bpos;
 	#else
 		va_copy(ap, var_ap);
+		p = (char*)(var->values+params);
 	#endif
 		
 		for ( ; i < params; i++ )
@@ -209,6 +207,74 @@ var_t *var_define_v( const char *name, const char *val_types, va_list var_ap )
 		va_end(buffed_ap);
 	}
 	#endif
+	
+	preturn var;
+}
+
+var_t *var_define_l( const char *name, vlist_t *vlist )
+{
+	var_t *var;
+	vlist_node_t *node;
+	int i, params = vlist->vals->size,
+		namelen = strlen(name);
+	uint size = sizeof(var_t)+namelen+params+params*sizeof(void*)+2+vlist->datasz;
+	char *p;
+	pstart();
+	
+	if ( vlist->datasz == 0 )
+		KU_ERRQ_VALUE(KE_EMPTY, NULL);
+	
+	// Выделение памяти под переменную и заполнение метаданными
+	var = dmalloc(size);
+	if ( var == NULL )
+		KU_ERRQ_VALUE(KE_MEMORY, NULL);
+	var->name = (char*)(var+1);
+	strcpy(var->name, name);
+	var->val_types = var->name+namelen+1;
+	var->values = (void**)(var->val_types+params+1);
+	
+	// Заполнение данными
+	p = (char*)(var->values+params);
+	dl_list_first(vlist->vals);
+	for ( i = 0; !dl_list_offside(vlist->vals); i++ )
+	{
+		node = dl_list_next(vlist->vals);
+		var->val_types[i] = node->val_type;
+		var->values[i] = p;
+		switch ( node->val_type )
+		{
+			case VAL_INTEGER:
+			case VAL_BOOLEAN:
+			{
+				*((int*)p) = *(int*)(node+1);
+				p += sizeof(int);
+				break;
+			}
+			case VAL_LONGINT:
+			{
+				*((long int*)p) = *(long int*)(node+1);
+				p += sizeof(long int);
+				break;
+			}
+			case VAL_DOUBLE:
+			{
+				*((double*)p) = *(double*)(node+1);
+				p += sizeof(double);
+				break;
+			}
+			case VAL_STRING:
+			{
+				strcpy(p, (char*)(node+1));
+				p += strlen((char*)(node+1))+1;
+				break;
+			}
+			default:
+			{
+				dfree(var);
+				KU_ERRQ_VALUE(KE_INVALID, NULL);
+			}
+		}
+	}
 	
 	preturn var;
 }

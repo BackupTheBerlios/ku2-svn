@@ -179,7 +179,7 @@ kucode_t dl_list_search( list_t *list, void *data )
 	ls_node_t *cur = list->head;
 	pstart();
 	
-	if ( cur == NULL )
+	if ( (cur == NULL) || (list->cmpf == NULL) )
 		return KE_NOTFOUND;
 	
 	while ( cur && (list->cmpf(cur->data, data) != 0) )
@@ -343,6 +343,7 @@ kucode_t dl_list_delete_n( list_t *list, uint cnt, ku_act_f freef )
 	if ( !end_node )
 		KU_ERRQ(KE_EMPTY);
 	
+	list->size -= cnt;
 	pre_node = end_node->prev;
 	
 	while ( end_node && (cnt--) )

@@ -166,3 +166,21 @@ kucode_t ku_strtoulong( const char *str, unsigned long int *i )
 
 	preturn KE_NONE;
 }
+
+kucode_t ku_strtodouble( const char *str, double *i )
+{
+	int old_errno;
+	char *ep;
+	double res;
+	pstart();
+	
+	old_errno = errno;
+	errno = 0;
+	res = strtod(str, &ep);
+	if ( errno || (*ep != 0) )
+	    KU_ERRQ(KE_INVALID);
+	*i = res;
+	errno = old_errno;
+
+	preturn KE_NONE;
+}

@@ -21,6 +21,7 @@ kucode_t kucode;
 static uint mallocs = 0;
 static size_t sizes = 0;
 static int ku_func_debug_is_on = 0;
+static uint ku_func_lvl = 0;
 
 void printf_debug( const char *file, const char *func, int line, char *fmt, ... )
 {
@@ -74,11 +75,23 @@ void func_debug( int status )
 void pstart_debug( const char *func )
 {
 	if ( ku_func_debug_is_on )
+	{
+		uint i;
+		for ( i = 0; i < ku_func_lvl; i++ )
+			printf("   ");
+		ku_func_lvl++;
 		printf("### ==> %s >>>\n", func);
+	}
 }
 
 void pstop_debug( const char *func )
 {
 	if ( ku_func_debug_is_on )
+	{
+		uint i;
+		ku_func_lvl--;
+		for ( i = 0; i < ku_func_lvl; i++ )
+			printf("   ");
 		printf("### <== %s <<<\n", func);
+	}
 }

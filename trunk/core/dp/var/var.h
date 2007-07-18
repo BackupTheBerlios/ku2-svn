@@ -80,6 +80,10 @@ var_t *var_define( const char *name, const char *val_types, ... );
 var_t *var_define_v( const char *name, const char *val_types, va_list var_ap );
 #endif
 
+#ifdef KU__VLIST_H__
+var_t *var_define_l( const char *name, vlist_t *vlist );
+#endif
+
 //! Undefine the variable.
 /*!
 	Undefines and freed the allocated memory of the variable.

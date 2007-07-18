@@ -27,10 +27,11 @@ extern "C" {
 #include "ku2/ecode.h"
 #include "ku2/types.h"
 #include "ds/abtree/abtree.h"
+#include "dp/var/vlist.h"
 #include "dp/var/vspace.h"
 
 //! Line buffer, maximum line length can be read.
-#define CFG_BUFFER 2048
+#define CFG_BUFFER 512
 
 //! Session flags.
 enum CFG_FLAGS

@@ -41,6 +41,11 @@ vspace_t *vspace_define( const char *name );
 kucode_t vspace_undef( vspace_t *space );
 
 kucode_t vspace_addv( vspace_t *space, const char *name, const char *val_types, ... );
+
+#ifdef KU__VLIST_H__
+kucode_t vspace_addv_l( vspace_t *space, const char *name, vlist_t *vlist );
+#endif
+
 kucode_t vspace_adds( vspace_t *space, const char *name );
 
 #ifdef KU__VAR_H__

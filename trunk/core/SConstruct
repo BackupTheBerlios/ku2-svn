@@ -121,6 +121,7 @@ sources = Split("""
 	dp/resmanager/res.c
 	dp/var/var.c
 	dp/var/vspace.c
+	dp/var/vlist.c
 	other/other.c
 	io/cfgreader/cfg.c
 	io/dialogue/dialogue.c

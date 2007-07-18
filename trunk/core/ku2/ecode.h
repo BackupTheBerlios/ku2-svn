@@ -71,6 +71,13 @@ kucode
 	preturn __ecode; \
 }
 
+//! Set the error code and return the value from the function.
+#define KU_ERRQ_VALUE(__ecode, __value) \
+{ \
+	KU_SET_ERROR(__ecode); \
+	preturn __value; \
+}
+
 #ifdef __cplusplus
 }
 #endif

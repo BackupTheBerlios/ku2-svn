@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "dp/var/vlist.h"
 #include "dp/var/var.h"
 #include "dp/var/vspace.h"
 #include "ku2/ecode.h"
@@ -52,10 +53,7 @@ vspace_t *vspace_define( const char *name )
 	
 	space = dmalloc(sizeof(vspace_t)+strlen(name)+1);
 	if ( space == NULL )
-	{
-		KU_SET_ERROR(KE_MEMORY);
-		return NULL;
-	}
+		KU_ERRQ_VALUE(KE_MEMORY, NULL);
 	
 	space->name = (char*)space+sizeof(vspace_t);
 	strcpy(space->name, name);
@@ -87,25 +85,56 @@ kucode_t vspace_addv( vspace_t *space, const char *name, const char *val_types, 
 	var = var_define_v(name, val_types, ap);
 	va_end(ap);
 	if ( var == NULL )
-		return KU_GET_ERROR();
+		{ preturn KU_GET_ERROR(); }
 	
 	if ( space->vars == NULL )
 	{
 		space->vars = abtree_create(var_compf, 0);
 		if ( space->vars == NULL )
-			return KU_GET_ERROR();
+			{ preturn KU_GET_ERROR(); }
 		if ( abtree_ins(space->vars, var) != KE_NONE )
 		{
 			var_undef(var);
 			abtree_free(space->vars, NULL);
 			space->vars = NULL;
-			return KU_GET_ERROR();
+			preturn KU_GET_ERROR();
 		}
 	}	else
 	if ( abtree_ins(space->vars, var) != KE_NONE )
 	{
 		var_undef(var);
-		return KU_GET_ERROR();
+		preturn KU_GET_ERROR();
+	}
+	
+	preturn KE_NONE;
+}
+
+kucode_t vspace_addv_l( vspace_t *space, const char *name, vlist_t *vlist )
+{
+	var_t *var;
+	pstart();
+	
+	var = var_define_l(name, vlist);
+	if ( var == NULL )
+		{ preturn KU_GET_ERROR(); }
+	
+	if ( space->vars == NULL )
+	{
+		space->vars = abtree_create(var_compf, 0);
+		if ( space->vars == NULL )
+			{ preturn KU_GET_ERROR(); }
+		if ( abtree_ins(space->vars, var) != KE_NONE )
+		{
+			var_undef(var);
+			abtree_free(space->vars, NULL);
+			space->vars = NULL;
+			preturn KU_GET_ERROR();
+		}
+	}	else
+	if ( abtree_ins(space->vars, var) != KE_NONE )
+	{
+		var_undef(var);
+		preturn KU_GET_ERROR();
 	}
 	
 	preturn KE_NONE;
@@ -118,25 +147,25 @@ kucode_t vspace_adds( vspace_t *space, const char *name )
 	
 	new_space = vspace_define(name);
 	if ( new_space == NULL )
-		return KU_GET_ERROR();
+		{ preturn KU_GET_ERROR(); }
 	
 	if ( space->spaces == NULL )
 	{
 		space->spaces = abtree_create(vspace_compf, 0);
 		if ( space->spaces == NULL )
-			return KU_GET_ERROR();
+			{ preturn KU_GET_ERROR(); }
 		if ( abtree_ins(space->spaces, new_space) != KE_NONE )
 		{
 			vspace_undef(new_space);
 			abtree_free(space->spaces, NULL);
 			space->spaces = NULL;
-			return KU_GET_ERROR();
+			preturn KU_GET_ERROR();
 		}
 	}	else
 	if ( abtree_ins(space->spaces, new_space) != KE_NONE )
 	{
 		vspace_undef(new_space);
-		return KU_GET_ERROR();
+		preturn KU_GET_ERROR();
 	}
 	
 	preturn KE_NONE;
@@ -159,10 +188,7 @@ static vspace_t *vspace_get_leaf( vspace_t *space, const char *path, char **leaf
 		{
 			*(p++) = *(cur++);
 			if ( p-buf >= VSPACE_MAX_NODE_LEN )
-			{
-				KU_SET_ERROR(KE_FULL);
-				preturn NULL;
-			}
+				KU_ERRQ_VALUE(KE_FULL, NULL);
 		}
 		if ( *cur == 0 )
 			break;
@@ -171,10 +197,7 @@ static vspace_t *vspace_get_leaf( vspace_t *space, const char *path, char **leaf
 	
 		space = abtree_search(space->spaces, &search_space);
 		if ( space->spaces == NULL )
-		{
-			KU_SET_ERROR(KE_NOTFOUND);
-			preturn NULL;
-		}
+			KU_ERRQ_VALUE(KE_NOTFOUND, NULL);
 	}
 	
 	*leaf = search_space.name;
@@ -188,7 +211,7 @@ const var_t *vspace_getv( vspace_t *space, const char *path )
 	
 	space = vspace_get_leaf(space, path, &search_var.name);
 	if ( space == NULL )
-		preturn NULL;
+		{ preturn NULL; }
 	
 	if ( space->vars == NULL )
 	{
@@ -197,7 +220,7 @@ const var_t *vspace_getv( vspace_t *space, const char *path )
 	}
 	var = abtree_search(space->vars, &search_var);
 	if ( var == NULL )
-		preturn NULL;
+		{ preturn NULL; }
 	
 	preturn var;
 }
@@ -209,7 +232,7 @@ vspace_t *vspace_gets( vspace_t *space, const char *path )
 	
 	space = vspace_get_leaf(space, path, &search_space.name);
 	if ( space == NULL )
-		preturn NULL;
+		{ preturn NULL; }
 	
 	if ( space->spaces == NULL )
 	{
@@ -218,7 +241,7 @@ vspace_t *vspace_gets( vspace_t *space, const char *path )
 	}
 	space = abtree_search(space->spaces, &search_space);
 	if ( space == NULL )
-		preturn NULL;
+		{ preturn NULL; }
 	
 	preturn space;
 }
