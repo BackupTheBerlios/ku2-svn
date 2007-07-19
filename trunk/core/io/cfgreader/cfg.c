@@ -213,7 +213,7 @@ __cfg_inherited_error:
 }
 
 // пропустить пробелы
-static inline void cfg_sksp( char **p )
+static inline void cfg_sksp( const char **p )
 {
 	while ( isspace(**p) && (**p != 0) ) (*p)++;
 }
@@ -221,7 +221,7 @@ static inline void cfg_sksp( char **p )
 // прочитать следующее слово
 // возвращает NULL, если нет закрывающей кавычки
 // p переносится на начало последующего слова
-static inline char *cfg_readnext( char **p )
+static inline char *cfg_readnext( const char **p )
 {
 	static char buf[CFG_BUFFER];
 	char *c = buf;
@@ -242,8 +242,20 @@ static inline char *cfg_readnext( char **p )
 	return buf;
 }
 
-static inline int cfg_parse_directive( cfg_session_t *session, char *c, vspace_t **vspace_ptr )
+typedef
+struct
 {
+	char prefix[CFG_BUFFER];
+	vlist_t *vlist;
+	vspace_t *vspace[6];
+	int vspace_i;
+	cfg_query_t *q;
+}	cfg_process_st;
+
+static inline int cfg_parse_directive( cfg_session_t *session, const char *c, cfg_process_st *st )
+{
+	vspace_t space_stack[6];
+	int space_i;
 	char *cur = cfg_readnext(&c);
 	
 	if ( !strcmp(cur, "end") )
@@ -259,21 +271,26 @@ static inline int cfg_parse_directive( cfg_session_t *session, char *c, vspace_t
 	return 1;
 }
 
-static inline int cfg_parse_parameters( int has_rule, char *c, cfg_query_t *q, vlist_t **vlist_ptr )
+/*
+	Внимание, отсутствие символов межу разделителями
+	распознаётся как пустая строка; если как тип параметра
+	указан не STRING, то результат - синтактическая ошибка
+*/
+static inline int cfg_parse_parameters( int has_rule, const char *c, cfg_process_st *st )
 {
-	vlist_t *vlist = *vlist_ptr;
+	//vlist_t *vlist = *vlist_ptr;
 	uint i, len_fmt;
 	char *cur;
 	
 	if ( has_rule )
-		len_fmt = strlen(q->fmt);
+		len_fmt = strlen(st->q->fmt);
 	for ( i = 0;; i++ )
 	{
 		// если параметров меньше, чем их обязательное кол-во,
 		// то - ошибка
 		if ( *c == 0 )
 		{
-			if ( has_rule && (i < q->comp) )
+			if ( has_rule && (i < st->q->comp) )
 				KU_ERRQ_VALUE(KE_SYNTAX, 0) else break;
 		}
 		// или если их больше, чем надо..
@@ -296,37 +313,37 @@ static inline int cfg_parse_parameters( int has_rule, char *c, cfg_query_t *q, v
 				double f;
 				char *s;
 			}	ret;
-			switch ( q->fmt[i] )
+			switch ( st->q->fmt[i] )
 			{
 				case VAL_INTEGER:
 				{
 					if ( ku_strtoint(cur, &ret.i) != KE_NONE )
 						KU_ERRQ_VALUE(KE_SYNTAX, 0);
-					if ( (q->mode == 0) || (q->mode == 'r') )
-						*((int*)q->ptr[i]) = ret.i;
+					if ( (st->q->mode == 0) || (st->q->mode == 'r') )
+						*((int*)st->q->ptr[i]) = ret.i;
 					break;
 				}
 				case VAL_LONGINT:
 				{
 					if ( ku_strtolong(cur, &ret.I) != KE_NONE )
 						KU_ERRQ_VALUE(KE_SYNTAX, 0);
-					if ( (q->mode == 0) || (q->mode == 'r') )
-						*((long int*)q->ptr[i]) = ret.I;
+					if ( (st->q->mode == 0) || (st->q->mode == 'r') )
+						*((long int*)st->q->ptr[i]) = ret.I;
 					break;
 				}
 				case VAL_DOUBLE:
 				{
 					if ( ku_strtodouble(cur, &ret.f) != KE_NONE )
 						KU_ERRQ_VALUE(KE_SYNTAX, 0);
-					if ( (q->mode == 0) || (q->mode == 'r') )
-						*((double*)q->ptr[i]) = ret.f;
+					if ( (st->q->mode == 0) || (st->q->mode == 'r') )
+						*((double*)st->q->ptr[i]) = ret.f;
 					break;
 				}
 				case VAL_STRING:
 				{
 					ret.s = cur;
-					if ( (q->mode == 0) || (q->mode == 'r') )
-						strcpy((char*)q->ptr[i], ret.s);
+					if ( (st->q->mode == 0) || (st->q->mode == 'r') )
+						strcpy((char*)st->q->ptr[i], ret.s);
 					break;
 				}
 				case VAL_BOOLEAN:
@@ -336,30 +353,29 @@ static inline int cfg_parse_parameters( int has_rule, char *c, cfg_query_t *q, v
 							if ( (strcmp(cur, "no") && strcmp(cur, "false")) == 0 )
 								ret.i = 0; else
 									KU_ERRQ_VALUE(KE_SYNTAX, 0);
-					if ( (q->mode == 0) || (q->mode == 'r') )
-						*((int*)q->ptr[i]) = ret.i;
+					if ( (st->q->mode == 0) || (st->q->mode == 'r') )
+						*((int*)st->q->ptr[i]) = ret.i;
 					break;
 				}
 				default:
 					KU_ERRQ_VALUE(KE_INVALID, 0);
 			}
 			// добавление значений в динамический список
-			if ( (q->mode == 0) || (q->mode == 'd') )
+			if ( (st->q->mode == 0) || (st->q->mode == 'd') )
 			{
-				if ( vlist == NULL )
+				if ( st->vlist == NULL )
 				{
-					vlist = vlist_define();
-					if ( vlist == NULL )
+					st->vlist = vlist_define();
+					if ( st->vlist == NULL )
 						{ preturn 0; }
-					*vlist_ptr = vlist;
 				}
-				if ( q->fmt[i] == VAL_STRING )
+				if ( st->q->fmt[i] == VAL_STRING )
 				{
-					if ( vlist_add(vlist, VAL_STRING, ret.s) != KE_NONE )
+					if ( vlist_add(st->vlist, VAL_STRING, ret.s) != KE_NONE )
 						{ preturn 0; }
 				}	else
 				{
-					if ( vlist_add(vlist, q->fmt[i], &ret) != KE_NONE )
+					if ( vlist_add(st->vlist, st->q->fmt[i], &ret) != KE_NONE )
 						{ preturn 0; }
 				}
 			}
@@ -367,14 +383,13 @@ static inline int cfg_parse_parameters( int has_rule, char *c, cfg_query_t *q, v
 		{
 			// правила для этого идентификатора нет, записываем в
 			// пространство переменных
-			if ( vlist == NULL )
+			if ( st->vlist == NULL )
 			{
-				vlist = vlist_define();
-				if ( vlist == NULL )
+				st->vlist = vlist_define();
+				if ( st->vlist == NULL )
 					{ preturn 0; }
-				*vlist_ptr = vlist;
 			}
-			if ( vlist_add(vlist, VAL_STRING, cur) != KE_NONE )
+			if ( vlist_add(st->vlist, VAL_STRING, cur) != KE_NONE )
 				{ preturn 0; }
 		}
 	}
@@ -382,11 +397,6 @@ static inline int cfg_parse_parameters( int has_rule, char *c, cfg_query_t *q, v
 	return 1;
 }
 
-/*
-	Внимание, отсутствие символов межу разделителями
-	распознаётся как пустая строка; если как тип параметра
-	указан не STRING, то результат - синтактическая ошибка
-*/
 #define CFG_PROCESS_ERROR(__ecode) \
 { \
 	__kucode = __ecode; \
@@ -397,16 +407,16 @@ kucode_t cfg_process( cfg_session_t *session )
 	kucode_t __kucode;
 	char buf[CFG_BUFFER];
 	int quota = 0;
-	vlist_t *vlist = NULL;
-	vspace_t *vspace = session->vsp;
+	cfg_process_st st = { .prefix = "", .vlist = NULL };
 	pstart();
 	
 	// читаем, пока дают..
 	errno = 0;
 	while ( fgets(buf, CFG_BUFFER, session->cfgf) != NULL )
 	{
-		cfg_query_t sq, *q;
-		char *c = buf, *cur, id_name[CFG_BUFFER];
+		cfg_query_t sq;
+		const char *c = buf;
+		char *cur, id_name[CFG_BUFFER];
 		
 		session->cfg_line++;
 		
@@ -423,7 +433,7 @@ kucode_t cfg_process( cfg_session_t *session )
 		// обработка дериктив
 		if ( *c == '&' )
 		{
-			if ( !cfg_parse_directive(session, c+1, &vspace) )
+			if ( !cfg_parse_directive(session, c+1, &st) )
 				goto __cfg_inherited_error; else
 				continue;
 		}
@@ -432,15 +442,17 @@ kucode_t cfg_process( cfg_session_t *session )
 		cur = cfg_readnext(&c);
 		if ( cur == NULL )
 			CFG_PROCESS_ERROR(KE_SYNTAX);
+		if ( *st.prefix != 0 ) // дополнение префикса к идентификатору
+			cur = qstr(st.prefix, cur);
 		
 		// поиск идентификатора
 		if ( session->qtree != NULL )
 		{
 			sq.id = cur;
-			q = abtree_search(session->qtree, &sq);
+			st.q = abtree_search(session->qtree, &sq);
 		}	else
-			q = NULL;
-		if ( q == NULL )
+			st.q = NULL;
+		if ( st.q == NULL )
 		{
 			if ( session->flags&CFG_STRICT )
 				CFG_PROCESS_ERROR(KE_NOTFOUND) else
@@ -454,27 +466,28 @@ kucode_t cfg_process( cfg_session_t *session )
 		
 		// чтение параметров
 		strcpy(id_name, cur);
-		if ( !cfg_parse_parameters(q != NULL, c, q, &vlist) )
+		if ( !cfg_parse_parameters(st.q != NULL, c, &st) )
 			goto __cfg_inherited_error;
-		if ( (vlist != NULL) && (vlist->datasz > 0) )
+		if ( (st.vlist != NULL) && (st.vlist->datasz > 0) )
 		{
-			if ( vspace == NULL )
+			if ( session->vsp == NULL )
 			{
 				session->vsp = vspace_define("");
 				if ( session->vsp == NULL )
 					goto __cfg_inherited_error;
-				vspace = session->vsp;
+				st.vspace[0] = session->vsp;
+				st.vspace_i = 0;
 			}
-			if ( vspace_addv_l(vspace, id_name, vlist) != KE_NONE )
+			if ( vspace_addv_l(st.vspace[st.vspace_i], id_name, st.vlist) != KE_NONE )
 				goto __cfg_inherited_error;
-			vlist_clear(vlist);
+			vlist_clear(st.vlist);
 		}
 		
 		// если выбран пошаговый режим
 		if ( session->flags&CFG_STEP )
 		{
-			if ( vlist )
-				vlist_undef(vlist);
+			if ( st.vlist )
+				vlist_undef(st.vlist);
 			session->cfg_stepid = id_name;
 			preturn KE_SIGNAL;
 		}
@@ -485,8 +498,8 @@ kucode_t cfg_process( cfg_session_t *session )
 		CFG_PROCESS_ERROR(KE_IO);
 	
 	// освобождаем список значений
-	if ( vlist != NULL )
-		vlist_undef(vlist);
+	if ( st.vlist != NULL )
+		vlist_undef(st.vlist);
 	
 	// если не найдено окончание комментариев до конца файла, то ошибка
 	if ( quota )
@@ -495,12 +508,12 @@ kucode_t cfg_process( cfg_session_t *session )
 	preturn KE_NONE;
 
 __cfg_error:
-	if ( vlist != NULL )
-		vlist_undef(vlist);
+	if ( st.vlist != NULL )
+		vlist_undef(st.vlist);
 	KU_ERRQ(__kucode);
 
 __cfg_inherited_error:
-	if ( vlist != NULL )
-		vlist_undef(vlist);
+	if ( st.vlist != NULL )
+		vlist_undef(st.vlist);
 	preturn KU_GET_ERROR();
 }
