@@ -33,6 +33,9 @@ extern "C" {
 //! Line buffer, maximum line length can be read.
 #define CFG_BUFFER 512
 
+//! Depth of the variable space levels (sections` depth).
+#define CFG_VSPACE_STACK_SIZE 6
+
 //! Session flags.
 enum CFG_FLAGS
 {

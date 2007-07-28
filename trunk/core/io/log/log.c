@@ -33,7 +33,7 @@ kucode_t ku_openlog( ku_log *thelog, const char *file, ku_flag32_t flags )
 	if ( !(flags&LOG_NHEAD) )
 	{
 		fprintf(thelog->logstream, "========\n");
-		ku_plog(thelog, 0, NULL, NULL, gettext("Logging has been started\n"));
+		ku_plog(thelog, 10000, NULL, NULL, gettext("Logging has been started\n"));
 		fflush(thelog->logstream);
 	}
 	
@@ -51,7 +51,7 @@ kucode_t ku_closelog( ku_log *thelog, ku_flag32_t flags )
 	
 	if ( !(flags&LOG_NHEAD) )
 	{
-		ku_plog(thelog, 0, NULL, NULL, gettext("Logging is being stopped\n"));
+		ku_plog(thelog, 10000, NULL, NULL, gettext("Logging is being stopped\n"));
 		fprintf(thelog->logstream, "========\n\n");
 		fflush(thelog->logstream);
 	}

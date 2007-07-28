@@ -134,12 +134,13 @@ kucode_t cfg_query( cfg_session_t *session, const char *rules, ... )
 			char *p;
 			
 			// режим обработки
-			switch ( cur[1] )
+			switch ( *(++cur) )
 			{
 				case 'd':
 				case 'r':
 				{
-					mode = cur[1];
+					mode = *cur;
+					cur++;
 					break;
 				}
 				case 0:
@@ -155,10 +156,10 @@ kucode_t cfg_query( cfg_session_t *session, const char *rules, ... )
 			// после этих процедур указатель cur указывает на
 			// следующий за значением символ
 			errno = 0;
-			l = strtoul(cur+2, &p, 10);
-			if ( errno == ERANGE )
+			l = strtoul(cur, &p, 10);
+			if ( (errno == ERANGE) || ((errno == EINVAL) && l) )
 				CFG_QUERY_ERROR(KE_INVALID);
-			if ( errno == EINVAL )
+			if ( p == cur )
 				comp = len_fmt; else
 			{
 				if ( l > (unsigned long int)len_fmt )
@@ -247,28 +248,75 @@ struct
 {
 	char prefix[CFG_BUFFER];
 	vlist_t *vlist;
-	vspace_t *vspace[6];
+	vspace_t *vspace[CFG_VSPACE_STACK_SIZE];
 	int vspace_i;
 	cfg_query_t *q;
 }	cfg_process_st;
 
 static inline int cfg_parse_directive( cfg_session_t *session, const char *c, cfg_process_st *st )
 {
-	vspace_t space_stack[6];
-	int space_i;
-	char *cur = cfg_readnext(&c);
+	char *cur;
+	pstart();
 	
-	if ( !strcmp(cur, "end") )
+	cur = cfg_readnext(&c);
+	if ( !strcmp(cur, "section") ) // новая секция
 	{
+		char *secname = cfg_readnext(&c);
+		int prfxlen, seclen;
 		
+		if ( *c != 0 )
+			KU_ERRQ_VALUE(KE_SYNTAX, 0); // больше, чем один параметр!
+		
+		// если нет пространства перенеммых, то создаём его
+		if ( session->vsp == NULL )
+		{
+			session->vsp = vspace_define("");
+			if ( session->vsp == NULL )
+				{ preturn 0; }
+			st->vspace[0] = session->vsp;
+			st->vspace_i = 0;
+		}	else
+		{
+			if ( st->vspace_i == CFG_VSPACE_STACK_SIZE-1 )
+				KU_ERRQ_VALUE(KE_FULL, 0); // достигнута максимальная глубина секций
+		}
+		
+		if ( vspace_adds(st->vspace[st->vspace_i], secname) != KE_NONE )
+			{ preturn 0; }
+		st->vspace[st->vspace_i+1] = vspace_gets(st->vspace[st->vspace_i], secname);
+		st->vspace_i++;
+		
+		prfxlen = strlen(st->prefix);
+		seclen = strlen(secname);
+		
+		if ( prfxlen+seclen+2 >= CFG_BUFFER )
+			KU_ERRQ_VALUE(KE_SYNTAX, 0); // переполнение префикса
+		strcpy(st->prefix+prfxlen, secname);
+		prfxlen += seclen;
+		st->prefix[prfxlen] = '/';
+		st->prefix[prfxlen+1] = 0;
 	}	else
-	if ( !strcmp(cur, "section") )
+	if ( !strcmp(cur, "endsec") ) // конец секции
 	{
+		if ( *c != 0 )
+			return 0; // не должно быть параметров!
+		if ( st->vspace_i == 0 )
+			KU_ERRQ_VALUE(KE_EMPTY, 0); // нечего закрывать
 		
+		
+		if ( st->vspace_i-- == 1 )
+		{
+			*st->prefix = 0;
+		}	else
+		{
+			char *p = st->prefix+strlen(st->prefix);
+			while ( *(p--) != '/' );
+			*p = 0;
+		}
 	}	else
-		return 0;
+		KU_ERRQ_VALUE(KE_SYNTAX, 0);
 	
-	return 1;
+	preturn 1;
 }
 
 /*
@@ -278,9 +326,9 @@ static inline int cfg_parse_directive( cfg_session_t *session, const char *c, cf
 */
 static inline int cfg_parse_parameters( int has_rule, const char *c, cfg_process_st *st )
 {
-	//vlist_t *vlist = *vlist_ptr;
 	uint i, len_fmt;
 	char *cur;
+	pstart();
 	
 	if ( has_rule )
 		len_fmt = strlen(st->q->fmt);
@@ -394,7 +442,7 @@ static inline int cfg_parse_parameters( int has_rule, const char *c, cfg_process
 		}
 	}
 	
-	return 1;
+	preturn 1;
 }
 
 #define CFG_PROCESS_ERROR(__ecode) \
@@ -412,6 +460,7 @@ kucode_t cfg_process( cfg_session_t *session )
 	
 	// читаем, пока дают..
 	errno = 0;
+	buf[CFG_BUFFER-1] = 0;
 	while ( fgets(buf, CFG_BUFFER, session->cfgf) != NULL )
 	{
 		cfg_query_t sq;
@@ -419,6 +468,10 @@ kucode_t cfg_process( cfg_session_t *session )
 		char *cur, id_name[CFG_BUFFER];
 		
 		session->cfg_line++;
+		
+		// если было прочитано слишком много..
+		if ( buf[CFG_BUFFER-1] != 0 )
+			CFG_PROCESS_ERROR(KE_SYNTAX);
 		
 		// пропуск комментариев
 		cfg_sksp(&c);
@@ -442,13 +495,13 @@ kucode_t cfg_process( cfg_session_t *session )
 		cur = cfg_readnext(&c);
 		if ( cur == NULL )
 			CFG_PROCESS_ERROR(KE_SYNTAX);
-		if ( *st.prefix != 0 ) // дополнение префикса к идентификатору
-			cur = qstr(st.prefix, cur);
 		
 		// поиск идентификатора
 		if ( session->qtree != NULL )
 		{
-			sq.id = cur;
+			if ( *st.prefix != 0 ) // дополнение префикса к идентификатору
+				sq.id = qstr(st.prefix, cur); else
+				sq.id = cur;
 			st.q = abtree_search(session->qtree, &sq);
 		}	else
 			st.q = NULL;

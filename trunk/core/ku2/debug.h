@@ -44,8 +44,7 @@ if ( expr ) \
 if ( expr ) \
 { \
 	pavoid_debug(__FILE__, __FUNCTION__, __LINE__); \
-	kucode = KE_ASSERT; \
-	return retval; \
+	KU_ERRQ_VALUE(KE_ASSERT, retval); \
 }
 
 #define func_debug_on func_debug(1)
