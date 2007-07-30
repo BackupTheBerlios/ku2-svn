@@ -180,9 +180,9 @@ static vspace_t *vspace_get_leaf( vspace_t *space, const char *path, char **leaf
 	pstart();
 	
 	cur = path;
+	search_space.name = buf;
 	for (;;)
 	{	
-		search_space.name = buf;
 		p = buf;
 		while ( (*cur != '/') && (*cur) )
 		{
@@ -190,9 +190,9 @@ static vspace_t *vspace_get_leaf( vspace_t *space, const char *path, char **leaf
 			if ( p-buf >= VSPACE_MAX_NODE_LEN )
 				KU_ERRQ_VALUE(KE_FULL, NULL);
 		}
+		*p = 0;
 		if ( *cur == 0 )
 			break;
-		*p = 0;
 		cur++;
 	
 		space = abtree_search(space->spaces, &search_space);
@@ -200,7 +200,7 @@ static vspace_t *vspace_get_leaf( vspace_t *space, const char *path, char **leaf
 			KU_ERRQ_VALUE(KE_NOTFOUND, NULL);
 	}
 	
-	*leaf = search_space.name;
+	*leaf = buf;
 	preturn space;
 }
 

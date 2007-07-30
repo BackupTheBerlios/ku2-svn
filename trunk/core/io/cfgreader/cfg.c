@@ -396,11 +396,8 @@ static inline int cfg_parse_parameters( int has_rule, const char *c, cfg_process
 				}
 				case VAL_BOOLEAN:
 				{
-					if ( (strcmp(cur, "yes") && strcmp(cur, "true")) == 0 )
-						ret.i = 1; else
-							if ( (strcmp(cur, "no") && strcmp(cur, "false")) == 0 )
-								ret.i = 0; else
-									KU_ERRQ_VALUE(KE_SYNTAX, 0);
+					if ( ku_strtobool(cur, &ret.i) != KE_NONE )
+						KU_ERRQ_VALUE(KE_SYNTAX, 0);
 					if ( (st->q->mode == 0) || (st->q->mode == 'r') )
 						*((int*)st->q->ptr[i]) = ret.i;
 					break;

@@ -168,6 +168,17 @@ kucode_t ku_strtoulong( const char *str, unsigned long int *i );
 */
 kucode_t ku_strtodouble( const char *str, double *i );
 
+//! Convert string to boolean/int.
+/*!
+	Converts string to boolean/int.
+	\param str String to be converted.
+	\param i Integer (1/0) to be saved to.
+	\retval KE_NONE No errors.
+	\retval KE_INVALID Invalid boolean.
+	\sa ku_strtoint(), ku_strtouint() and ku_strtolong().
+*/
+kucode_t ku_strtobool( const char *str, int *i );
+
 //! Get the power of 10.
 /*!
 	Gets the power of 10.

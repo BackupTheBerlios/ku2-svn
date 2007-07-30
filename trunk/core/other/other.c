@@ -105,7 +105,7 @@ kucode_t ku_strtoint( const char *str, int *i )
 	old_errno = errno;
 	errno = 0;
 	res = strtol(str, &ep, 10);
-	if ( errno || (*ep != 0) || (res < INT_MIN) || (res > INT_MAX) )
+	if ( errno || (*ep != 0) || (ep == str) || (res < INT_MIN) || (res > INT_MAX) )
 	    KU_ERRQ(KE_INVALID);
 	*i = res;
 	errno = old_errno;
@@ -123,7 +123,7 @@ kucode_t ku_strtouint( const char *str, unsigned int *i )
 	old_errno = errno;
 	errno = 0;
 	res = strtoul(str, &ep, 10);
-	if ( errno || (*ep != 0) || (res > UINT_MAX) )
+	if ( errno || (*ep != 0) || (ep == str) || (res > UINT_MAX) )
 	    KU_ERRQ(KE_INVALID);
 	*i = res;
 	errno = old_errno;
@@ -141,7 +141,7 @@ kucode_t ku_strtolong( const char *str, long int *i )
 	old_errno = errno;
 	errno = 0;
 	res = strtol(str, &ep, 10);
-	if ( errno || (*ep != 0) )
+	if ( errno || (*ep != 0) || (ep == str) )
 	    KU_ERRQ(KE_INVALID);
 	*i = res;
 	errno = old_errno;
@@ -159,7 +159,7 @@ kucode_t ku_strtoulong( const char *str, unsigned long int *i )
 	old_errno = errno;
 	errno = 0;
 	res = strtoul(str, &ep, 10);
-	if ( errno || (*ep != 0) )
+	if ( errno || (*ep != 0) || (ep == str) )
 	    KU_ERRQ(KE_INVALID);
 	*i = res;
 	errno = old_errno;
@@ -177,12 +177,22 @@ kucode_t ku_strtodouble( const char *str, double *i )
 	old_errno = errno;
 	errno = 0;
 	res = strtod(str, &ep);
-	if ( errno || (*ep != 0) )
+	if ( errno || (*ep != 0) || (ep == str) )
 	    KU_ERRQ(KE_INVALID);
 	*i = res;
 	errno = old_errno;
 
 	preturn KE_NONE;
+}
+
+kucode_t ku_strtobool( const char *str, int *i )
+{
+	if ( (strcmp(str, "yes") && strcmp(str, "true")) == 0 )
+		*i = 1; else
+			if ( (strcmp(str, "no") && strcmp(str, "false")) == 0 )
+				*i = 0; else
+					KU_ERRQ(KE_INVALID);
+	return KE_NONE;
 }
 
 uint ku_pow10ui( uint pow )
