@@ -168,6 +168,15 @@ kucode_t ku_strtoulong( const char *str, unsigned long int *i );
 */
 kucode_t ku_strtodouble( const char *str, double *i );
 
+//! Get the power of 10.
+/*!
+	Gets the power of 10.
+	\param pow The exponent of power of 10.
+	\return The power of 10.
+	\note \ref kucode is not affected.
+*/
+uint ku_pow10ui( uint pow );
+
 #ifdef __cplusplus
 }
 #endif

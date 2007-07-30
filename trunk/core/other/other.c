@@ -184,3 +184,11 @@ kucode_t ku_strtodouble( const char *str, double *i )
 
 	preturn KE_NONE;
 }
+
+uint ku_pow10ui( uint pow )
+{
+	uint val = 1;
+	while ( pow-- )
+		val *= 10;
+	return val;
+}
