@@ -1,0 +1,24 @@
+#!/bin/bash
+#	Update the Kane Utilities 2 (multimedia) stats.
+
+echo Updating stats for Kane Utilities 2 multimedia...
+for ifile in `grep ^\#FILES: $0 | sed s/^\#FILES://`; do
+	cp -f ${ifile}.pre $ifile &&
+	grep ^\#RULE: $0 | sed s/^\#RULE:// | 
+	(
+		while read S_IN S_OUT; do
+			sed s/$S_IN/$S_OUT/ $ifile > ${ifile}.tmp &&
+			mv ${ifile}.tmp $ifile
+		done
+	)
+done
+
+chmod a+x makerpm
+
+#	Files and rules for stat changing.
+#FILES: ku2mm.h ku2mm.pc ku2mm.spec makerpm
+
+#RULE: __st_VER_MAJ 1
+#RULE: __st_VER_MIN 3
+#RULE: __st_RELEASE 0
+#RULE: __st_PREFIX \\/usr

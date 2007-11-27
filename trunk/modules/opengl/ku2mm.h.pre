@@ -1,0 +1,28 @@
+/*
+		ku2mm.h
+		Sun Nov 25 16:26:32 2007
+
+	This file is the part of Kane Utilities 2.
+	See licencing agreement in a root direcory for more details.
+	http://developer.berlios.de/projects/ku2/
+
+	Copyright, 2007
+		J. Anton (Jeļkins Antons) aka Kane
+		kane@mail.berlios.de
+*/
+
+#ifndef KU__KU2MM_H__
+#define KU__KU2MM_H__
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define KU2MM_VER_MAJOR __st_VER_MAJ
+#define KU2MM_VER_MINOR __st_VER_MIN
+#define KU2MM_VER_PATCH __st_RELEASE
+#define KU2MM_VERSION KU2MM_VER_MAJOR.KU2MM_VER_MINOR.KU2MM_VER_PATCH
+
+#ifdef __cplusplus
+}
+#endif
+#endif

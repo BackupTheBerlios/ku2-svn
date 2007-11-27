@@ -16,7 +16,7 @@
 
 #include "io/log/log.h"
 #include "dp/resmanager/res.h"
-#include "gfx/gfx.h"
+//#include "gfx/gfx.h"
 #include "gui/gui.h"
 
 #define BUTTON_UD_NORM 1

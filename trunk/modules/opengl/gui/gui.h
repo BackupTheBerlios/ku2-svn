@@ -12,8 +12,6 @@
 
 	Functions for GUI management.
 	\author J. Anton
-	\date Mon Nov 13 18:49:31 2006
-	\version 1.0.1
 */
 
 #ifndef KU__GUI_H__
@@ -35,6 +33,8 @@ extern "C" {
 
 #define GUI_PROJ_X(_x, _w) (((float)GUI_PROJ_WIDTH)/(_w)*(_x)+GUI_PROJ_LEFT)
 #define GUI_PROJ_Y(_y, _h) (((float)GUI_PROJ_HEIGHT)/(_h)*(_y)-GUI_PROJ_BOTTOM)
+
+#define GUI_LOG_ACTIVITIES
 
 //! GUI object.
 typedef

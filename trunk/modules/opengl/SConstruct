@@ -1,16 +1,14 @@
 #
-#	SConstruct file for Kane Utilities 2
+#	SConstruct file for Kane Utilities 2 (multimedia)
+#		J. Anton, Copyright 2006+
 #
-#	Sat Nov 11 13:57:52 2006
-#		J. Anton, Copyright 2006
-#
+
+import os
 
 ###
 #	Initialisation
 ##
-env = Environment(CPPPATH = [".", "#core"])
-mm_defines = []
-com_defines = []
+env = Environment(CPPPATH = ["."])
 
 ###
 #	System settings
@@ -30,17 +28,19 @@ if env["PLATFORM"] == "win32" and (sysset == "vc" or sysset == "auto"):
 	sdl_includes = ["C:\Devel\Microsoft Visual Studio 8\VC\include\SDL"]
 elif env["PLATFORM"] == "win32" and sysset == "mingw":
 	env.Tool("mingw")
-	env.Append(CCFLAGS = ["-Wall"])
+	env.Append(CCFLAGS = ["-Wall", "-Wextra", "-Werror-implicit-function-declaration"],
+		CPPDEFINES = ["POSIX", "_REENTRANT", "_GNU_SOURCE"])
 	debug_ccflags = ["-g"]
 	release_ccflags = ["-O2"]
 	release_linkflags = ["-s"]
 	sdl_includes = ["C:\Devel\MSYS\mingw\include\SDL"]
 elif env["PLATFORM"] == "posix" and sysset == "auto":
-	env.Append(CCFLAGS = ["-Wall"])
+	env.Append(CCFLAGS = ["-Wall", "-Wextra", "-Werror-implicit-function-declaration"],
+		CPPDEFINES = ["POSIX", "_REENTRANT", "_GNU_SOURCE"],
+		CPPPATH = ["/usr/include/SDL"])
 	debug_ccflags = ["-g"]
 	release_ccflags = ["-O2"]
 	release_linkflags = ["-s"]
-	sdl_includes = ["/usr/include/SDL"]
 else:
 	print "Unsupported platform: " + env["PLATFORM"] + " (" + sysset + ")"
 	Exit()
@@ -76,14 +76,9 @@ if not conf.CheckCHeader("time.h"):
 
 #	Headers for OPENGL module:
 if not conf.CheckCHeader("nvidia/GL/gl.h"):
-	mm_defines += ["NO_NVIDIA_GL_H"]
+	env.Append(CPPDEFINES = ["NO_NVIDIA_GL_H"])
 	if not conf.CheckCHeader("GL/gl.h"):
-		mm_defines += ["NO_GL_H"]
-
-#	Headers for COM module:
-if env["PLATFORM"] == "win32":
-	if not conf.CheckCHeader("winsock2"):
-		com_defines += ["NO_WINSOCK2_H"]
+		env.Append(CPPDEFINES = ["NO_GL_H"])
 env = conf.Finish()
 
 ###
@@ -113,16 +108,26 @@ else:
 #	Possible add-ons:
 #		gettext - use libintl support
 ###
-use = ARGUMENTS.get("use", "")
-notuse = ARGUMENTS.get("notuse", "")
-if "gettext" in use and not "gettext" in notuse:
+enable = ARGUMENTS.get("enable", "")
+disable = ARGUMENTS.get("disable", "")
+if "gettext" in enable and not "gettext" in disable:
 	env.Append(CPPDEFINES = ["USE_GETTEXT"])
 
 ###
-#	Kane Utilities 2 SDL/OpenGL GUI and multimedia module
+#	Module externa, requests (including KU2 core)
 ###
-mm_sources = Split("""
-	gfx/gfx.c
+env.ParseConfig("pkg-config --cflags --libs ku2")
+
+###
+#	Getting the install root and prefix
+###
+install_root = ARGUMENTS.get("root", "/")
+install_prefix = ARGUMENTS.get("prefix", "/usr/")
+
+###
+#	Kane Utilities 2 SDL/OpenGL GUI and multimedia module sources and includes
+###
+sources = Split("""
 	gfx/image.c
 	gfx/font.c
 	gui/gui.c
@@ -132,11 +137,27 @@ mm_sources = Split("""
 	widgets/textline.c
 	""")
 
-env4mm = env.Copy()
-env4mm.Append(CPPPATH = sdl_includes, CPPDEFINES = mm_defines)
+includes = Split("""
+	ku2mm.h
+	gui/gui.h
+	gfx/font.h
+	gfx/image.h
+	widgets/button.h
+	widgets/frame.h
+	widgets/textline.h
+	widgets/texed.h
+	""")
 
-ku2mm = env4mm.Library("ku2mm", mm_sources)
+###
+#	Building and Installing
+###
+ku2mm = env.Library("ku2mm", sources)
 
-
+env.Alias("install", install_root+install_prefix)
+env.Install(install_root+install_prefix+"/lib/", ku2mm)
+env.Install(install_root+install_prefix+"/lib/pkgconfig/", File("ku2mm.pc"))
+for c_inc in includes:
+	c_inc_f = File(c_inc)
+	env.Install(install_root+install_prefix+"/include/ku2/mm/"+os.path.dirname(c_inc_f.path), c_inc_f)
 
 Default(ku2mm)

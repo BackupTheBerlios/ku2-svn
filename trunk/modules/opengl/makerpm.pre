@@ -1,0 +1,10 @@
+#!/bin/bash
+
+svn export . ku2mm-__st_VER_MAJ.__st_VER_MIN-__st_RELEASE &&
+cp ku2mm.h ku2mm-__st_VER_MAJ.__st_VER_MIN-__st_RELEASE &&
+(
+	tar -jcf /usr/src/redhat/SOURCES/ku2mm-__st_VER_MAJ.__st_VER_MIN-__st_RELEASE.tar.bz2 \
+		ku2mm-__st_VER_MAJ.__st_VER_MIN-__st_RELEASE &&
+	rpmbuild -ba --target=i686 ku2mm.spec
+	rm -rf ku2mm-__st_VER_MAJ.__st_VER_MIN-__st_RELEASE
+)

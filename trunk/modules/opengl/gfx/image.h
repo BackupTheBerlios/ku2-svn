@@ -1,10 +1,15 @@
-/***************************************************************************
- *            image.h
- *
- *  Mon Oct 23 17:54:01 2006
- *  Copyright  2006  J. Anton
- *  kane@mail.berlios.de
- ****************************************************************************/
+/*
+		image.h
+		Sun Nov 25 16:57:17 2007
+
+	This file is the part of Kane Utilities 2.
+	See licencing agreement in a root direcory for more details.
+	http://developer.berlios.de/projects/ku2/
+
+	Copyright, 2007
+		J. Anton (Jeļkins Antons) aka Kane
+		kane@mail.berlios.de
+*/
 
 /*!
 	\file
@@ -12,8 +17,6 @@
 
 	Functions for image control.
 	\author J. Anton
-	\date Mon Oct 23 17:54:43 2006
-	\version 1.0.0
 */
 
 #ifndef KU__IMAGE_H__
@@ -37,6 +40,26 @@ struct
 		h;			//!< Image height.
 	void *pixels;	//!< Pixel data.
 }	gfx_image_t;
+
+//! Draw an image.
+/*!
+	Draws and image \a src on \a dst.
+	\param src Source image.
+	\param dst Image, where to draw the source image.
+	\param mode Drawing mode.
+	\param x Destination \a x.
+	\param y Destination \a y.
+	\param _x Source \a x.
+	\param _y Source \a y.
+	\param _w Source image width.
+	\param _h Source image height.
+	\retval KE_NONE No error.
+	\retval KE_EXTERNAL \b SDL_BlitSurface() has failed.
+	\note If \a _w is zero then the whole width is copied. \n
+	If \a _h is zero then the whole height is copied. \n
+	if \a dst is \e NULL then the source image is copied on the screen.
+*/
+kucode_t gfx_draw( gfx_image_t *src, int x, int y );
 
 gfx_image_t *gfx_img_fromSDL( SDL_Surface *src );
 

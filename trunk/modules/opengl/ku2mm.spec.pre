@@ -1,0 +1,89 @@
+#
+#		RPM 'spec` file for Kane Utilities 2 (multimedia)
+#				J. Anton, Copyright 2007
+#
+
+%define ku_ver __st_VER_MAJ.__st_VER_MIN
+%define ku_rel __st_RELEASE
+
+%define ku_broot /tmp/ku2mm
+%define ku_prefix __st_PREFIX
+
+%define ku_debug 0
+%define ku_with_doc 1
+%define ku_with_gettext 1
+
+Name:			kaneutil2mm
+Version:		%{ku_ver}
+Release:		%{ku_rel}
+Summary:		Simple GUI and multimedia module for using with KU2
+Url:			http://developer.berlios.de/projects/ku2/
+Group:			Development
+License:		LGPL
+
+Requires:		glibc
+BuildRequires:	scons, glibc-headers, kaneutil2
+%if %{ku_with_doc}
+BuildRequires:	doxygen
+%endif
+
+BuildRoot:		%{ku_broot}
+Source:			ku2mm-%{ku_ver}-%{ku_rel}.tar.bz2
+
+%description
+Simple GUI and multimedia module for using with KU2. This package contents
+wrappers and utilities for working with fonts, images and user interface.
+
+###
+#	Preparation
+###
+%prep
+%setup -n ku2mm-%{ku_ver}-%{ku_rel}
+
+###
+#	Building
+###
+%build
+bash udstats
+
+%if %{ku_debug}
+%define scons_mode mode=debug
+%else
+%define scons_mode mode=release
+%endif
+
+%if %{ku_with_gettext}
+%define scons_enable enable=gettext
+%else
+%define scons_enable disable=gettext
+%endif
+
+%if %{ku_with_doc}
+doxygen Doxyfile
+%endif
+
+scons -Q %{scons_mode} %{scons_enable}
+
+###
+#	Installation
+###
+%install
+scons -Q %{scons_mode} %{scons_enable} root=%{ku_broot} prefix=%{ku_prefix} install
+rm -f `find %{ku_broot} -name ".sconsign"`
+
+%if %{ku_with_doc}
+mkdir -p %{ku_broot}/%{ku_prefix}/doc/ku2mm-%{ku_ver}-%{ku_rel}/
+cp -R docs/html/ %{ku_broot}/%{ku_prefix}/doc/ku2mm-%{ku_ver}-%{ku_rel}/
+%endif
+
+%files
+%{ku_prefix}/lib/libku2mm.a
+%{ku_prefix}/lib/pkgconfig/ku2mm.pc
+%{ku_prefix}/include/ku2/mm
+
+%if %{ku_with_doc}
+%{ku_prefix}/doc/ku2mm-%{ku_ver}-%{ku_rel}
+%endif
+
+%clean
+rm -rf %{ku_broot}

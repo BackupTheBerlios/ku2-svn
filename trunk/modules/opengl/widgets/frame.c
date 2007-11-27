@@ -15,7 +15,7 @@
 #include "ku2/gettext.h"
 #include "io/log/log.h"
 #include "dp/resmanager/res.h"
-#include "gfx/gfx.h"
+//#include "gfx/gfx.h"
 #include "gui/gui.h"
 
 kucode_t frame_init( gui_obj_t *obj )

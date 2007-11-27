@@ -15,7 +15,7 @@
 #include "dp/resmanager/res.h"
 
 #include "texed.h"
-#include "gfx/gfx.h"
+//#include "gfx/gfx.h"
 #include "gui/gui.h"
 
 #define TEXED_UD_TEXT 1

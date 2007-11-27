@@ -1,10 +1,15 @@
-/***************************************************************************
- *            font.h
- *
- *  Sat Sep  9 14:39:31 2006
- *  Copyright  2006  J. Anton
- *  kane@mail.berlios.de
- ****************************************************************************/
+/*
+		font.h
+		Sun Nov 25 17:13:59 2007
+
+	This file is the part of Kane Utilities 2.
+	See licencing agreement in a root direcory for more details.
+	http://developer.berlios.de/projects/ku2/
+
+	Copyright, 2007
+		J. Anton (Jeļkins Antons) aka Kane
+		kane@mail.berlios.de
+*/
 
 /*!
 	\file
@@ -12,8 +17,6 @@
 
 	Functions for font management operations.
 	\author J. Anton
-	\date Sat Sep 9 14:40:56 2006
-	\version 1.1.0
 */
 
 #ifndef KU__GFX_FONT_H__

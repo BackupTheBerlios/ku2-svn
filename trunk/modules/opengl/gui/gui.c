@@ -26,7 +26,7 @@
 #include "other/other.h"
 
 //! Comparing function.
-static int gui_compf( void *obj1, void *obj2 )
+static int gui_compf( const void *obj1, const void *obj2 )
 {
 	return (int*)obj1-(int*)obj2;
 }
@@ -92,115 +92,114 @@ static int gui_lrx,	//!< Real X of the found object.
 kucode_t gui_init( uint w, uint h )
 {
 	pstart();
-
+	
 	gui_objects = abtree_create(gui_compf, 0);
 	if ( gui_objects == NULL )
-		return kucode;
-
+		{ preturn KU_GET_ERROR(); }
+	
 	gui_w = w;
 	gui_h = h;
-
+	
 	obj_root = NULL;
 	obj_mon = NULL;
 	obj_mdown = NULL;
 	obj_focus = NULL;
-
-	pstop();
-	return KE_NONE;
+	
+	preturn KE_NONE;
 }
 
 kucode_t gui_halt( void )
 {
 	pstart();
-
+	
 	abtree_free(gui_objects, gui_freef);
-
-	pstop();
-	return KE_NONE;
+	
+	preturn KE_NONE;
 }
 
 gui_obj_t *gui_obj_create( gui_load_f initf, uint widget_sz, ku_flag32_t flags )
 {
 	gui_obj_t *obj;
 	pstart();
-
+	
 	obj = dmalloc(sizeof(gui_obj_t)+widget_sz);
 	if ( obj == NULL )
-	{
-		kucode = KE_MEMORY;
-		return NULL;
-	}
-
+		KU_ERRQ_VALUE(KE_MEMORY, NULL);
+	
 	obj->parent = NULL;
 	obj->children = NULL;
 	obj->status = GUI_NOTLOADED;
 	obj->flags = flags;
 	obj->updated = 0;
 	obj->widget_sz = widget_sz;
-
+	
 	obj->initf = initf;
 	obj->destroyf = NULL;
-
+	
 	obj->load = \
 	obj->uload = \
 	obj->enable = \
 	obj->disable = \
 	obj->hide = \
 	obj->update = NULL;
-
+	
 	obj->dim = NULL;
-
+	
 	obj->set = \
 	obj->get = NULL;
-
+	
 	obj->mon = \
 	obj->moff = \
 	obj->mdown = \
 	obj->mup = NULL;
-
+	
 	obj->kdown = \
 	obj->kup = NULL;
-
+	
 	obj->defocus = NULL;
-
+	
 	obj->draw = NULL;
-
+	
 	obj->widget = (int8_t*)obj+sizeof(gui_obj_t);
-
+	
 	if ( initf(obj) != KE_NONE )
 	{
 		dfree(obj);
-		return NULL;
+		preturn NULL;
 	}
-
+	
 	if ( abtree_ins(gui_objects, obj) != KE_NONE )
 	{
-		obj->destroyf(obj);
+		if ( obj->destroyf )
+			obj->destroyf(obj);
 		dfree(obj);
-		return NULL;
+		preturn NULL;
 	}
-
+	
 	obj->id = gui_lastid++;
-
-	pdebug("Object '%s` %u is created!\n", (char*)obj->widget, obj->id);
-	pstop();
-	return obj;
+	
+	#ifdef GUI_LOG_ACTIVITIES
+	plogfn_i("GUI", "Object '%s` %u is created!\n", (char*)obj->widget, obj->id);
+	#endif
+	preturn obj;
 }
 
 kucode_t gui_obj_delete( gui_obj_t *obj )
 {
 	static int recursion_lvl = 0;
 	pstart();
-
+	
+	ku_avoid( obj == NULL );
+	
 	recursion_lvl++;
-
+	
 	// выгружаем подобъект
 	gui_ch_status(obj, GUI_NOTLOADED);
-
+	
 	// удаляем подобъект
 	if ( obj->destroyf )
 		obj->destroyf(obj);
-
+	
 	// удаляем потомков
 	if ( obj->children )
 	{
@@ -209,96 +208,108 @@ kucode_t gui_obj_delete( gui_obj_t *obj )
 				while ( !dl_list_offside(obj->children) );
 		dl_list_free(obj->children, NULL);
 	}
-
+	
 	// исключаем из потомков предка
 	if ( (recursion_lvl == 1) && obj->parent )
 	{
 		gui_excl_from_parent(obj);
 	}
-
+	
 	// удаляем из списка объектов
 	abtree_rem(gui_objects, obj, NULL);
-
-	pdebug("Object '%s` %u is deleted!\n", (char*)obj->widget, obj->id);
+	
+	#ifdef GUI_LOG_ACTIVITIES
+	plogfn_i("GUI", "Object '%s` %u is deleted!\n", (char*)obj->widget, obj->id);
+	#endif
+	
 	dfree(obj);
 	recursion_lvl--;
-
-	pstop();
-	return KE_NONE;
+	
+	preturn KE_NONE;
 }
 
 void gui_root( gui_obj_t *obj )
 {
 	pstart();
-
+	
 	obj_root = obj;
 	obj_mon = NULL;
 	obj_mdown = NULL;
 	obj_focus = NULL;
-
-	pdebug("Object '%s` %u became a root!\n", obj ? (char*)obj->widget : "NULL", obj ? obj->id : -1);
+	
+	#ifdef GUI_LOG_ACTIVITIES
+	plogfn_i("GUI", "Object '%s` %u became a root!\n", obj ? (char*)obj->widget : "NULL", obj ? obj->id : (uint)-1);
+	#endif
 	pstop();
 }
 
 kucode_t gui_move( gui_obj_t *obj, int x, int y )
 {
 	pstart();
-
+	
+	ku_avoid( obj == NULL );
+	
 	obj->x = x;
 	obj->y = y;
-
-	pdebug("Object '%s` %u was moved!\n", (char*)obj->widget, obj->id);
-	pstop();
-	return KE_NONE;
+	
+	#ifdef GUI_LOG_ACTIVITIES
+	plogfn_i("GUI", "Object '%s` %u was moved!\n", (char*)obj->widget, obj->id);
+	#endif
+	preturn KE_NONE;
 }
 
 kucode_t gui_resize( gui_obj_t *obj, int w, int h )
 {
 	pstart();
-
+	
+	ku_avoid( obj == NULL );
+	
 	obj->width = w;
 	obj->height = h;
-
+	
 	if ( obj->dim && (obj->dim(obj) != KE_NONE) )
-		return kucode;
-
-	pdebug("Object '%s` %u was resized!\n", (char*)obj->widget, obj->id);
-	pstop();
-	return KE_NONE;
+		{ preturn KU_GET_ERROR(); }
+	
+	#ifdef GUI_LOG_ACTIVITIES
+	plogfn_i("GUI", "Object '%s` %u was resized!\n", (char*)obj->widget, obj->id);
+	#endif
+	preturn KE_NONE;
 }
 
 kucode_t gui_ch_host( gui_obj_t *obj, gui_obj_t *host )
 {
 	pstart();
-
-	ku_avoid( obj->parent == host );
-
+	
+	ku_avoid( (obj == NULL) || (obj->parent == host) );
+	
 	if ( host )
 		if ( gui_ins_to_children(host, obj) != KE_NONE )
-			return kucode;
-
+			{ preturn KU_GET_ERROR(); }
+	
 	if ( obj->parent )
 		gui_excl_from_parent(obj);
 	obj->parent = host;
-
-	pdebug("Object '%s` %u changed host!\n", (char*)obj->widget, obj->id);
-	pstop();
-	return KE_NONE;
+	
+	#ifdef GUI_LOG_ACTIVITIES
+	plogfn_i("GUI", "Object '%s` %u changed host!\n", (char*)obj->widget, obj->id);
+	#endif
+	preturn KE_NONE;
 }
 
 kucode_t gui_focus( gui_obj_t *obj )
 {
 	pstart();
-
-	ku_avoid( obj == obj_focus );
-
+	
+	ku_avoid( (obj == NULL) || (obj == obj_focus) );
+	
 	if ( obj_focus && obj_focus->defocus && (obj_focus->defocus(obj_focus) == GUIE_CRITICAL) )
-		return kucode;
+		{ preturn KU_GET_ERROR(); }
 	obj_focus = obj;
-
-	pdebug("Object '%s` %u has become focused!\n", (char*)obj->widget, obj->id);
-	pstop();
-	return KE_NONE;
+	
+	#ifdef GUI_LOG_ACTIVITIES
+	plogfn_i("GUI", "Object '%s` %u has become focused!\n", (char*)obj->widget, obj->id);
+	#endif
+	preturn KE_NONE;
 }
 
 kucode_t gui_set( gui_obj_t *obj, int parcnt, ... )
@@ -307,11 +318,11 @@ kucode_t gui_set( gui_obj_t *obj, int parcnt, ... )
 	int i, param;
 	void *data;
 	pstart();
-
-	ku_avoid( parcnt <= 0 );
-
+	
+	ku_avoid( (obj == NULL) || (parcnt <= 0) );
+	
 	va_start(ap, parcnt);
-
+	
 	if ( obj->set )
 	{
 		for ( i = 0; i < parcnt; i++ )
@@ -321,7 +332,7 @@ kucode_t gui_set( gui_obj_t *obj, int parcnt, ... )
 			if ( obj->set(obj, param, data) != KE_NONE )
 			{
 				va_end(ap);
-				return kucode;
+				preturn KU_GET_ERROR();
 			}
 		}
 		if ( obj->update && (obj->status > GUI_NOTLOADED) )
@@ -331,10 +342,9 @@ kucode_t gui_set( gui_obj_t *obj, int parcnt, ... )
 		va_end(ap);
 		KU_ERRQ(KE_INVALID);
 	}
-
+	
 	va_end(ap);
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t gui_get( gui_obj_t *obj, int parcnt, ... )
@@ -343,11 +353,11 @@ kucode_t gui_get( gui_obj_t *obj, int parcnt, ... )
 	int i, param;
 	void *data;
 	pstart();
-
-	ku_avoid( parcnt <= 0 );
-
+	
+	ku_avoid( (obj == NULL) || (parcnt <= 0) );
+	
 	va_start(ap, parcnt);
-
+	
 	if ( obj->get )
 	{
 		for ( i = 0; i < parcnt; i++ )
@@ -357,7 +367,7 @@ kucode_t gui_get( gui_obj_t *obj, int parcnt, ... )
 			if ( obj->get(obj, param, data) != KE_NONE )
 			{
 				va_end(ap);
-				return kucode;
+				preturn KU_GET_ERROR();
 			}
 		}
 	}	else
@@ -365,16 +375,17 @@ kucode_t gui_get( gui_obj_t *obj, int parcnt, ... )
 		va_end(ap);
 		KU_ERRQ(KE_INVALID);
 	}
-
+	
 	va_end(ap);
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status )
 {
 	pstart();
-
+	
+	ku_avoid( obj == NULL );
+	
 	if ( obj->status != status )
 	switch ( status )
 	{
@@ -382,7 +393,7 @@ kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status )
 		{
 			// выгрузить объект
 			if ( obj->uload && (obj->uload(obj) != KE_NONE) )
-				return kucode;
+				{ preturn KU_GET_ERROR(); }
 			break;
 		}
 		case GUI_ENABLED:
@@ -392,40 +403,39 @@ kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status )
 			if ( obj->status == GUI_NOTLOADED )
 			{
 				if ( obj->load && (obj->load(obj) != KE_NONE) )
-					return kucode;
+					{ preturn KU_GET_ERROR(); }
 			}
 			if ( obj->enable && (obj->enable(obj) != KE_NONE) )
-				return kucode;
+				{ preturn KU_GET_ERROR(); }
 			break;
 		}
 		case GUI_DISABLED:
 		{
 			// сделать объект недоступным, но видимым
 			if ( obj->disable && (obj->disable(obj) != KE_NONE) )
-				return kucode;
+				{ preturn KU_GET_ERROR(); }
 			break;
 		}
 		case GUI_HIDDEN:
 		{
 			// скрыть объект
 			if ( obj->hide && (obj->hide(obj) != KE_NONE) )
-				return kucode;
+				{ preturn KU_GET_ERROR(); }
 		}
 	}
-
+	
 	obj->status = status;
-
-	pstop();
-	return KE_NONE;
+	
+	preturn KE_NONE;
 }
 
 static kucode_t gui_obj_draw( gui_obj_t *obj, int x, int y )
 {
 	pstart();
-
+	
 	if ( obj->draw(obj, obj->x+x, obj->y+y) != KE_NONE )
-		return kucode;
-
+		{ preturn KU_GET_ERROR(); }
+	
 	if ( obj->children )
 	{
 		if ( dl_list_first(obj->children) == KE_NONE )
@@ -433,44 +443,46 @@ static kucode_t gui_obj_draw( gui_obj_t *obj, int x, int y )
 			do
 			{
 				if ( gui_obj_draw(dl_list_next(obj->children), obj->x+x, obj->y+y) != KE_NONE )
-					return kucode;
+					{ preturn KU_GET_ERROR(); }
 			}	while ( !dl_list_offside(obj->children) );
 		}
 	}
-
-	pstop();
-	return KE_NONE;
+	
+	preturn KE_NONE;
 }
 
 kucode_t gui_draw( void )
 {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	//glFrustum(GUI_PROJ_LEFT, -GUI_PROJ_LEFT, \
+	/*
+	glFrustum(GUI_PROJ_LEFT, -GUI_PROJ_LEFT, \
 		GUI_PROJ_BOTTOM, -GUI_PROJ_BOTTOM, 0.1, 2);
+	*/
 	glOrtho(-4, 4, -3, 3, 1, -1);
 	glMatrixMode(GL_MODELVIEW);
 
 	if ( obj_root )
-		return gui_obj_draw(obj_root, 0, 0); else
-		return KE_NONE;
+		{ preturn gui_obj_draw(obj_root, 0, 0); }
+	
+	preturn KE_NONE;
 }
 
 static inline gui_obj_t *gui_search_by_coord( int x, int y )
 {
 	/*static gui_obj_t *last_obj = NULL;*/
 	gui_obj_t *obj;
-
+	
 	/*if ( last_obj && !last_obj->children && \
 		(last_obj->x <= x) && (last_obj->x+last_obj->width >= x) && \
 		(last_obj->y <= y) && (last_obj->y+last_obj->height >= y) )
 		return last_obj;*/
-
+	
 	obj = obj_root;
 	if ( (!obj) || (obj->status == GUI_HIDDEN) || (obj->x > x) || \
 		(obj->x+obj->width < x) || (obj->y > y) || (obj->y+obj->height < y ) )
-		return NULL;
-
+		{ preturn NULL; }
+	
 	gui_lrx = obj->x;
 	gui_lry = obj->y;
 	while ( obj->children && (obj->children->size > 0) )
@@ -489,11 +501,11 @@ static inline gui_obj_t *gui_search_by_coord( int x, int y )
 				break;
 			}
 			if  ( dl_list_offside(obj->children) )
-				return /*last_obj = */obj;
+				{ preturn /*last_obj = */obj; }
 		}
 	}
-
-	return /*last_obj = */obj;
+	
+	preturn /*last_obj = */obj;
 }
 
 gui_event_st gui_process( SDL_Event *event )
@@ -501,7 +513,7 @@ gui_event_st gui_process( SDL_Event *event )
 	gui_obj_t *obj;
 	gui_event_st status[2] = { GUIE_LEAVE, GUIE_LEAVE };
 	pstart();
-
+	
 	switch ( event->type )
 	{
 		case SDL_MOUSEMOTION:
@@ -558,7 +570,6 @@ gui_event_st gui_process( SDL_Event *event )
 			break;
 		}
 	}
-
-	pstop();
-	return MINint(status[0], status[1]);
+	
+	preturn MINint(status[0], status[1]);
 }

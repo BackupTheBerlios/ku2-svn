@@ -1,0 +1,11 @@
+prefix=__st_PREFIX
+
+version=__st_VER_MAJ.__st_VER_MIN.__st_RELEASE
+include_dir=${prefix}/include/ku2/mm
+lib_dir=${prefix}/lib
+
+Name: Kane Utilities 2 GUI and multimedia
+Description: Simple GUI and multimedia module for using with KU2
+Version: ${version}
+Libs: -L${lib_dir} -lku2
+Cflags: -I${include_dir}
