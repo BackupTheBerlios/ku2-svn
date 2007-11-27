@@ -1,6 +1,6 @@
 #
 #	SConstruct file for Kane Utilities 2 (core)
-#		J. Anton, Copyright 2007
+#		J. Anton, Copyright 2006+
 #
 
 import os
@@ -27,12 +27,14 @@ if env["PLATFORM"] == "win32" and (sysset == "vc" or sysset == "auto"):
 	release_linkflags = []
 elif env["PLATFORM"] == "win32" and sysset == "mingw":
 	env.Tool("mingw")
-	env.Append(CCFLAGS = ["-Wall", "-Wextra"])
+	env.Append(CCFLAGS = ["-Wall", "-Wextra", "-Werror-implicit-function-declaration"],
+		CPPDEFINES = ["POSIX", "_REENTRANT", "_GNU_SOURCE"])
 	debug_ccflags = ["-g3", "-ggdb3", "-pg", "-dm"]
 	release_ccflags = ["-O2"]
 	release_linkflags = ["-s"]
 elif env["PLATFORM"] == "posix" and sysset == "auto":
-	env.Append(CCFLAGS = ["-Wall", "-Wextra", "-Werror-implicit-function-declaration"])
+	env.Append(CCFLAGS = ["-Wall", "-Wextra", "-Werror-implicit-function-declaration"],
+		CPPDEFINES = ["POSIX", "_REENTRANT", "_GNU_SOURCE"])
 	debug_ccflags = ["-g3", "-ggdb3", "-pg"]
 	release_ccflags = ["-O2"]
 	release_linkflags = ["-s"]
@@ -143,13 +145,14 @@ includes = Split("""
 	ds/abtree/abtree.h
 	ds/list/list.h
 	dp/resmanager/res.h
+	dp/var/vlist.h
 	dp/var/var.h
 	dp/var/vspace.h
 	other/other.h
 	io/cfgreader/cfg.h
 	io/dialogue/dialogue.h
 	io/log/log.h
-""")
+	""")
 
 ###
 #	Building and Installing
