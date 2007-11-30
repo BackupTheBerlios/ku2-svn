@@ -33,9 +33,11 @@ enum LOG_FLAGS
 	LOG_ZFL = 0,	//!< Zero flag.
 	LOG_DEFAULT = 1,
 					//!< Make the created stream as default log destination.
-	LOG_NHEAD = 2,	//!< No header and footer of the logging session.
+	LOG_NDEFAULT = 2,
+					//!< Override the default LOG_DEFAULT for ku_closelog().
+	LOG_NHEAD = 4,	//!< No header and footer of the logging session.
 	
-	LOG_FLUSH = 4	//!< Flush the stream after every write.
+	LOG_FLUSH = 8	//!< Flush the stream after every write.
 };
 
 //! The log.
@@ -72,7 +74,7 @@ kucode_t ku_closelog( ku_log *thelog, ku_flag32_t flags );
 	Writes all buffered data to the disk.
 	\sa openlog(), closelog() and plog().
 */
-kucode_t ku_toutchlog( ku_log *thelog );
+kucode_t ku_touchlog( ku_log *thelog );
 
 //! Print a log message.
 /*!

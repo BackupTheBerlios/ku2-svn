@@ -17,7 +17,7 @@
 #include "ku2/debug.h"
 #include "ku2/gettext.h"
 
-ku_log *deflog;
+static ku_log *deflog = NULL;
 
 kucode_t ku_openlog( ku_log *thelog, const char *file, ku_flag32_t flags )
 {
@@ -29,7 +29,7 @@ kucode_t ku_openlog( ku_log *thelog, const char *file, ku_flag32_t flags )
 	
 	if ( flags&LOG_DEFAULT )
 		deflog = thelog;
-
+	
 	if ( !(flags&LOG_NHEAD) )
 	{
 		fprintf(thelog->logstream, "========\n");
@@ -49,14 +49,14 @@ kucode_t ku_closelog( ku_log *thelog, ku_flag32_t flags )
 	if ( thelog == NULL )
 		thelog = deflog;
 	
-	if ( !(flags&LOG_NHEAD) )
+	if ( !((flags&LOG_NHEAD) || (thelog->flags&LOG_NHEAD)) )
 	{
 		ku_plog(thelog, 10000, NULL, NULL, gettext("Logging is being stopped\n"));
 		fprintf(thelog->logstream, "========\n\n");
 		fflush(thelog->logstream);
 	}
 	
-	if ( thelog->flags&LOG_DEFAULT )
+	if ( (thelog->flags&LOG_DEFAULT) && !(flags&LOG_NDEFAULT) )
 		deflog = NULL;
 	
 	if ( fclose(thelog->logstream) != 0 )
@@ -65,11 +65,17 @@ kucode_t ku_closelog( ku_log *thelog, ku_flag32_t flags )
 	preturn KE_NONE;
 }
 
-kucode_t ku_toutchlog( ku_log *thelog )
+kucode_t ku_touchlog( ku_log *thelog )
 {
 	if ( thelog == NULL )
-		thelog = deflog;
-	fflush(thelog->logstream);
+	{
+		if ( deflog == NULL )
+			fflush(stdout); else
+			fflush(deflog->logstream);
+	}	else
+	{
+		fflush(thelog->logstream);
+	}
 	return KE_NONE;
 }
 
@@ -78,10 +84,19 @@ void ku_plog( ku_log *thelog, uint16_t code, const char *function, const char *i
 	va_list ap;
 	time_t t;
 	struct tm *tm;
+	ku_log stdoutlog;
 	time(&t);
 	
 	if ( thelog == NULL )
-		thelog = deflog;
+	{
+		if ( deflog == NULL )
+		{
+			thelog = &stdoutlog;
+			thelog->logstream = stdout;
+			thelog->flags = LOG_ZFL;
+		}	else
+			thelog = deflog;
+	}
 	
 	tm = localtime(&t);
 	
@@ -102,16 +117,19 @@ void ku_plog( ku_log *thelog, uint16_t code, const char *function, const char *i
 		fflush(thelog->logstream);
 	
 	#ifdef DEBUG_LOG
-	printf("=== LOG === [%.2d.%.2d.%.4d %.2d:%.2d:%.2d] ", \
-		tm->tm_mday, tm->tm_mon+1, tm->tm_year+1900, \
-		tm->tm_hour, tm->tm_min, tm->tm_sec);
-	if ( code <= 9999 )
-		printf("[%.4u] ", code);
-	if ( info != NULL )
-		printf("[%s] ", info);
-	if ( function != NULL )
-		printf("[%s] ", function);
-	vprintf(fmt, ap);
+	if ( thelog != &stdoutlog )
+	{
+		printf("=== LOG === [%.2d.%.2d.%.4d %.2d:%.2d:%.2d] ", \
+			tm->tm_mday, tm->tm_mon+1, tm->tm_year+1900, \
+			tm->tm_hour, tm->tm_min, tm->tm_sec);
+		if ( code <= 9999 )
+			printf("[%.4u] ", code);
+		if ( info != NULL )
+			printf("[%s] ", info);
+		if ( function != NULL )
+			printf("[%s] ", function);
+		vprintf(fmt, ap);
+	}
 	#endif
 	
 	va_end(ap);
