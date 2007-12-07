@@ -1,10 +1,16 @@
-/***************************************************************************
- *            abtree.c
- *
- *  Fri Aug 25 20:27:03 2006
- *  Copyright  2006  J. Anton
- *  kane@mail.berlios.de
- ****************************************************************************/
+/*
+		abtree.c
+		Fri Aug 25 20:27:03 2006
+		Fri Dec  7 15:02:57 2007
+
+	This file is the part of Kane Utilities 2.
+	See licencing agreement in a root direcory for more details.
+	http://developer.berlios.de/projects/ku2/
+
+	Copyright, 2007
+		J. Anton (Jeļkins Antons) aka Kane
+		kane@mail.berlios.de
+*/
 
 #include "ds/abtree/abtree.h"
 #include "ku2/debug.h"
@@ -139,7 +145,7 @@ static void ab_rotate_right( tree_t *tree, tree_node_t *node )
 	pstop();
 }
 
-tree_t *abtree_create( ku_comp_f func, ku_flag32_t flags UNUSED )
+tree_t *abtree_create( ku_comp_f func, UNUSED_VAR(ku_flag32_t flags) )
 {
 	tree_t *tree;
 	pstart();
@@ -279,6 +285,10 @@ kucode_t abtree_ins( tree_t *tree, const void *data )
 kucode_t abtree_replace( tree_t *tree, const void *odata, const void *ndata,
 						ku_act_f freef )
 {
+	DO_NOT_USE(tree);
+	DO_NOT_USE(odata);
+	DO_NOT_USE(ndata);
+	DO_NOT_USE(freef);
 	pstart();
 	preturn KE_NONE;
 }

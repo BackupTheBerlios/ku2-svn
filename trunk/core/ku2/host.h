@@ -18,8 +18,6 @@
 	Host computer system specific parameters. OS definitions, compiller
 	definitions, etc.
 	\author J. Anton
-	\date Mon May 21 18:54:56 2007
-	\version 1.6.0
 */
 
 #ifndef KU__HOST_H__
@@ -28,11 +26,13 @@
 extern "C" {
 #endif
 
+#define DO_NOT_USE( __var ) (void)__var
+
 //! Declare the variable or the function as unused.
 #ifdef __GNUC__
-#define UNUSED __attribute__((unused))
+#define UNUSED_VAR( __var ) __var __attribute__((unused))
 #else
-#define UNUSED
+#define UNUSED_VAR( __var ) __var
 #endif
 
 //! Declare the function as DLL exportable.
