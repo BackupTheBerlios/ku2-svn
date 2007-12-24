@@ -22,8 +22,8 @@ static kucode_t res_uload( res_t *res )
 {
 	res->data = res->type->control(NULL, RES_ULOAD, res->data);
 	if ( res->data != NULL )
-		KU_ERRQ(KE_EXTERNAL);
-
+		return KU_SET_ERROR(KE_EXTERNAL);
+	
 	return KE_NONE;
 }
 
@@ -68,11 +68,11 @@ kucode_t res_init( void )
 	pstart();
 
 	if ( (reses = abtree_create(res_cmpf, 0)) == NULL )
-		preturn kucode;
+		KU_ERRQ_PASS();
 	if ( (restypes = abtree_create(res_type_cmpf, 0)) == NULL )
 	{
-		abtree_free(reses, NULL);
-		preturn kucode;
+		KU_WITHOUT_ERROR(abtree_free(reses, NULL));
+		KU_ERRQ_PASS();
 	}
 	
 	preturn KE_NONE;
@@ -82,9 +82,11 @@ kucode_t res_halt( void )
 {
 	pstart();
 	
-	abtree_free(reses, res_freef);
-	abtree_free(restypes, res_type_freef);
-
+	KU_WITHOUT_ERROR_START();
+		abtree_free(reses, res_freef);
+		abtree_free(restypes, res_type_freef);
+	KU_WITHOUT_ERROR_STOP();
+	
 	preturn KE_NONE;
 }
 
@@ -104,7 +106,7 @@ kucode_t res_assign( int type, ku_flag32_t flags, rescontrol_f control )
 	if ( abtree_ins(restypes, rtype) != KE_NONE )
 	{
 		dfree(rtype);
-		preturn kucode;
+		KU_ERRQ_PASS();
 	}
 
 	preturn KE_NONE;
@@ -139,9 +141,9 @@ kucode_t res_add( const char *path, const char *name, int type, void *param,
 	if ( abtree_ins(reses, res) != KE_NONE )
 	{
 		dfree(res);
-		preturn kucode;
+		KU_ERRQ_PASS();
 	}
-
+	
 	preturn KE_NONE;
 }
 
@@ -152,20 +154,15 @@ void *res_access( const char *name )
 	
 	res = res_search(name);
 	if ( res == NULL )
-	{
-		kucode = KE_NOTFOUND;
-		preturn NULL;
-	}
+		KU_ERRQ_VALUE(KE_NOTFOUND, NULL);
 	
 	if ( (res->loadcnt == 0) || (res->type->flags&RESTYPE_UNIQ) )
 	{
 		//	загрузка ресурса
 		res->data = res->type->control(res->path, RES_LOAD, res->param);
 		if ( res->data == NULL )
-		{
-			kucode = KE_EXTERNAL;
-			preturn NULL;
-		}
+			KU_ERRQ_VALUE(KE_EXTERNAL, NULL);
+		
 		res->loadcnt = 1;
 	}	else
 	{
@@ -182,20 +179,15 @@ void *res_access_adv( const char *name, void *param )
 	
 	res = res_search(name);
 	if ( res == NULL )
-	{
-		kucode = KE_NOTFOUND;
-		preturn NULL;
-	}
+		KU_ERRQ_VALUE(KE_NOTFOUND, NULL);
 	
 	if ( (res->loadcnt == 0) || (res->type->flags&RESTYPE_UNIQ) )
 	{
 		//	загрузка ресурса
 		res->data = res->type->control(res->path, RES_LOAD, param);
 		if ( res->data == NULL )
-		{
-			kucode = KE_EXTERNAL;
-			preturn NULL;
-		}
+			KU_ERRQ_VALUE(KE_EXTERNAL, NULL);
+		
 		res->loadcnt = 1;
 	}	else
 	{
@@ -222,7 +214,7 @@ kucode_t res_release( const char *name )
 	{
 		//	выгрузка ресурса
 		if ( res_uload(res) != KE_NONE )
-			preturn kucode;
+			KU_ERRQ_PASS();
 	}
 	res->loadcnt--;
 	

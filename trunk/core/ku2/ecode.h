@@ -48,6 +48,7 @@ enum
 	KE_LIBRARY		//!< External library error.
 }	kucode_t;
 
+#ifdef ALLOW_KUCODE_ACCESS
 //! Contains code of the last error.
 /*!
 	This variable contains the code of the last error
@@ -58,18 +59,31 @@ extern kucode_t kucode;
 
 //! Set the error code.
 #define KU_SET_ERROR( __ecode ) \
-kucode = __ecode;
+kucode = __ecode
 
 //! Get the error code.
 #define KU_GET_ERROR() \
 kucode
 
+#else	// ALLOW_KUCODE_ACCESS
+kucode_t ku_set_error( kucode_t __ecode );
+kucode_t ku_get_error( void );
+
+#define KU_SET_ERROR( __ecode ) \
+ku_set_error(__ecode)
+
+#define KU_GET_ERROR() \
+ku_get_error()
+
+#endif	// ALLOW_KUCODE_ACCESS
+
+//! Return the last error code from the function.
+#define KU_ERRQ_PASS() \
+preturn KU_GET_ERROR()
+
 //! Set the error code and return it from the function.
 #define KU_ERRQ( __ecode ) \
-{ \
-	KU_SET_ERROR(__ecode); \
-	preturn __ecode; \
-}
+preturn (KU_SET_ERROR(__ecode));
 
 //! Set the error code and return the value from the function.
 #define KU_ERRQ_VALUE(__ecode, __value) \
@@ -77,6 +91,10 @@ kucode
 	KU_SET_ERROR(__ecode); \
 	preturn __value; \
 }
+
+#define KU_WITHOUT_ERROR(__call) __call
+#define KU_WITHOUT_ERROR_START()
+#define KU_WITHOUT_ERROR_STOP()
 
 #ifdef __cplusplus
 }

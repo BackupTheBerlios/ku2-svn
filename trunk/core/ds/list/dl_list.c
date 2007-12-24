@@ -18,10 +18,7 @@ list_t *dl_list_create( ku_comp_f func, ku_flag32_t flags __attribute__((unused)
 	
 	ls = (list_t*)dmalloc(sizeof(list_t));
 	if ( ls == NULL )
-	{
-		kucode = KE_MEMORY;
-		return NULL;
-	}
+		KU_ERRQ_VALUE(KE_MEMORY, NULL);
 	
 	ls->size = 0;
 	ls->ptr = NULL;
@@ -180,13 +177,13 @@ kucode_t dl_list_search( list_t *list, void *data )
 	pstart();
 	
 	if ( (cur == NULL) || (list->cmpf == NULL) )
-		return KE_NOTFOUND;
+		preturn KE_NOTFOUND;
 	
 	while ( cur && (list->cmpf(cur->data, data) != 0) )
 		cur = cur->next;
 	
 	if ( cur == NULL )
-		return KE_NOTFOUND;
+		preturn KE_NOTFOUND;
 	
 	list->ptr = cur;
 	

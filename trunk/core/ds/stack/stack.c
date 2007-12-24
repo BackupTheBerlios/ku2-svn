@@ -21,10 +21,7 @@ stack_t *stack_create( uint elements, ku_flag32_t flags __attribute__((unused)))
 	
 	stack = dmalloc(sizeof(stack_t)+sizeof(void*)*elements);
 	if ( stack == NULL )
-	{
-		kucode = KE_MEMORY;
-		preturn NULL;
-	}
+		KU_ERRQ_VALUE(KE_MEMORY, NULL);
 	
 	stack->pos = 0;
 	stack->nodesz = (elements != 0) ? elements : STACK_DEAULT_NODE_SIZE;
@@ -65,10 +62,7 @@ void *stack_pop( stack_t *stack )
 	pstart();
 	
 	if ( stack->pos == 0 )
-	{
-		kucode = KE_EMPTY;
-		preturn NULL;
-	}
+		KU_ERRQ_VALUE(KE_EMPTY, NULL);
 	
 	preturn stack->data[--stack->pos];
 }

@@ -330,8 +330,6 @@ static inline int cfg_parse_parameters( int has_rule, const char *c, cfg_process
 	char *cur;
 	pstart();
 	
-	if ( has_rule )
-		len_fmt = strlen(st->q->fmt);
 	for ( i = 0;; i++ )
 	{
 		// если параметров меньше, чем их обязательное кол-во,
@@ -342,8 +340,12 @@ static inline int cfg_parse_parameters( int has_rule, const char *c, cfg_process
 				KU_ERRQ_VALUE(KE_SYNTAX, 0) else break;
 		}
 		// или если их больше, чем надо..
-		if ( (i >= len_fmt) && has_rule )
-			KU_ERRQ_VALUE(KE_SYNTAX, 0);
+		if ( has_rule )
+		{
+			len_fmt = strlen(st->q->fmt);
+			if ( i >= len_fmt )
+				KU_ERRQ_VALUE(KE_SYNTAX, 0);
+		}
 		c++;
 		
 		// чтение одного параметра

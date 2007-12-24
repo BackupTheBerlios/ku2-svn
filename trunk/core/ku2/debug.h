@@ -24,35 +24,35 @@ extern "C" {
 
 #ifdef DEBUG
 
-void printf_debug( const char *file, const char *func, int line, char *fmt, ... );
-void pavoid_debug( const char *file, const char *func, int line );
-void func_debug( int status );
-void pstart_debug( const char *func );
-void pstop_debug( const char *func );
+void ku_printf_debug( const char *file, const char *func, int line, char *fmt, ... );
+void ku_pavoid_debug( const char *file, const char *func, int line );
+void ku_func_debug( int status );
+void ku_pstart_debug( const char *func );
+void ku_pstop_debug( const char *func );
 
 #define pdebug( m, ... ) \
-printf_debug(__FILE__, __FUNCTION__, __LINE__, m, ##__VA_ARGS__)
+ku_printf_debug(__FILE__, __FUNCTION__, __LINE__, m, ##__VA_ARGS__)
 
 #define ku_avoid( expr ) \
 if ( expr ) \
 { \
-	pavoid_debug(__FILE__, __FUNCTION__, __LINE__); \
+	ku_pavoid_debug(__FILE__, __FUNCTION__, __LINE__); \
 	KU_ERRQ(KE_ASSERT); \
 }
 
 #define ku_avoid_adv( expr, retval ) \
 if ( expr ) \
 { \
-	pavoid_debug(__FILE__, __FUNCTION__, __LINE__); \
+	ku_pavoid_debug(__FILE__, __FUNCTION__, __LINE__); \
 	KU_ERRQ_VALUE(KE_ASSERT, retval); \
 }
 
-#define func_debug_on func_debug(1)
-#define func_debug_off func_debug(0)
+#define func_debug_on ku_func_debug(1)
+#define func_debug_off ku_func_debug(0)
 
-#define pstart() pstart_debug(__FUNCTION__)
-#define pstop() pstop_debug(__FUNCTION__)
-#define preturn pstop_debug(__FUNCTION__); return
+#define pstart() ku_pstart_debug(__FUNCTION__)
+#define pstop() ku_pstop_debug(__FUNCTION__)
+#define preturn return ku_pstop_debug(__FUNCTION__),
 
 #else	//	DEBUG
 

@@ -28,13 +28,13 @@ if env["PLATFORM"] == "win32" and (sysset == "vc" or sysset == "auto"):
 elif env["PLATFORM"] == "win32" and sysset == "mingw":
 	env.Tool("mingw")
 	env.Append(CCFLAGS = ["-Wall", "-Wextra", "-Werror-implicit-function-declaration"],
-		CPPDEFINES = ["POSIX", "_REENTRANT", "_GNU_SOURCE"])
+		CPPDEFINES = ["POSIX", "_GNU_SOURCE"])
 	debug_ccflags = ["-g3", "-ggdb3", "-pg", "-dm"]
 	release_ccflags = ["-O2"]
 	release_linkflags = ["-s"]
 elif env["PLATFORM"] == "posix" and sysset == "auto":
 	env.Append(CCFLAGS = ["-Wall", "-Wextra", "-Werror-implicit-function-declaration"],
-		CPPDEFINES = ["POSIX", "_REENTRANT", "_GNU_SOURCE"])
+		CPPDEFINES = ["POSIX", "_GNU_SOURCE"])
 	debug_ccflags = ["-g3", "-ggdb3", "-pg"]
 	release_ccflags = ["-O2"]
 	release_linkflags = ["-s"]
@@ -98,11 +98,18 @@ else:
 #	Getting list of add-ons to build with.
 #	Possible add-ons:
 #		gettext - use libintl support
+#		kucode - allow to use direct access to error variable
+#		thread_safe - build thread-safe functions
 ###
+def_feat = "thread_safe"
 enable = ARGUMENTS.get("enable", "")
 disable = ARGUMENTS.get("disable", "")
-if "gettext" in enable and not "gettext" in disable:
+if ("gettext" in def_feat or "gettext" in enable) and not "gettext" in disable:
 	env.Append(CPPDEFINES = ["USE_GETTEXT"])
+if ("kucode" in def_feat or "kucode" in enable) and not "kucode" in disable:
+	env.Append(CPPDEFINES = ["ALLOW_KUCODE_ACCESS"])
+if ("thread_safe" in def_feat or "thread_safe" in enable) and not "thread_safe" in disable:
+	env.Append(CPPDEFINES = ["THREAD_SAFE", "_REENTRANT"])
 
 ###
 #	Getting the install root and prefix

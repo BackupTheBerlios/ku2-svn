@@ -23,7 +23,7 @@ static size_t sizes = 0;
 static int ku_func_debug_is_on = 0;
 static uint ku_func_lvl = 0;
 
-void printf_debug( const char *file, const char *func, int line, char *fmt, ... )
+void ku_printf_debug( const char *file, const char *func, int line, char *fmt, ... )
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -32,12 +32,12 @@ void printf_debug( const char *file, const char *func, int line, char *fmt, ... 
 	va_end(ap);
 }
 
-void pavoid_debug( const char *file, const char *func, int line )
+void ku_pavoid_debug( const char *file, const char *func, int line )
 {
 	plog(gettext("Not avoided expression >> %s: %d [%s]\n"), file, line, func);
 }
 
-void *malloc_debug( size_t size )
+void *ku_malloc_debug( size_t size )
 {
 	void *ptr = malloc(size);
 	if ( ptr != NULL )
@@ -51,7 +51,7 @@ void *malloc_debug( size_t size )
 	return ptr;
 }
 
-void free_debug( void *__ptr )
+void ku_free_debug( void *__ptr )
 {
 	free(__ptr);
 	mallocs--;
@@ -60,19 +60,19 @@ void free_debug( void *__ptr )
 	#endif
 }
 
-void memory_stat( void )
+void ku_memory_stat( void )
 {
 	plog(gettext("Memory status:\n" \
 		"\tbytes allocated: %d\n" \
 		"\tblocks: %u.\n"), sizes, mallocs);
 }
 
-void func_debug( int status )
+void ku_func_debug( int status )
 {
 	ku_func_debug_is_on = status;
 }
 
-void pstart_debug( const char *func )
+void ku_pstart_debug( const char *func )
 {
 	if ( ku_func_debug_is_on )
 	{
@@ -84,7 +84,7 @@ void pstart_debug( const char *func )
 	}
 }
 
-void pstop_debug( const char *func )
+void ku_pstop_debug( const char *func )
 {
 	if ( ku_func_debug_is_on )
 	{
@@ -94,4 +94,14 @@ void pstop_debug( const char *func )
 			printf("   ");
 		printf("### <== %s <<<\n", func);
 	}
+}
+
+kucode_t ku_set_error( kucode_t __ecode )
+{
+	return kucode = __ecode;
+}
+
+kucode_t ku_get_error( void )
+{
+	return kucode;
 }

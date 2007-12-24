@@ -27,6 +27,9 @@
 extern "C" {
 #endif
 
+#define KU_INIT()
+#define KU_HALT()
+
 #ifdef DEBUG
 
 #include "ku2/debug.h"
