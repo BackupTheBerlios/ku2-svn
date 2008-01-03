@@ -1,10 +1,15 @@
-/***************************************************************************
- *            gui.c
- *
- *  Fri Jun  2 18:26:00 2006
- *  Copyright  2006  J. Anton
- *  kane@mail.berlios.de
- ****************************************************************************/
+/*
+		gui.c
+		Tue Dec 25 16:04:24 2007
+
+	This file is the part of Kane Utilities 2.
+	See licencing agreement in a root direcory for more details.
+	http://developer.berlios.de/projects/ku2/
+
+	Copyright, 2007
+		J. Anton (Jeļkins Antons) aka Kane
+		kane@mail.berlios.de
+*/
 
 #include <stdarg.h>
 
@@ -61,10 +66,10 @@ static kucode_t gui_ins_to_children( gui_obj_t *parent, gui_obj_t *child )
 	{
 		parent->children = dl_list_create(gui_compf, 0);
 		if ( parent->children == NULL )
-			return kucode;
+			return KU_GET_ERROR();
 	}
 	if ( dl_list_ins_last(parent->children, child) != KE_NONE )
-		return kucode;
+		return KU_GET_ERROR();
 
 	return KE_NONE;
 }
@@ -95,7 +100,7 @@ kucode_t gui_init( uint w, uint h )
 	
 	gui_objects = abtree_create(gui_compf, 0);
 	if ( gui_objects == NULL )
-		{ preturn KU_GET_ERROR(); }
+		KU_ERRQ_PASS();
 	
 	gui_w = w;
 	gui_h = h;
@@ -112,7 +117,7 @@ kucode_t gui_halt( void )
 {
 	pstart();
 	
-	abtree_free(gui_objects, gui_freef);
+	KU_WITHOUT_ERROR(abtree_free(gui_objects, gui_freef));
 	
 	preturn KE_NONE;
 }
@@ -268,7 +273,7 @@ kucode_t gui_resize( gui_obj_t *obj, int w, int h )
 	obj->height = h;
 	
 	if ( obj->dim && (obj->dim(obj) != KE_NONE) )
-		{ preturn KU_GET_ERROR(); }
+		KU_ERRQ_PASS();
 	
 	#ifdef GUI_LOG_ACTIVITIES
 	plogfn_i("GUI", "Object '%s` %u was resized!\n", (char*)obj->widget, obj->id);
@@ -284,7 +289,7 @@ kucode_t gui_ch_host( gui_obj_t *obj, gui_obj_t *host )
 	
 	if ( host )
 		if ( gui_ins_to_children(host, obj) != KE_NONE )
-			{ preturn KU_GET_ERROR(); }
+			KU_ERRQ_PASS();
 	
 	if ( obj->parent )
 		gui_excl_from_parent(obj);
@@ -303,7 +308,7 @@ kucode_t gui_focus( gui_obj_t *obj )
 	ku_avoid( (obj == NULL) || (obj == obj_focus) );
 	
 	if ( obj_focus && obj_focus->defocus && (obj_focus->defocus(obj_focus) == GUIE_CRITICAL) )
-		{ preturn KU_GET_ERROR(); }
+		KU_ERRQ_PASS();
 	obj_focus = obj;
 	
 	#ifdef GUI_LOG_ACTIVITIES
@@ -332,7 +337,7 @@ kucode_t gui_set( gui_obj_t *obj, int parcnt, ... )
 			if ( obj->set(obj, param, data) != KE_NONE )
 			{
 				va_end(ap);
-				preturn KU_GET_ERROR();
+				KU_ERRQ_PASS();
 			}
 		}
 		if ( obj->update && (obj->status > GUI_NOTLOADED) )
@@ -367,7 +372,7 @@ kucode_t gui_get( gui_obj_t *obj, int parcnt, ... )
 			if ( obj->get(obj, param, data) != KE_NONE )
 			{
 				va_end(ap);
-				preturn KU_GET_ERROR();
+				KU_ERRQ_PASS();
 			}
 		}
 	}	else
@@ -393,7 +398,7 @@ kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status )
 		{
 			// выгрузить объект
 			if ( obj->uload && (obj->uload(obj) != KE_NONE) )
-				{ preturn KU_GET_ERROR(); }
+				KU_ERRQ_PASS();
 			break;
 		}
 		case GUI_ENABLED:
@@ -403,24 +408,24 @@ kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status )
 			if ( obj->status == GUI_NOTLOADED )
 			{
 				if ( obj->load && (obj->load(obj) != KE_NONE) )
-					{ preturn KU_GET_ERROR(); }
+					KU_ERRQ_PASS();
 			}
 			if ( obj->enable && (obj->enable(obj) != KE_NONE) )
-				{ preturn KU_GET_ERROR(); }
+				KU_ERRQ_PASS();
 			break;
 		}
 		case GUI_DISABLED:
 		{
 			// сделать объект недоступным, но видимым
 			if ( obj->disable && (obj->disable(obj) != KE_NONE) )
-				{ preturn KU_GET_ERROR(); }
+				KU_ERRQ_PASS();
 			break;
 		}
 		case GUI_HIDDEN:
 		{
 			// скрыть объект
 			if ( obj->hide && (obj->hide(obj) != KE_NONE) )
-				{ preturn KU_GET_ERROR(); }
+				KU_ERRQ_PASS();
 		}
 	}
 	
@@ -434,7 +439,7 @@ static kucode_t gui_obj_draw( gui_obj_t *obj, int x, int y )
 	pstart();
 	
 	if ( obj->draw(obj, obj->x+x, obj->y+y) != KE_NONE )
-		{ preturn KU_GET_ERROR(); }
+		KU_ERRQ_PASS();
 	
 	if ( obj->children )
 	{
@@ -443,7 +448,7 @@ static kucode_t gui_obj_draw( gui_obj_t *obj, int x, int y )
 			do
 			{
 				if ( gui_obj_draw(dl_list_next(obj->children), obj->x+x, obj->y+y) != KE_NONE )
-					{ preturn KU_GET_ERROR(); }
+					KU_ERRQ_PASS();
 			}	while ( !dl_list_offside(obj->children) );
 		}
 	}
@@ -453,17 +458,18 @@ static kucode_t gui_obj_draw( gui_obj_t *obj, int x, int y )
 
 kucode_t gui_draw( void )
 {
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	pstart();
+	//glMatrixMode(GL_PROJECTION);
+	//glLoadIdentity();
 	/*
 	glFrustum(GUI_PROJ_LEFT, -GUI_PROJ_LEFT, \
 		GUI_PROJ_BOTTOM, -GUI_PROJ_BOTTOM, 0.1, 2);
 	*/
-	glOrtho(-4, 4, -3, 3, 1, -1);
-	glMatrixMode(GL_MODELVIEW);
+	//glOrtho(-4, 4, -3, 3, 1, -1);
+	//glMatrixMode(GL_MODELVIEW);
 
 	if ( obj_root )
-		{ preturn gui_obj_draw(obj_root, 0, 0); }
+		preturn gui_obj_draw(obj_root, 0, 0);
 	
 	preturn KE_NONE;
 }

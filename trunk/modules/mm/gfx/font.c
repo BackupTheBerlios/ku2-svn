@@ -14,16 +14,15 @@
 #include <string.h>
 #include <errno.h>
 
-#include "font.h"
-#include "image.h"
-
 #include "ku2/ecode.h"
 #include "ku2/debug.h"
 #include "ku2/gettext.h"
-
 #include "dp/resmanager/res.h"
 #include "io/cfgreader/cfg.h"
 #include "io/log/log.h"
+
+#include "font.h"
+#include "image.h"
 
 gfx_image_t *gfx_font_render( const char *text, gfx_font_t *font, \
 							  gfx_font_style_t style, \
@@ -47,6 +46,10 @@ gfx_image_t *gfx_font_render( const char *text, gfx_font_t *font, \
 		preturn NULL;
 	}
 	
+	#if MM_BACKEND == SDL
+	img = (gfx_image_t*)sdlimg;
+	
+	#elif MM_BACKEND == SDL_OGL
 	img = gfx_img_fromSDL(sdlimg);
 	if ( img == NULL )
 	{
@@ -54,6 +57,7 @@ gfx_image_t *gfx_font_render( const char *text, gfx_font_t *font, \
 		preturn NULL;
 	}
 	SDL_FreeSurface(sdlimg);
+	#endif
 	
 	preturn img;
 }

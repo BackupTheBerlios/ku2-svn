@@ -14,10 +14,12 @@
 #include <string.h>
 #include <errno.h>
 
-#if !defined(NO_NVIDIA_GL_H)
-#include <nvidia/GL/gl.h>
-#else
-#include <GL/gl.h>
+#if MM_BACKEND == SDL_OGL
+	#if !defined(NO_NVIDIA_GL_H)
+	#include <nvidia/GL/gl.h>
+	#else
+	#include <GL/gl.h>
+	#endif
 #endif
 
 #include "SDL.h"
@@ -32,19 +34,64 @@
 #include "io/cfgreader/cfg.h"
 
 #include "image.h"
+#include "gfx.h"
 
+#if MM_BACKEND == SDL_OGL
 extern void glWindowPos2i( int x, int y );
+#endif
 
-kucode_t gfx_image_draw( gfx_image_t *src, int x, int y )
+#if MM_BACKEND == SDL
+kucode_t gfx_img_draw_adv( const gfx_image_t *img, gfx_imgmode_t mode,
+						   int x, int y, int _x, int _y, int _w, int _h )
 {
+	SDL_Rect rs, rd;
 	pstart();
 	
-	glWindowPos2i(x, y);
-	glDrawPixels(src->w, src->h, src->format, GL_UNSIGNED_BYTE, src->pixels);
+	rs.x = _x;
+	rs.y = _y;
+	rs.w = _w;
+	rs.h = _h;
+	if ( rs.w == 0 ) rs.w = img->w;
+	if ( rs.h == 0 ) rs.h = img->h;
+	
+	if ( mode == GFX_IMG_PIECE )
+	{
+		rd.x = x;
+		rd.y = y;
+	}	else
+	{
+		rd.x = x+rs.x;
+		rd.y = y+rs.y;
+	}
+	
+	if ( SDL_BlitSurface((SDL_Surface*)img, &rs, sdl_screen, &rd) != 0 )
+	{
+		plogfn_i("IMAGE", gettext("Failed to draw an image: %s\n"), SDL_GetError());
+		KU_ERRQ(KE_EXTERNAL);
+	}
 	
 	preturn KE_NONE;
 }
 
+kucode_t gfx_img_draw( const gfx_image_t *img, int x, int y )
+{
+	pstart();
+	
+	preturn gfx_img_draw_adv(img, GFX_IMG_PIECE, x, y, 0, 0, 0, 0);
+	
+	//glWindowPos2i(x, y);
+	//glDrawPixels(src->w, src->h, src->format, GL_UNSIGNED_BYTE, src->pixels);
+	
+	//preturn KE_NONE;
+}
+
+void gfx_img_free( gfx_image_t *img )
+{
+	SDL_FreeSurface((SDL_Surface*)img);
+}
+
+#elif MM_BACKEND == SDL_OGL
+#error Not implemented!
 gfx_image_t *gfx_img_fromSDL( SDL_Surface *src )
 {
 	gfx_image_t *img;
@@ -56,7 +103,7 @@ gfx_image_t *gfx_img_fromSDL( SDL_Surface *src )
 		src->pitch*src->h);
 	if ( img == NULL )
 	{
-		plogfn(gettext("Out of memory.\n"));
+		plogfn_i("IMAGE", gettext("Out of memory.\n"));
 		SDL_FreeSurface(src);
 		preturn NULL;
 	}
@@ -94,6 +141,7 @@ gfx_image_t *gfx_img_fromSDL( SDL_Surface *src )
 	
 	preturn img;
 }
+#endif
 
 static void *gfx_img_control( const char *path, rescontrol_t action, void *data )
 {
@@ -111,6 +159,10 @@ static void *gfx_img_control( const char *path, rescontrol_t action, void *data 
 			preturn NULL;
 		}
 		
+		#if MM_BACKEND == SDL
+		img = (gfx_image_t*)sdlimg;
+		
+		#elif MM_BACKEND == SDL_OGL
 		//	создание gfx_image_t
 		img = gfx_img_fromSDL(sdlimg);
 		if ( img == NULL )
@@ -121,6 +173,7 @@ static void *gfx_img_control( const char *path, rescontrol_t action, void *data 
 		
 		//	удаление SDL_Surface
 		SDL_FreeSurface(sdlimg);
+		#endif
 	}	else
 	{
 		dfree(data);

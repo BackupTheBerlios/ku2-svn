@@ -1,10 +1,15 @@
-/***************************************************************************
- *            texted.c
- *
- *  Wed Aug 30 22:45:58 2006
- *  Copyright  2006  J. Anton
- *  kane@mail.berlios.de
- ****************************************************************************/
+/*
+		texed.c
+		Tue Dec 25 16:28:43 2007
+
+	This file is the part of Kane Utilities 2.
+	See licencing agreement in a root direcory for more details.
+	http://developer.berlios.de/projects/ku2/
+
+	Copyright, 2007
+		J. Anton (Jeļkins Antons) aka Kane
+		kane@mail.berlios.de
+*/
 
 #include <string.h>
 
@@ -23,7 +28,7 @@
 static void texed_ch_state( gui_obj_t *obj, int state )
 {
 	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
-
+	
 	switch ( state )
 	{
 		case TEXED_NORM:
@@ -37,7 +42,7 @@ static void texed_ch_state( gui_obj_t *obj, int state )
 			break;
 		}
 	}
-
+	
 	obj->width = widget->face->w;
 	obj->height = widget->face->h;
 }
@@ -46,62 +51,62 @@ kucode_t texed_init( gui_obj_t *obj )
 {
 	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
 	pstart();
-
+	
 	strcpy(widget->wname, "texed");
-
+	
 	widget->keypress = NULL;
 	widget->back_nor_name = NULL;
 	widget->back_focus_name = NULL;
 	widget->font_name = NULL;
-
+	
 	widget->font_style = GFX_NORMAL;
 	widget->font_r = \
 	widget->font_g = \
 	widget->font_b = 0;
-
+	
 	widget->textlen = -1;
 	widget->textpos = 0;
 	widget->text = NULL;
-
+	
 	obj->destroyf = texed_destroy;
 	obj->load = texed_load;
 	obj->uload = texed_uload;
-
+	
 	obj->set = texed_set;
 	obj->get = texed_get;
-
+	
 	obj->mdown = texed_mdown;
 	obj->kdown = texed_kdown;
 	obj->defocus = texed_defocus;
-
+	
 	obj->draw = texed_draw;
-
-	pstop();
-	return KE_NONE;
+	
+	preturn KE_NONE;
 }
 
 kucode_t texed_destroy( gui_obj_t *obj )
 {
 	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
 	pstart();
-
+	
+	KU_WITHOUT_ERROR_START();
 	if ( obj->status > GUI_NOTLOADED )
 		texed_uload(obj);
-
+	
 	if ( widget->back_nor_name )
 		dfree(widget->back_nor_name);
-
+	
 	if ( widget->back_focus_name )
 		dfree(widget->back_focus_name);
-
+	
 	if ( widget->font_name )
 		dfree(widget->font_name);
-
+	
 	if ( widget->text )
 		dfree(widget->text);
-
-	pstop();
-	return KE_NONE;
+	KU_WITHOUT_ERROR_STOP();
+	
+	KU_ERRQ_BLOCKED();
 }
 
 //	загрузка данных кнопки
@@ -109,17 +114,17 @@ kucode_t texed_load( gui_obj_t *obj )
 {
 	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
 	pstart();
-
+	
 	ku_avoid( obj->status != GUI_NOTLOADED );
-
+	
 	//	загружаем главное изображение, не может быть NULL
 	ku_avoid( widget->back_nor_name == NULL );
 	widget->back_nor = res_access(widget->back_nor_name);
 	if ( widget->back_nor == NULL )
 	{
-		plogfn(gettext("Object %u background '%s` was not loaded: %d\n"), \
-			obj->id, widget->back_nor_name, kucode);
-		return kucode;
+		plogfn_i("TEXED", gettext("Object %u background '%s` was not loaded: %d\n"), \
+			obj->id, widget->back_nor_name, KU_GET_ERROR());
+		KU_ERRQ_PASS();
 	}
 
 	/*
@@ -131,8 +136,10 @@ kucode_t texed_load( gui_obj_t *obj )
 		widget->back_focus = res_access(widget->back_focus_name);
 		if ( widget->back_focus == NULL )
 		{
-			plogfn(gettext("Object %u focused background '%s` was not loaded: %d\n"), \
-				obj->id, widget->back_focus_name, kucode);
+			plogfn_i("TEXED", gettext("Object %u focused background '%s` was not loaded: %d\n"), \
+				obj->id, widget->back_focus_name, KU_GET_ERROR());
+			KU_WITHOUT_ERROR(res_release(widget->back_nor_name));
+			KU_ERRQ_PASS();
 		}
 	}	else
 		widget->back_focus = NULL;
@@ -146,14 +153,30 @@ kucode_t texed_load( gui_obj_t *obj )
 		widget->font = res_access(widget->font_name);
 		if ( widget->font == NULL )
 		{
-			plogfn(gettext("Object %u font '%s` was not loaded: %d\n"), \
-				obj->id, widget->font_name, kucode);
+			plogfn_i("TEXED", gettext("Object %u font '%s` was not loaded: %d\n"), \
+				obj->id, widget->font_name, KU_GET_ERROR());
+			KU_WITHOUT_ERROR_START();
+				res_release(widget->back_nor_name);
+				res_release(widget->back_focus_name);
+			KU_WITHOUT_ERROR_STOP();
+			KU_ERRQ_PASS();
 		}	else
 		//	если установлен текст кнопки..
 		if ( widget->text )
 		{
 			widget->fontface = gfx_font_render(widget->text, widget->font, \
 				widget->font_style, widget->font_r, widget->font_g, widget->font_b);
+			if ( widget->fontface == NULL )
+			{
+				plogfn_i("TEXED", gettext("Object %u text was not rendered: %d\n"),
+						 obj->id, KU_GET_ERROR());
+				KU_WITHOUT_ERROR_START();
+					res_release(widget->back_nor_name);
+					res_release(widget->back_focus_name);
+					res_release(widget->font_name);
+				KU_WITHOUT_ERROR_STOP();
+				KU_ERRQ_PASS();
+			}
 		}	else
 			widget->fontface = NULL;
 	}	else
@@ -161,11 +184,10 @@ kucode_t texed_load( gui_obj_t *obj )
 		widget->font = NULL;
 		widget->fontface = NULL;
 	}
-
+	
 	texed_ch_state(obj, TEXED_NORM);
-
-	pstop();
-	return KE_NONE;
+	
+	preturn KE_NONE;
 }
 
 //	освобождение от загруженных данных
@@ -173,48 +195,61 @@ kucode_t texed_uload( gui_obj_t *obj )
 {
 	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
 	pstart();
-
+	
 	ku_avoid( obj->status == GUI_NOTLOADED );
-
 	ku_avoid( widget->back_nor_name == NULL );
+	
+	KU_WITHOUT_ERROR_START();
 	if ( res_release(widget->back_nor_name) != KE_NONE )
-		plogfn(gettext("Object %u failed to release a background \"%s\": %d\n"), \
-			obj->id, widget->back_nor_name, kucode);
-
+		plogfn_i("TEXED", gettext("Object %u failed to release a background '%s`: %d\n"), \
+			obj->id, widget->back_nor_name, KU_GET_ERROR());
+	
 	if ( widget->back_focus && (res_release(widget->back_focus_name) != KE_NONE) )
-		plogfn(gettext("Object %u failed to release a focused background \"%s\": %d\n"), \
-			obj->id, widget->back_focus_name, kucode);
-
+		plogfn_i("TEXED", gettext("Object %u failed to release a focused background '%s`: %d\n"), \
+			obj->id, widget->back_focus_name, KU_GET_ERROR());
+	
 	if ( widget->font && (res_release(widget->font_name) != KE_NONE) )
-		plogfn(gettext("Object %u failed to release a font \"%s\": %d\n"), \
-			obj->id, widget->font_name, kucode);
-
+		plogfn_i("TEXED", gettext("Object %u failed to release a font '%s`: %d\n"), \
+			obj->id, widget->font_name, KU_GET_ERROR());
+	
 	if ( widget->fontface )
-		dfree(widget->fontface);
-
-	pstop();
-	return KE_NONE;
+		gfx_img_free(widget->fontface);
+	KU_WITHOUT_ERROR_STOP();
+	
+	KU_ERRQ_BLOCKED();
 }
 
 kucode_t texed_update( gui_obj_t *obj )
 {
 	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
+	pstart();
+	
 	if ( obj->updated&TEXED_UD_TEXT )
 	{
+		gfx_image_t *const oldff = widget->fontface;
+		
 		obj->updated &= ~TEXED_UD_TEXT;
-		if ( widget->fontface )
-			dfree(widget->fontface);
+		
 		widget->fontface = gfx_font_render(widget->text, widget->font, \
-				widget->font_style, widget->font_r, widget->font_g, widget->font_b);
+			widget->font_style, widget->font_r, widget->font_g, widget->font_b);
+		if ( widget->fontface == NULL )
+		{
+			plogfn_i("TEXED", gettext("Object %u text was not rendered: %d\n"),
+					 obj->id, KU_GET_ERROR());
+			widget->fontface = oldff;
+			KU_ERRQ_PASS();
+		}	else
+			gfx_img_free(oldff);
 	}
-	return KE_NONE;
+	
+	preturn KE_NONE;
 }
 
 kucode_t texed_set( gui_obj_t *obj, int param, void *data )
 {
 	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
 	pstart();
-
+	
 	switch ( param )
 	{
 		case TEXED_NORM:
@@ -304,16 +339,15 @@ kucode_t texed_set( gui_obj_t *obj, int param, void *data )
 		default:
 			KU_ERRQ(KE_INVALID);
 	}
-
-	pstop();
-	return KE_NONE;
+	
+	preturn KE_NONE;
 }
 
 kucode_t texed_get( gui_obj_t *obj, int param, void *data )
 {
 	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
 	pstart();
-
+	
 	switch ( param )
 	{
 		case TEXED_TEXT:
@@ -377,30 +411,28 @@ kucode_t texed_get( gui_obj_t *obj, int param, void *data )
 		default:
 			KU_ERRQ(KE_INVALID);
 	}*/
-
-	pstop();
-	return KE_NONE;
+	
+	preturn KE_NONE;
 }
 
 gui_event_st texed_mdown( gui_obj_t *obj, int x, int y, int z )
 {
 	//gui_texed_t *const widget = (gui_texed_t*)obj->widget;
 	pstart();
-
+	
 	if ( gui_focus(obj) != KE_NONE )
-		return GUIE_ERROR;
-
+		preturn GUIE_ERROR;
+	
 	texed_ch_state(obj, TEXED_FOCUS);
-
-	pstop();
-	return GUIE_EAT;
+	
+	preturn GUIE_EAT;
 }
 
 gui_event_st texed_kdown( gui_obj_t *obj, char ch )
 {
 	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
 	pstart();
-
+	
 	if ( isalnum(ch) || (ch == ' ') )
 	{
 		if ( widget->textpos < widget->textlen )
@@ -408,7 +440,7 @@ gui_event_st texed_kdown( gui_obj_t *obj, char ch )
 			widget->text[widget->textpos++] = ch;
 			widget->text[widget->textpos] = 0;
 			obj->updated |= TEXED_UD_TEXT;
-			texed_update(obj);
+			KU_WITHOUT_ERROR(texed_update(obj));
 		}
 	}	else
 	if ( ch == SDLK_BACKSPACE )
@@ -417,31 +449,30 @@ gui_event_st texed_kdown( gui_obj_t *obj, char ch )
 		{
 			widget->text[--widget->textpos] = 0;
 			obj->updated |= TEXED_UD_TEXT;
-			texed_update(obj);
+			KU_WITHOUT_ERROR(texed_update(obj));
 		}
 	}
-
-	pstop();
-	return GUIE_EAT;
+	
+	preturn GUIE_EAT;
 }
 
 gui_event_st texed_defocus( gui_obj_t *obj )
 {
+	pstart();
 	texed_ch_state(obj, TEXED_NORM);
-	return GUIE_EAT;
+	preturn GUIE_EAT;
 }
 
 kucode_t texed_draw( gui_obj_t *obj, int x, int y )
 {
 	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
 	pstart();
-
-	if ( gfx_draw(widget->face, x, y) != KE_NONE )
-		return kucode;
-
-	if ( widget->fontface && (gfx_draw(widget->fontface, x+10, y+(widget->face->h-widget->fontface->h)/2) != KE_NONE) )
-		return kucode;
-
-	pstop();
-	return KE_NONE;
+	
+	if ( gfx_img_draw(widget->face, x, y) != KE_NONE )
+		KU_ERRQ_PASS();
+	
+	if ( widget->fontface && (gfx_img_draw(widget->fontface, x+10, y+(widget->face->h-widget->fontface->h)/2) != KE_NONE) )
+		KU_ERRQ_PASS();
+	
+	preturn KE_NONE;
 }

@@ -1,10 +1,15 @@
-/***************************************************************************
- *            frame.c
- *
- *  Wed Aug 30 22:45:29 2006
- *  Copyright  2006  J. Anton
- *  kane@mail.berlios.de
- ****************************************************************************/
+/*
+		frame.c
+		Tue Dec 25 16:03:52 2007
+
+	This file is the part of Kane Utilities 2.
+	See licencing agreement in a root direcory for more details.
+	http://developer.berlios.de/projects/ku2/
+
+	Copyright, 2007
+		J. Anton (Jeļkins Antons) aka Kane
+		kane@mail.berlios.de
+*/
 
 #include <string.h>
 
@@ -15,101 +20,87 @@
 #include "ku2/gettext.h"
 #include "io/log/log.h"
 #include "dp/resmanager/res.h"
-//#include "gfx/gfx.h"
 #include "gui/gui.h"
 
 kucode_t frame_init( gui_obj_t *obj )
 {
 	gui_frame_t *const frame = (gui_frame_t*)obj->widget;
 	pstart();
-
+	
 	strcpy(frame->wname, "frame");
 	frame->background_name = NULL;
 	frame->background = NULL;
-
+	
 	obj->destroyf = frame_destroy;
 	obj->load = frame_load;
 	obj->uload = frame_uload;
-	obj->enable = NULL;
-	obj->disable = NULL;
-	obj->hide = NULL;
-
+	
 	obj->dim = NULL;
-
+	
 	obj->set = frame_set;
 	obj->get = frame_get;
-
-	obj->mon = NULL;
-	obj->moff = NULL;
-	obj->mdown = NULL;
-	obj->mup = NULL;
-
-	obj->kdown = NULL;
-	obj->kup = NULL;
-
+	
 	obj->draw = frame_draw;
-
-	pstop();
-	return KE_NONE;
+	
+	preturn KE_NONE;
 }
 
 kucode_t frame_destroy( gui_obj_t *obj )
 {
 	gui_frame_t *const frame = (gui_frame_t*)obj->widget;
 	pstart();
-
+	
 	if ( obj->status > GUI_NOTLOADED )
 		frame_uload(obj);
-
+	
 	if ( frame->background_name )
 		dfree(frame->background_name);
-
-	pstop();
-	return KE_NONE;
+	
+	preturn KE_NONE;
 }
 
 kucode_t frame_load( gui_obj_t *obj )
 {
 	gui_frame_t *const frame = (gui_frame_t*)obj->widget;
 	pstart();
-
+	
 	ku_avoid( frame->background_name == NULL );
-
+	
 	frame->background = res_access(frame->background_name);
 	if ( frame->background == NULL )
 	{
 		plog(gettext("Object 'frame` %u background '%s` was not loaded: %d\n"), \
-			obj->id, frame->background_name, kucode);
-		return kucode;
+			obj->id, frame->background_name, KU_GET_ERROR());
+		KU_ERRQ_PASS();
 	}
 	obj->width = frame->background->w;
 	obj->height = frame->background->h;
-
-	pstop();
-	return KE_NONE;
+	
+	preturn KE_NONE;
 }
 
 kucode_t frame_uload( gui_obj_t *obj )
 {
 	gui_frame_t *const frame = (gui_frame_t*)obj->widget;
 	pstart();
-
+	
 	ku_avoid( frame->background == NULL );
-
-	if ( res_release(frame->background_name) != KE_NONE )
-		plog(gettext("Note: Object 'frame` %u failed to release " \
-			"a background '%s`: %d\n"), obj->id, frame->background_name, kucode);
-	frame->background = NULL;
-
-	pstop();
-	return KE_NONE;
+	
+	KU_WITHOUT_ERROR_START();
+		if ( res_release(frame->background_name) != KE_NONE )
+			plog(gettext("Note: Object 'frame` %u failed to release " \
+				"a background '%s`: %d\n"), obj->id, frame->background_name, KU_GET_ERROR());
+		frame->background = NULL;
+	KU_WITHOUT_ERROR_STOP();
+	
+	KU_ERRQ_BLOCKED();
 }
 
 kucode_t frame_set( gui_obj_t *obj, int param, void *data )
 {
 	gui_frame_t *const frame = (gui_frame_t*)obj->widget;
 	pstart();
-
+	
 	switch ( param )
 	{
 		case FRAME_BACKGROUND:
@@ -126,17 +117,15 @@ kucode_t frame_set( gui_obj_t *obj, int param, void *data )
 		default:
 			KU_ERRQ(KE_INVALID);
 	}
-
-	pstop();
-	return KE_NONE;
+	
+	preturn KE_NONE;
 }
 
 kucode_t frame_get( gui_obj_t *obj, int param, void *data )
-
 {
 	gui_frame_t *const frame = (gui_frame_t*)obj->widget;
 	pstart();
-
+	
 	switch ( param )
 	{
 		case FRAME_BACKGROUND:
@@ -147,19 +136,17 @@ kucode_t frame_get( gui_obj_t *obj, int param, void *data )
 		default:
 			KU_ERRQ(KE_INVALID);
 	}
-
-	pstop();
-	return KE_NONE;
+	
+	preturn KE_NONE;
 }
 
 kucode_t frame_draw( gui_obj_t *obj, int x, int y )
 {
 	gui_frame_t *const frame = (gui_frame_t*)obj->widget;
 	pstart();
-
-	if ( gfx_draw(frame->background, x, y) != KE_NONE )
-		return kucode;
-
-	pstop();
-	return KE_NONE;
+	
+	if ( gfx_img_draw(frame->background, x, y) != KE_NONE )
+		KU_ERRQ_PASS();
+	
+	preturn KE_NONE;
 }

@@ -25,18 +25,18 @@ extern "C" {
 #ifdef DEBUG
 #include <stdlib.h>
 
-void *malloc_debug( size_t size );
-void free_debug( void *__ptr );
-void memory_stat( void );
+void *ku_malloc_debug( size_t size );
+void ku_free_debug( void *__ptr );
+void ku_memory_stat( void );
 
 #define dmalloc( size ) \
-malloc_debug(size)
+ku_malloc_debug(size)
 
 #define dfree( ptr ) \
-free_debug(ptr)
+ku_free_debug(ptr)
 
 #define dlogmemstat() \
-memory_stat()
+ku_memory_stat()
 
 #else	//	DEBUG
 #include <stdlib.h>

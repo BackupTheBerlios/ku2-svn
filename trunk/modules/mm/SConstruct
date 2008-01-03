@@ -8,7 +8,7 @@ import os
 ###
 #	Initialisation
 ##
-env = Environment(CPPPATH = ["."])
+env = Environment(CPPPATH = ["."], CPPDEFINES = ["MM_BACKEND=SDL"])
 
 ###
 #	System settings
@@ -128,14 +128,16 @@ install_prefix = ARGUMENTS.get("prefix", "/usr/")
 #	Kane Utilities 2 SDL/OpenGL GUI and multimedia module sources and includes
 ###
 sources = Split("""
+	gfx/gfx.c
 	gfx/image.c
 	gfx/font.c
 	gui/gui.c
 	widgets/frame.c
 	widgets/button.c
 	widgets/texed.c
-	widgets/textline.c
 	""")
+#	widgets/textline.c
+#	""")
 
 includes = Split("""
 	ku2mm.h

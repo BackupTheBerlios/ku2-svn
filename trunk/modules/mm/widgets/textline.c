@@ -231,7 +231,7 @@ kucode_t text_draw( gui_obj_t *obj, int x, int y )
 	gui_text_t *const widget = (gui_text_t*)obj->widget;
 	pstart();
 
-	gfx_draw(widget->face, x, y);
+	gfx_img_draw(widget->face, x, y);
 
 	pstop();
 	return KE_NONE;

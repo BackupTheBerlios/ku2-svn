@@ -30,6 +30,9 @@ extern "C" {
 #include "ku2/ecode.h"
 #include "ku2/types.h"
 
+#if MM_BACKEND == SDL
+typedef SDL_Surface gfx_image_t;
+#elif MM_BACKEND == SDL_OGL
 //! Image.
 typedef
 struct
@@ -37,9 +40,32 @@ struct
 	uint32_t format;
 					//!< GL pixel format.
 	uint w,			//!< Image width.
-		h;			//!< Image height.
+		 h;			//!< Image height.
 	void *pixels;	//!< Pixel data.
 }	gfx_image_t;
+#endif
+
+//! Drawing mode.
+typedef
+enum
+{
+	//! Sprite mode.
+	/*!
+	Selected area of the source image will be drawn
+	at \a x and \a y coordinates in the destination
+	image.
+	*/
+	GFX_IMG_PIECE,
+	
+	//! Image mode.
+	/*!
+	Selected area of the source image will be drawn
+	there, where it were if the whole source image
+	was drawn at \a x and \a y coordinates in the
+	destination image.
+	*/
+	GFX_IMG_REAL
+}	gfx_imgmode_t;
 
 //! Draw an image.
 /*!
@@ -59,8 +85,9 @@ struct
 	If \a _h is zero then the whole height is copied. \n
 	if \a dst is \e NULL then the source image is copied on the screen.
 */
-kucode_t gfx_draw( gfx_image_t *src, int x, int y );
+kucode_t gfx_img_draw( const gfx_image_t *img, int x, int y );
 
+void gfx_img_free( gfx_image_t *img );
 gfx_image_t *gfx_img_fromSDL( SDL_Surface *src );
 
 //! Assign an image resource type and add resources from file.

@@ -92,6 +92,9 @@ preturn (KU_SET_ERROR(__ecode));
 	preturn __value; \
 }
 
+#define KU_ERRQ_BLOCKED() \
+KU_ERRQ_PASS()
+
 #define KU_WITHOUT_ERROR(__call) __call
 #define KU_WITHOUT_ERROR_START()
 #define KU_WITHOUT_ERROR_STOP()
