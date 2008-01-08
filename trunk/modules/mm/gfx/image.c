@@ -36,11 +36,8 @@
 #include "image.h"
 #include "gfx.h"
 
-#if MM_BACKEND == SDL_OGL
 extern void glWindowPos2i( int x, int y );
-#endif
 
-#if MM_BACKEND == SDL
 kucode_t gfx_img_draw_adv( const gfx_image_t *img, gfx_imgmode_t mode,
 						   int x, int y, int _x, int _y, int _w, int _h )
 {
@@ -64,19 +61,20 @@ kucode_t gfx_img_draw_adv( const gfx_image_t *img, gfx_imgmode_t mode,
 		rd.y = y+rs.y;
 	}
 	
-	if ( SDL_BlitSurface((SDL_Surface*)img, &rs, sdl_screen, &rd) != 0 )
+	if ( SDL_BlitSurface((SDL_Surface*)img, &rs, gfx_screen, &rd) != 0 )
 	{
 		plogfn_i("IMAGE", gettext("Failed to draw an image: %s\n"), SDL_GetError());
 		KU_ERRQ(KE_EXTERNAL);
 	}
 	
+	gfx_needs_update = 1;
 	preturn KE_NONE;
 }
 
 kucode_t gfx_img_draw( const gfx_image_t *img, int x, int y )
 {
 	pstart();
-	
+	_
 	preturn gfx_img_draw_adv(img, GFX_IMG_PIECE, x, y, 0, 0, 0, 0);
 	
 	//glWindowPos2i(x, y);
@@ -90,13 +88,13 @@ void gfx_img_free( gfx_image_t *img )
 	SDL_FreeSurface((SDL_Surface*)img);
 }
 
-#elif MM_BACKEND == SDL_OGL
-#error Not implemented!
 gfx_image_t *gfx_img_fromSDL( SDL_Surface *src )
 {
 	gfx_image_t *img;
 	uint oldy, newy;
 	pstart();
+	
+	preturn (gfx_image_t*)src;
 	
 	SDL_LockSurface(src);
 	img = dmalloc(sizeof(gfx_image_t)+ \
@@ -138,10 +136,10 @@ gfx_image_t *gfx_img_fromSDL( SDL_Surface *src )
 			src->pitch);
 	
 	SDL_UnlockSurface(src);
+	SDL_FreeSurface(src);
 	
 	preturn img;
 }
-#endif
 
 static void *gfx_img_control( const char *path, rescontrol_t action, void *data )
 {
@@ -159,10 +157,6 @@ static void *gfx_img_control( const char *path, rescontrol_t action, void *data 
 			preturn NULL;
 		}
 		
-		#if MM_BACKEND == SDL
-		img = (gfx_image_t*)sdlimg;
-		
-		#elif MM_BACKEND == SDL_OGL
 		//	создание gfx_image_t
 		img = gfx_img_fromSDL(sdlimg);
 		if ( img == NULL )
@@ -170,10 +164,6 @@ static void *gfx_img_control( const char *path, rescontrol_t action, void *data 
 			SDL_FreeSurface(sdlimg);
 			preturn NULL;
 		}
-		
-		//	удаление SDL_Surface
-		SDL_FreeSurface(sdlimg);
-		#endif
 	}	else
 	{
 		dfree(data);

@@ -66,7 +66,7 @@ static int res_type_freef( void *rtype )
 kucode_t res_init( void )
 {
 	pstart();
-
+	
 	if ( (reses = abtree_create(res_cmpf, 0)) == NULL )
 		KU_ERRQ_PASS();
 	if ( (restypes = abtree_create(res_type_cmpf, 0)) == NULL )
@@ -98,11 +98,11 @@ kucode_t res_assign( int type, ku_flag32_t flags, rescontrol_f control )
 	rtype = dmalloc(sizeof(restype_t));
 	if ( rtype == NULL )
 		KU_ERRQ(KE_MEMORY);
-
+	
 	rtype->type = type;
 	rtype->flags = flags;
 	rtype->control = control;
-
+	
 	if ( abtree_ins(restypes, rtype) != KE_NONE )
 	{
 		dfree(rtype);

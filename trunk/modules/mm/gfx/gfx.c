@@ -19,21 +19,17 @@
 
 #include "gfx.h"
 
-//#if MM_BACKEND == SDL
-SDL_Surface *sdl_screen;
-//#endif
+SDL_Surface *gfx_screen;
 
 int gfx_updated = 0;
 gfx_resolution_t gfx_resolution;
 
+int gfx_needs_update;
+
 kucode_t gfx_create_window( int width, int height, int bpp, int fullscreen,
 						   gfx_mode_t mode, const char *caption, const char *bar_caption )
 {
-	#if MM_BACKEND == SDL
 	uint32_t flags = 0;
-	#elif MM_BACKEND = SDL_OGL
-	#error Not implemented!
-	#endif
 	const SDL_VideoInfo *vi;
 	char dname[64];
 	pstart();
@@ -60,13 +56,18 @@ kucode_t gfx_create_window( int width, int height, int bpp, int fullscreen,
 			flags |= SDL_DOUBLEBUF;
 			break;
 		}
+		case GFX_OPENGL:
+		{
+			KU_ERRQ(KE_NOIMPLEM);
+			break;
+		}
 	}
 	
 	if ( fullscreen )
 		flags |= SDL_FULLSCREEN;
 	
-	sdl_screen = SDL_SetVideoMode(width, height, bpp, flags);
-	if ( sdl_screen == NULL )
+	gfx_screen = SDL_SetVideoMode(width, height, bpp, flags);
+	if ( gfx_screen == NULL )
 	{
 		plogfn_i("GFX", gettext("Failed to set the video mode: %s\n"), SDL_GetError());
 		KU_ERRQ(KE_EXTERNAL);
@@ -88,4 +89,13 @@ kucode_t gfx_create_window( int width, int height, int bpp, int fullscreen,
 		 vi->blit_fill, vi->video_mem);
 	
 	preturn KE_NONE;
+}
+
+void gfx_screen_update( void )
+{
+	if ( gfx_needs_update )
+	{
+		SDL_Flip(gfx_screen);
+		gfx_needs_update = 0;
+	}
 }

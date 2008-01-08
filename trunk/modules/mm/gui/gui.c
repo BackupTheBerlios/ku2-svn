@@ -476,6 +476,7 @@ kucode_t gui_draw( void )
 
 static inline gui_obj_t *gui_search_by_coord( int x, int y )
 {
+	pstart();
 	/*static gui_obj_t *last_obj = NULL;*/
 	gui_obj_t *obj;
 	

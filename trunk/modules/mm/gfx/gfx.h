@@ -32,8 +32,9 @@ extern "C" {
 typedef
 enum
 {
-	GFX_SOFTWARE,	//!< Software screen.
-	GFX_HARDWARE	//!< Hardware screen.
+	GFX_SOFTWARE,	//!< Software SDL 2D screen.
+	GFX_HARDWARE,	//!< Hardware SDL 2D screen.
+	GFX_OPENGL		//!< Hardware OpenGL screen.
 }	gfx_mode_t;
 
 //! Text alligment.
@@ -57,11 +58,13 @@ enum
 }	gfx_resolution_t;
  
 //! Screen surface.
-extern SDL_Surface *sdl_screen;
+extern SDL_Surface *gfx_screen;
  
 //! The most similar standart mode.
 extern gfx_resolution_t gfx_resolution;
- 
+
+extern int gfx_needs_update;
+
 //! Set a video mode and create a window.
 /*!
 Sets a video mode and, if needed, creates a window.
@@ -79,7 +82,9 @@ Sets a video mode and, if needed, creates a window.
 */
 kucode_t gfx_create_window( int width, int height, int bpp, int fullscreen, \
 						    gfx_mode_t mode, const char *caption, const char *bar_caption );
- 
+
+void gfx_screen_update( void );
+
 //! Draw an image.
 /*!
 Draws and image \a src on \a dst.

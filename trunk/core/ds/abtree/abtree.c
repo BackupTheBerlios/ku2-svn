@@ -208,7 +208,7 @@ kucode_t abtree_clear( tree_t *tree, ku_act_f freef )
 
 kucode_t abtree_ins( tree_t *tree, const void *data )
 {
-	tree_node_t *cur = tree->root;
+	tree_node_t *cur = tree->root;;
 	tree_node_t *p = NULL, *newnode;
 	pstart();
 	

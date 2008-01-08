@@ -16,6 +16,8 @@
 #include "ku2/gettext.h"
 #include "io/log/log.h"
 
+#define KU_FUNC_DEBUG_MAX_LVL 15
+
 kucode_t kucode;
 
 static uint mallocs = 0;
@@ -89,7 +91,12 @@ void ku_pstop_debug( const char *func )
 	if ( ku_func_debug_is_on )
 	{
 		uint i;
-		ku_func_lvl--;
+		if ( ku_func_lvl-- == (uint)-1 )
+		{
+			printf("NEGATIVE LEVEL ERROR ### <== %s <<<\n", func);
+			ku_func_lvl = 0;
+			return;
+		}
 		for ( i = 0; i < ku_func_lvl; i++ )
 			printf("   ");
 		printf("### <== %s <<<\n", func);
