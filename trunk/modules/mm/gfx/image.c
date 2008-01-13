@@ -44,6 +44,8 @@ kucode_t gfx_img_draw_adv( const gfx_image_t *img, gfx_imgmode_t mode,
 	SDL_Rect rs, rd;
 	pstart();
 	
+	ku_avoid(img == NULL);
+	
 	rs.x = _x;
 	rs.y = _y;
 	rs.w = _w;
@@ -145,32 +147,35 @@ static void *gfx_img_control( const char *path, rescontrol_t action, void *data 
 {
 	SDL_Surface *sdlimg;
 	gfx_image_t *img;
-	pstart();
+	pstartp("path = %s, action = %s, data = %p",
+			path,
+			(action == RES_LOAD) ? "load": "unload",
+			data);
 	
 	if ( action == RES_LOAD )
 	{
 		//	загрузка изображения
-		sdlimg = IMG_Load(path);
-		if ( sdlimg == NULL )
+		/*sdl*/img = IMG_Load(path);
+		if ( /*sdl*/img == NULL )
 		{
 			plogfn(gettext("Failed to load an image '%s`: %s\n"), path, IMG_GetError());
 			preturn NULL;
 		}
 		
 		//	создание gfx_image_t
-		img = gfx_img_fromSDL(sdlimg);
+		/*img = gfx_img_fromSDL(sdlimg);
 		if ( img == NULL )
 		{
 			SDL_FreeSurface(sdlimg);
 			preturn NULL;
-		}
+		}*/
 	}	else
 	{
-		dfree(data);
+		gfx_img_free(img);
 		img = NULL;
 	}
 	
-	preturn img;
+	preturnp("img = %p", img) img;
 }
 
 kucode_t gfx_add_image_resources( int resource_type, const char *resfile )

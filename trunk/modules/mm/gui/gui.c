@@ -94,9 +94,11 @@ static int gui_lrx,	//!< Real X of the found object.
 	gui_mdown_rx,	//!< Real X of object, where the mouse button was pressed.
 	gui_mdown_ry;	//!< Real Y of object, where the mouse button was pressed.
 
+static int gui_redraw = 0;
+
 kucode_t gui_init( uint w, uint h )
 {
-	pstart();
+	pstartp("w = %u, h = %u", w, h);
 	
 	gui_objects = abtree_create(gui_compf, 0);
 	if ( gui_objects == NULL )
@@ -192,14 +194,13 @@ gui_obj_t *gui_obj_create( gui_load_f initf, uint widget_sz, ku_flag32_t flags )
 kucode_t gui_obj_delete( gui_obj_t *obj )
 {
 	static int recursion_lvl = 0;
-	pstart();
-	
 	ku_avoid( obj == NULL );
+	pstartp("obj = %p, obj->id = %u", obj, obj->id);
 	
 	recursion_lvl++;
 	
 	// выгружаем подобъект
-	gui_ch_status(obj, GUI_NOTLOADED);
+	//gui_ch_status(obj, GUI_NOTLOADED);
 	
 	// удаляем подобъект
 	if ( obj->destroyf )
@@ -235,7 +236,7 @@ kucode_t gui_obj_delete( gui_obj_t *obj )
 
 void gui_root( gui_obj_t *obj )
 {
-	pstart();
+	pstartp("obj = %p, obj->id = %u", obj, obj ? obj->id : -1);
 	
 	obj_root = obj;
 	obj_mon = NULL;
@@ -250,9 +251,8 @@ void gui_root( gui_obj_t *obj )
 
 kucode_t gui_move( gui_obj_t *obj, int x, int y )
 {
-	pstart();
-	
 	ku_avoid( obj == NULL );
+	pstartp("obj = %p, obj->id = %u", obj, obj->id);
 	
 	obj->x = x;
 	obj->y = y;
@@ -265,7 +265,7 @@ kucode_t gui_move( gui_obj_t *obj, int x, int y )
 
 kucode_t gui_resize( gui_obj_t *obj, int w, int h )
 {
-	pstart();
+	pstartp("obj = %p, obj->id = %u", obj, obj->id);
 	
 	ku_avoid( obj == NULL );
 	
@@ -283,7 +283,7 @@ kucode_t gui_resize( gui_obj_t *obj, int w, int h )
 
 kucode_t gui_ch_host( gui_obj_t *obj, gui_obj_t *host )
 {
-	pstart();
+	pstartp("obj = %p, obj->id = %u", obj, obj->id);
 	
 	ku_avoid( (obj == NULL) || (obj->parent == host) );
 	
@@ -303,7 +303,7 @@ kucode_t gui_ch_host( gui_obj_t *obj, gui_obj_t *host )
 
 kucode_t gui_focus( gui_obj_t *obj )
 {
-	pstart();
+	pstartp("obj = %p, obj->id = %u", obj, obj->id);
 	
 	ku_avoid( (obj == NULL) || (obj == obj_focus) );
 	
@@ -322,7 +322,7 @@ kucode_t gui_set( gui_obj_t *obj, int parcnt, ... )
 	va_list ap;
 	int i, param;
 	void *data;
-	pstart();
+	pstartp("obj = %p, obj->id = %u", obj, obj->id);
 	
 	ku_avoid( (obj == NULL) || (parcnt <= 0) );
 	
@@ -348,6 +348,8 @@ kucode_t gui_set( gui_obj_t *obj, int parcnt, ... )
 		KU_ERRQ(KE_INVALID);
 	}
 	
+	gui_redraw_later();
+	
 	va_end(ap);
 	preturn KE_NONE;
 }
@@ -357,7 +359,7 @@ kucode_t gui_get( gui_obj_t *obj, int parcnt, ... )
 	va_list ap;
 	int i, param;
 	void *data;
-	pstart();
+	pstartp("obj = %p, obj->id = %u", obj, obj->id);
 	
 	ku_avoid( (obj == NULL) || (parcnt <= 0) );
 	
@@ -387,7 +389,7 @@ kucode_t gui_get( gui_obj_t *obj, int parcnt, ... )
 
 kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status )
 {
-	pstart();
+	pstartp("obj = %p, obj->id = %u", obj, obj->id);
 	
 	ku_avoid( obj == NULL );
 	
@@ -428,28 +430,34 @@ kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status )
 				KU_ERRQ_PASS();
 		}
 	}
-	
+	_
 	obj->status = status;
-	
+	_
 	preturn KE_NONE;
 }
 
 static kucode_t gui_obj_draw( gui_obj_t *obj, int x, int y )
 {
-	pstart();
+	pstartp("obj = %p, obj->id = %u", obj, obj->id);
 	
+	ku_avoid( obj == NULL );
+	_
+	pdebug("%d: obj->draw = %p\n", obj->id, obj->draw);
 	if ( obj->draw(obj, obj->x+x, obj->y+y) != KE_NONE )
 		KU_ERRQ_PASS();
-	
+	_
 	if ( obj->children )
 	{
 		if ( dl_list_first(obj->children) == KE_NONE )
 		{
+			_
 			do
 			{
+				_
 				if ( gui_obj_draw(dl_list_next(obj->children), obj->x+x, obj->y+y) != KE_NONE )
 					KU_ERRQ_PASS();
 			}	while ( !dl_list_offside(obj->children) );
+			_
 		}
 	}
 	
@@ -468,10 +476,18 @@ kucode_t gui_draw( void )
 	//glOrtho(-4, 4, -3, 3, 1, -1);
 	//glMatrixMode(GL_MODELVIEW);
 
-	if ( obj_root )
+	if ( gui_redraw && obj_root )
+	{
+		gui_redraw = 0;
 		preturn gui_obj_draw(obj_root, 0, 0);
+	}
 	
 	preturn KE_NONE;
+}
+
+void gui_redraw_later( void )
+{
+	gui_redraw = 1;
 }
 
 static inline gui_obj_t *gui_search_by_coord( int x, int y )
@@ -525,7 +541,7 @@ gui_event_st gui_process( SDL_Event *event )
 	{
 		case SDL_MOUSEMOTION:
 		{
-			event->motion.y = gui_h-event->motion.y;
+			//event->motion.y = gui_h-event->motion.y;
 			obj = gui_search_by_coord(event->motion.x, event->motion.y);
 			if ( obj != obj_mon )
 			{
@@ -544,7 +560,7 @@ gui_event_st gui_process( SDL_Event *event )
 		{
 			_
 			ku_avoid( obj_mdown != NULL );
-			event->button.y = gui_h-event->button.y;
+			//event->button.y = gui_h-event->button.y;
 			obj_mdown = gui_search_by_coord(event->button.x, event->button.y);
 			if ( obj_mdown && (obj_mdown->status < GUI_DISABLED) && obj_mdown->mdown )
 				status[0] = obj_mdown->mdown(obj_mdown, event->button.x-gui_lrx, \
@@ -560,7 +576,7 @@ gui_event_st gui_process( SDL_Event *event )
 			{
 				if ( obj_mdown->mup )
 				{
-					event->motion.y = gui_h-event->motion.y;
+					//event->motion.y = gui_h-event->motion.y;
 					status[0] = obj_mdown->mup(obj_mdown, event->button.x-gui_mdown_rx, \
 						event->button.y-gui_mdown_ry, event->button.button);
 				}

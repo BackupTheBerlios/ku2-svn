@@ -33,7 +33,7 @@
 static void button_ch_state( gui_obj_t *obj, int state )
 {
 	gui_button_t *const widget = (gui_button_t*)obj->widget;
-
+	
 	switch ( state )
 	{
 		case BUTTON_NORM:
@@ -52,15 +52,17 @@ static void button_ch_state( gui_obj_t *obj, int state )
 			break;
 		}
 	}
-
+	
 	obj->width = widget->face->w;
 	obj->height = widget->face->h;
-
+	
 	if ( widget->fontface )
 	{
 		widget->font_rx = (obj->width-widget->fontface->w)/2;
 		widget->font_ry = (obj->height-widget->fontface->h)/2;
 	}
+	
+	gui_redraw_later();
 }
 
 kucode_t button_init( gui_obj_t *obj )
@@ -211,7 +213,7 @@ kucode_t button_uload( gui_obj_t *obj )
 			obj->id, widget->font_name, KU_GET_ERROR());
 	
 	if ( widget->fontface )
-		dfree(widget->fontface);
+		gfx_img_free(widget->fontface);
 	KU_WITHOUT_ERROR_STOP();
 	
 	KU_ERRQ_BLOCKED();
@@ -221,6 +223,8 @@ kucode_t button_update( gui_obj_t *obj )
 {
 	gui_button_t *const widget = (gui_button_t*)obj->widget;
 	pstart();
+	
+	gui_redraw_later();
 	
 	if ( obj->updated&BUTTON_UD_NORM )
 	{
@@ -304,6 +308,7 @@ kucode_t button_set( gui_obj_t *obj, int param, void *data )
 			if ( widget->back_nor_name )
 				dfree(widget->back_nor_name);
 			widget->back_nor_name = name;
+			obj->updated |= BUTTON_UD_NORM;
 			break;
 		}
 		case BUTTON_MON:
@@ -315,6 +320,7 @@ kucode_t button_set( gui_obj_t *obj, int param, void *data )
 			if ( widget->back_mon_name )
 				dfree(widget->back_mon_name);
 			widget->back_mon_name = name;
+			obj->updated |= BUTTON_UD_MON;
 			break;
 		}
 		case BUTTON_MDN:
@@ -326,6 +332,7 @@ kucode_t button_set( gui_obj_t *obj, int param, void *data )
 			if ( widget->back_mdn_name )
 				dfree(widget->back_mdn_name);
 			widget->back_mdn_name = name;
+			obj->updated |= BUTTON_UD_MDN;
 			break;
 		}
 		case BUTTON_CLICK:

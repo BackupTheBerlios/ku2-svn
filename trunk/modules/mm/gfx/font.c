@@ -31,7 +31,8 @@ gfx_image_t *gfx_font_render( const char *text, gfx_font_t *font, \
 	gfx_image_t *img;
 	SDL_Surface *sdlimg;
 	SDL_Color colour;
-	pstart();
+	pstartp("text = %s, font = %p, style = %d, RGB = %u:%u:%u",
+			text, font, style, r, g, b);
 	
 	colour.r = r;
 	colour.g = g;
@@ -59,13 +60,16 @@ gfx_image_t *gfx_font_render( const char *text, gfx_font_t *font, \
 	SDL_FreeSurface(sdlimg);
 	#endif
 	
-	preturn img;
+	preturnp("img = %p", img) img;
 }
 
 static void *gfx_font_control( const char *path, rescontrol_t action, void *data )
 {
 	TTF_Font *font;
-	pstart();
+	pstartp("path = %s, action = %s, data = %p",
+			path,
+			(action == RES_LOAD) ? "load": "unload",
+			data);
 	
 	if ( action == RES_LOAD )
 	{
@@ -81,7 +85,7 @@ static void *gfx_font_control( const char *path, rescontrol_t action, void *data
 		preturn NULL;
 	}
 	
-	preturn font;
+	preturnp("font = %p", font) font;
 }
 
 kucode_t gfx_add_font_resources( int resource_type, const char *resfile )

@@ -45,8 +45,7 @@ kucode_t text_init( gui_obj_t *obj )
 
 	obj->draw = text_draw;
 
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t text_destroy( gui_obj_t *obj )
@@ -63,8 +62,7 @@ kucode_t text_destroy( gui_obj_t *obj )
 	if ( widget->text )
 		dfree(widget->text);
 
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t text_load( gui_obj_t *obj )
@@ -79,23 +77,22 @@ kucode_t text_load( gui_obj_t *obj )
 	if ( widget->font == NULL )
 	{
 		plogfn(gettext("Object %u font '%s` was not loaded: %d\n"), \
-			obj->id, widget->font_name, kucode);
-		return kucode;
+			obj->id, widget->font_name, KU_GET_ERROR());
+		KU_ERRQ_PASS();
 	}
 	widget->face = gfx_font_render(widget->text, widget->font, \
 		widget->font_style, widget->font_r, widget->font_g, widget->font_b);
 	if ( widget->face == NULL )
 	{
-		plogfn(gettext("Object %u text cannot be rendered: %d\n"), obj->id, kucode);
+		plogfn(gettext("Object %u text cannot be rendered: %d\n"), obj->id, KU_GET_ERROR());
 		res_release(widget->font_name);
-		return kucode;
+		KU_ERRQ_PASS();
 	}
 
 	obj->width = widget->face->w;
 	obj->height = widget->face->h;
 
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t text_uload( gui_obj_t *obj )
@@ -108,13 +105,12 @@ kucode_t text_uload( gui_obj_t *obj )
 
 	if ( res_release(widget->font_name) != KE_NONE )
 		plog(gettext("Note: Object 'gfxbutton` %u failed to release " \
-			"a font '%s`: %d\n"), obj->id, widget->font_name, kucode);
+			"a font '%s`: %d\n"), obj->id, widget->font_name, KU_GET_ERROR());
 
 	if ( widget->face )
 		dfree(widget->face);
 
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t text_update( gui_obj_t *obj )
@@ -187,8 +183,7 @@ kucode_t text_set( gui_obj_t *obj, int param, void *data )
 			KU_ERRQ(KE_INVALID);
 	}
 
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t text_get( gui_obj_t *obj, int param, void *data )
@@ -222,8 +217,7 @@ kucode_t text_get( gui_obj_t *obj, int param, void *data )
 			KU_ERRQ(KE_INVALID);
 	}
 */
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }
 
 kucode_t text_draw( gui_obj_t *obj, int x, int y )
@@ -233,6 +227,5 @@ kucode_t text_draw( gui_obj_t *obj, int x, int y )
 
 	gfx_img_draw(widget->face, x, y);
 
-	pstop();
-	return KE_NONE;
+	preturn KE_NONE;
 }

@@ -135,9 +135,8 @@ sources = Split("""
 	widgets/frame.c
 	widgets/button.c
 	widgets/texed.c
+	widgets/textline.c
 	""")
-#	widgets/textline.c
-#	""")
 
 includes = Split("""
 	ku2mm.h

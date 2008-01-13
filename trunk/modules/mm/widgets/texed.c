@@ -28,6 +28,7 @@
 static void texed_ch_state( gui_obj_t *obj, int state )
 {
 	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
+	pstartp("obj = %p, obj->id = %u, state = %d", obj, obj->id, state);
 	
 	switch ( state )
 	{
@@ -45,6 +46,9 @@ static void texed_ch_state( gui_obj_t *obj, int state )
 	
 	obj->width = widget->face->w;
 	obj->height = widget->face->h;
+	
+	gui_redraw_later();
+	pstop();
 }
 
 kucode_t texed_init( gui_obj_t *obj )
@@ -113,7 +117,7 @@ kucode_t texed_destroy( gui_obj_t *obj )
 kucode_t texed_load( gui_obj_t *obj )
 {
 	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
-	pstart();
+	pstartp("obj = %p, obj->id = %u", obj, obj->id);
 	
 	ku_avoid( obj->status != GUI_NOTLOADED );
 	
@@ -229,6 +233,7 @@ kucode_t texed_update( gui_obj_t *obj )
 		gfx_image_t *const oldff = widget->fontface;
 		
 		obj->updated &= ~TEXED_UD_TEXT;
+		gui_redraw_later();
 		
 		widget->fontface = gfx_font_render(widget->text, widget->font, \
 			widget->font_style, widget->font_r, widget->font_g, widget->font_b);
@@ -466,7 +471,8 @@ gui_event_st texed_defocus( gui_obj_t *obj )
 kucode_t texed_draw( gui_obj_t *obj, int x, int y )
 {
 	gui_texed_t *const widget = (gui_texed_t*)obj->widget;
-	pstart();
+	pstartp("obj = %p, obj->id = %u, x = %d, y = %d, widget->face = %p",
+			obj, obj->id, x, y, widget->face);
 	
 	if ( gfx_img_draw(widget->face, x, y) != KE_NONE )
 		KU_ERRQ_PASS();

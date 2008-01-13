@@ -150,7 +150,7 @@ kucode_t res_add( const char *path, const char *name, int type, void *param,
 void *res_access( const char *name )
 {
 	res_t *res;
-	pstart();
+	pstartp("name = %s", name);
 	
 	res = res_search(name);
 	if ( res == NULL )
@@ -169,7 +169,7 @@ void *res_access( const char *name )
 		res->loadcnt++;
 	}
 	
-	preturn res->data;
+	preturnp("res->data = %p", res->data) res->data;
 }
 
 void *res_access_adv( const char *name, void *param )

@@ -27,8 +27,8 @@ extern "C" {
 void ku_printf_debug( const char *file, const char *func, int line, char *fmt, ... );
 void ku_pavoid_debug( const char *file, const char *func, int line );
 void ku_func_debug( int status );
-void ku_pstart_debug( const char *func );
-void ku_pstop_debug( const char *func );
+void ku_pstart_debug( const char *func, char *fmt, ... );
+void ku_pstop_debug( const char *func, char *fmt, ... );
 
 #define pdebug( m, ... ) \
 ku_printf_debug(__FILE__, __FUNCTION__, __LINE__, m, ##__VA_ARGS__)
@@ -50,9 +50,12 @@ if ( expr ) \
 #define func_debug_on ku_func_debug(1)
 #define func_debug_off ku_func_debug(0)
 
-#define pstart() ku_pstart_debug(__FUNCTION__)
-#define pstop() ku_pstop_debug(__FUNCTION__)
-#define preturn return ku_pstop_debug(__FUNCTION__),
+#define pstart() ku_pstart_debug(__FUNCTION__, NULL)
+#define pstartp( m, ... ) ku_pstart_debug(__FUNCTION__, m, ##__VA_ARGS__)
+#define pstop() ku_pstop_debug(__FUNCTION__, NULL)
+#define pstopp( m, ... ) ku_pstop_debug(__FUNCTION__, m, ##__VA_ARGS__)
+#define preturn return ku_pstop_debug(__FUNCTION__, NULL),
+#define preturnp( m, ... ) return ku_pstop_debug(__FUNCTION__, m, ##__VA_ARGS__),
 
 #else	//	DEBUG
 

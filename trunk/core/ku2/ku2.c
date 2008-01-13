@@ -74,7 +74,7 @@ void ku_func_debug( int status )
 	ku_func_debug_is_on = status;
 }
 
-void ku_pstart_debug( const char *func )
+void ku_pstart_debug( const char *func, char *fmt, ... )
 {
 	if ( ku_func_debug_is_on )
 	{
@@ -82,11 +82,20 @@ void ku_pstart_debug( const char *func )
 		for ( i = 0; i < ku_func_lvl; i++ )
 			printf("   ");
 		ku_func_lvl++;
-		printf("### ==> %s >>>\n", func);
+		if ( fmt == NULL )
+			printf("### ==> %s >>>\n", func); else
+		{
+			va_list ap;
+			va_start(ap, fmt);
+			printf("### ==> %s( ", func);
+			vprintf(fmt, ap);
+			printf(" ) >>>\n");
+			va_end(ap);
+		}
 	}
 }
 
-void ku_pstop_debug( const char *func )
+void ku_pstop_debug( const char *func, char *fmt, ... )
 {
 	if ( ku_func_debug_is_on )
 	{
@@ -99,7 +108,16 @@ void ku_pstop_debug( const char *func )
 		}
 		for ( i = 0; i < ku_func_lvl; i++ )
 			printf("   ");
-		printf("### <== %s <<<\n", func);
+		if ( fmt == NULL )
+			printf("### <== %s <<<\n", func); else
+		{
+			va_list ap;
+			va_start(ap, fmt);
+			printf("### <== %s( ", func);
+			vprintf(fmt, ap);
+			printf(" ) <<<\n");
+			va_end(ap);
+		}
 	}
 }
 

@@ -35,8 +35,6 @@ kucode_t frame_init( gui_obj_t *obj )
 	obj->load = frame_load;
 	obj->uload = frame_uload;
 	
-	obj->dim = NULL;
-	
 	obj->set = frame_set;
 	obj->get = frame_get;
 	

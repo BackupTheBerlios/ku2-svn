@@ -289,6 +289,7 @@ kucode_t gui_ch_status( gui_obj_t *obj, gui_status_t status );
 	\sa gui_draw_f().
 */
 kucode_t gui_draw( void );
+void gui_redraw_later( void );
 
 //! Process an event.
 /*!
