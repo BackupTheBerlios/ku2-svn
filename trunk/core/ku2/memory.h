@@ -27,6 +27,7 @@ extern "C" {
 
 void *ku_malloc_debug( size_t size );
 void ku_free_debug( void *__ptr );
+void *ku_realloc_debug( void *__ptr, size_t size );
 void ku_memory_stat( void );
 
 #define dmalloc( size ) \
@@ -34,6 +35,9 @@ ku_malloc_debug(size)
 
 #define dfree( ptr ) \
 ku_free_debug(ptr)
+
+#define drealloc( ptr, size ) \
+ku_realloc_debug(ptr, size)
 
 #define dlogmemstat() \
 ku_memory_stat()

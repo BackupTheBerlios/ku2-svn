@@ -56,9 +56,17 @@ struct STRUCT_LOG
 	\param file A log filename.
 	\retval KE_NONE No error.
 	\retval KE_IO Cannot open a file.
-	\sa closelog(), flushlog() and plog().
+	\sa ku_closelog(), ku_touchlog() and ku_plog().
 */
 kucode_t ku_openlog( ku_log *thelog, const char *file, ku_flag32_t flags );
+
+//! Set the default log.
+/*!
+	Sets the default log.
+	\param thelog The log to become a default one.
+	\sa ku_openlog(), ku_closelog(), ku_touchlog() and ku_plog().
+*/
+void ku_defaultlog( ku_log *thelog );
 
 //! Close a log file.
 /*!

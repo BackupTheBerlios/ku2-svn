@@ -42,12 +42,20 @@ kucode_t ku_openlog( ku_log *thelog, const char *file, ku_flag32_t flags )
 	preturn KE_NONE;
 }
 
+void ku_defaultlog( ku_log *thelog )
+{
+	pstart();
+	
+	deflog = thelog;
+	
+	pstop();
+}
+
 kucode_t ku_closelog( ku_log *thelog, ku_flag32_t flags )
 {
 	pstart();
 	
-	if ( thelog == NULL )
-		thelog = deflog;
+	ku_avoid( thelog == NULL );
 	
 	if ( !((flags&LOG_NHEAD) || (thelog->flags&LOG_NHEAD)) )
 	{
@@ -56,7 +64,7 @@ kucode_t ku_closelog( ku_log *thelog, ku_flag32_t flags )
 		fflush(thelog->logstream);
 	}
 	
-	if ( (thelog->flags&LOG_DEFAULT) && !(flags&LOG_NDEFAULT) )
+	if ( deflog == thelog )
 		deflog = NULL;
 	
 	if ( fclose(thelog->logstream) != 0 )

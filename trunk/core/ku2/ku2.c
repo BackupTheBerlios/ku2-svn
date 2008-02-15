@@ -48,7 +48,7 @@ void *ku_malloc_debug( size_t size )
 		sizes += size;
 	}
 	#ifdef DEBUG_MEMORY
-	printf("MALLOC: %p sized %d (total %d)\n", ptr, size, mallocs);
+	printf("MALLOC : %p sized %d (total %d)\n", ptr, size, mallocs);
 	#endif
 	return ptr;
 }
@@ -58,7 +58,16 @@ void ku_free_debug( void *__ptr )
 	free(__ptr);
 	mallocs--;
 	#ifdef DEBUG_MEMORY
-	printf("FREE  : %p (total left %d)\n", __ptr, mallocs);
+	printf("FREE   : %p (total left %d)\n", __ptr, mallocs);
+	#endif
+}
+
+void *ku_realloc_debug( void *__ptr, size_t size )
+{
+	void *ptr = realloc(__ptr, size);
+	#ifdef DEBUG_MEMORY
+	printf("REALLOC: %p changed to %p sized %d (total %d)\n",
+		   __ptr, ptr, size, mallocs);
 	#endif
 }
 
