@@ -290,7 +290,7 @@ kucode_t abtree_replace( tree_t *tree, const void *odata, const void *ndata,
 	DO_NOT_USE(ndata);
 	DO_NOT_USE(freef);
 	pstart();
-	preturn KE_NONE;
+	preturn KE_NOIMPLEM;
 }
 
 kucode_t abtree_rem( tree_t *tree, const void *data, ku_act_f freef )
@@ -446,49 +446,46 @@ kucode_t abtree_goto_first( tree_t *tree )
 	
 	if ( a != NULL )
 	{
-		while ( (a->left != NULL) || (a->right != NULL) )
+		while ( a->left != NULL )
 		{
-			if ( a->left != NULL )
-				a = a->left; else
-				a = a->right;
+			a = a->left;
 		}
 	}	else
 		preturn KE_EMPTY;
 	
 	tree->cur = a;
-
 	preturn KE_NONE;
 }
 
 void *abtree_goto_next( tree_t *tree )
 {
-	tree_node_t *a, *b = tree->cur;
+	tree_node_t *a = tree->cur;
 	pstart();
 	
-	if ( b != NULL )
+	if ( a != NULL )
 	{
-		a = b;
-		b = b->parent;
-		if ( b != NULL )
+		if ( tree->cur->right != NULL )
 		{
-			if ( (b->left == a) && (b->right != NULL) )
+			tree->cur = tree->cur->right;
+			while ( tree->cur->left != NULL )
+				tree->cur = tree->cur->left;
+		}	else
+		{
+			tree_node_t *b;
+			
+			do
 			{
-				b = b->right;
-				while ( (b->left != NULL) || (b->right != NULL) )
-				{
-					if ( b->left != NULL )
-						b = b->left; else
-						b = b->right;
-				}
-			}
+				b = tree->cur;
+				tree->cur = b->parent;
+			}	while ( (tree->cur) && (tree->cur->right == b) );
+			
 		}
-		tree->cur = b;
 	}	else
 	{
 		preturn NULL;
 	}
 	
-	preturn tree->cur->data;
+	preturn a->data;
 }
 
 void *abtree_unused_index( tree_t *tree, ku_interval_f intf, int *pos )
