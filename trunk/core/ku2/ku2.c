@@ -69,6 +69,7 @@ void *ku_realloc_debug( void *__ptr, size_t size )
 	printf("REALLOC: %p changed to %p sized %d (total %d)\n",
 		   __ptr, ptr, size, mallocs);
 	#endif
+	return ptr;
 }
 
 void ku_memory_stat( void )

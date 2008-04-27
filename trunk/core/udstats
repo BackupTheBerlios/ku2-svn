@@ -20,5 +20,5 @@ chmod a+x makerpm.ku2
 
 #RULE: __st_VER_MAJ 1
 #RULE: __st_VER_MIN 7
-#RULE: __st_RELEASE 0
+#RULE: __st_RELEASE 1
 #RULE: __st_PREFIX \\/usr

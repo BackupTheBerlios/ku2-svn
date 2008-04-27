@@ -99,6 +99,8 @@ if ( expr ) \
 */
 #define pstart()
 
+#define pstartp( m, ... )
+
 //! Declare the function end.
 /*!
 	If function debug watch is enabled then a message informing that the function
@@ -106,6 +108,8 @@ if ( expr ) \
 	\sa pstart() and preturn().
 */
 #define pstop()
+
+#define pstopp( m, ... )
 
 //! Declare the function end and return from it.
 /*!
@@ -116,6 +120,8 @@ if ( expr ) \
 	\sa pstart() and pstop().
 */
 #define preturn return
+
+#define preturnp( m, ... ) return
 
 #endif	//	DEBUG
 
