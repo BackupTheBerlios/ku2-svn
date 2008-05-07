@@ -42,7 +42,7 @@ __type KU_MESSAGE
 	}
 
 #define KU_ENDWATCH \
-	__ku_parse_end: asm(""); \
+	__ku_parse_end:; \
 }
 
 #define KU_MAKEMSG( __message ) \
@@ -50,6 +50,17 @@ __type KU_MESSAGE
 	KU_MESSAGE = __message; \
 	goto __ku_parse_begin; \
 }
+
+#define KU_OPEN_BLOCK \
+{ \
+	__label__ __ku_block_end;
+
+#define KU_CLOSE_BLOCK \
+	__ku_block_end:; \
+}
+
+#define KU_LEAVE_BLOCK \
+goto __ku_block_end
 
 #ifdef __cplusplus
 }
