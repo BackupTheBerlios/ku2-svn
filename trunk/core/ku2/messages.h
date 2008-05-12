@@ -43,13 +43,16 @@ __type KU_MESSAGE
 
 #define KU_ENDWATCH \
 	__ku_parse_end:; \
-}
+} asm("")
 
 #define KU_MAKEMSG( __message ) \
 { \
 	KU_MESSAGE = __message; \
 	goto __ku_parse_begin; \
 }
+
+#define KU_MAKEMSG_() \
+goto __ku_parse_begin;
 
 #define KU_OPEN_BLOCK \
 { \
