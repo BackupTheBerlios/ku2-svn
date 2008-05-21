@@ -58,7 +58,7 @@ struct STRUCT_LOG
 	\retval KE_IO Cannot open a file.
 	\sa ku_closelog(), ku_touchlog() and ku_plog().
 */
-kucode_t ku_openlog( ku_log *thelog, const char *file, ku_flag32_t flags );
+kucode_t ku_openlog( ku_log *thelog, const char *file, ku_flag32_t flags ) __THROW;
 
 //! Set the default log.
 /*!
@@ -66,7 +66,7 @@ kucode_t ku_openlog( ku_log *thelog, const char *file, ku_flag32_t flags );
 	\param thelog The log to become a default one.
 	\sa ku_openlog(), ku_closelog(), ku_touchlog() and ku_plog().
 */
-void ku_defaultlog( ku_log *thelog );
+void ku_defaultlog( ku_log *thelog ) __THROW;
 
 //! Close a log file.
 /*!
@@ -75,14 +75,14 @@ void ku_defaultlog( ku_log *thelog );
 	\retval KE_IO Cannot close a file.
 	\sa openlog(), flushlog() and plog().
 */
-kucode_t ku_closelog( ku_log *thelog, ku_flag32_t flags );
+kucode_t ku_closelog( ku_log *thelog, ku_flag32_t flags ) __THROW;
 
 //! Flush the log file.
 /*!
 	Writes all buffered data to the disk.
 	\sa openlog(), closelog() and plog().
 */
-kucode_t ku_touchlog( ku_log *thelog );
+kucode_t ku_touchlog( ku_log *thelog ) __THROW;
 
 //! Print a log message.
 /*!
@@ -92,7 +92,7 @@ kucode_t ku_touchlog( ku_log *thelog );
 	\note No newline symbol at the end of the message is added.
 	\sa openlog(), closelog(), plog_adv() and flushlog().
 */
-void ku_plog( ku_log *thelog, uint16_t code, const char *function, const char *info, const char *fmt, ... );
+void ku_plog( ku_log *thelog, uint16_t code, const char *function, const char *info, const char *fmt, ... ) __THROW;
 
 //! Print a log message with the function name.
 /*!

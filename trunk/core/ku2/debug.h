@@ -22,13 +22,15 @@
 extern "C" {
 #endif
 
+#include "ku2/host.h"
+
 #ifdef DEBUG
 
-void ku_printf_debug( const char *file, const char *func, int line, char *fmt, ... );
-void ku_pavoid_debug( const char *file, const char *func, int line );
-void ku_func_debug( int status );
-void ku_pstart_debug( const char *func, char *fmt, ... );
-void ku_pstop_debug( const char *func, char *fmt, ... );
+void ku_printf_debug( const char *file, const char *func, int line, char *fmt, ... ) __THROW;
+void ku_pavoid_debug( const char *file, const char *func, int line ) __THROW;
+void ku_func_debug( int status ) __THROW;
+void ku_pstart_debug( const char *func, char *fmt, ... ) __THROW;
+void ku_pstop_debug( const char *func, char *fmt, ... ) __THROW;
 
 #define pdebug( m, ... ) \
 ku_printf_debug(__FILE__, __FUNCTION__, __LINE__, m, ##__VA_ARGS__)

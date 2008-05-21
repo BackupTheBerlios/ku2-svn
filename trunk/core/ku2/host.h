@@ -26,6 +26,8 @@
 extern "C" {
 #endif
 
+#include <features.h>
+
 #define DO_NOT_USE( __var ) (void)__var
 
 //! Declare the variable or the function as unused.

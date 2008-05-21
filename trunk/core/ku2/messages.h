@@ -36,10 +36,27 @@ __type KU_MESSAGE
 	{ \
 		__label__ __ku_parse_begin;
 
+#define KU_WATCH_CMSG_DEFS \
+{ \
+	__label__ __ku_parse_end; \
+
+#define KU_DEFINE_CMSG( __message ) \
+	__label__ __ku_parse_w##__message
+
+#define KU_WATCH_CMSG_BEGIN \
+	{ \
+		__label__ __ku_parse_begin;
+
 #define KU_PARSE \
 		goto __ku_parse_end; \
 		__ku_parse_begin:; \
 	}
+
+#define KU_PARSE_CMSG( __message ) \
+__ku_parse_w##__message
+
+#define KU_BREAK_PARSE \
+goto __ku_parse_end
 
 #define KU_ENDWATCH \
 	__ku_parse_end:; \
@@ -52,7 +69,10 @@ __type KU_MESSAGE
 }
 
 #define KU_MAKEMSG_() \
-goto __ku_parse_begin;
+goto __ku_parse_begin
+
+#define KU_MKCMSG( __message ) \
+goto __ku_parse_w##__message
 
 #define KU_OPEN_BLOCK \
 { \
