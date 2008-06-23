@@ -26,7 +26,7 @@ extern "C" {
 #include "ku2/debug.h"
 
 //! Valid error codes.
-/*!	
+/*!
 	A list of the valid error codes for the Kane Utilities.
 */
 typedef

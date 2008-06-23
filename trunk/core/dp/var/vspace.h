@@ -33,7 +33,7 @@ typedef
 struct STRUCT_VSPACE
 {
 	char *name;
-	tree_t *vars,
+	ku_tree_t *vars,
 		*spaces;
 }	vspace_t;
 

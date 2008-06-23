@@ -25,6 +25,28 @@ extern "C" {
 #include "ku2/ecode.h"
 #include "ku2/types.h"
 
+#define ESC_BOLD( __txt ) "\033[1m"__txt"\033[0m"
+#define ESC_UNDERLINED( __txt ) "\033[4m"__txt"\033[0m"
+#define ESC_BLINK( __txt ) "\033[5m"__txt"\033[0m"
+
+#define ESC_BLACK( __txt ) "\033[0;30m"__txt"\033[0m"
+#define ESC_RED( __txt ) "\033[0;31m"__txt"\033[0m"
+#define ESC_GREEN( __txt ) "\033[0;32m"__txt"\033[0m"
+#define ESC_YELLOW( __txt ) "\033[0;33m"__txt"\033[0m"
+#define ESC_BLUE( __txt ) "\033[0;34m"__txt"\033[0m"
+#define ESC_MAGENTA( __txt ) "\033[0;35m"__txt"\033[0m"
+#define ESC_CYAN( __txt ) "\033[0;36m"__txt"\033[0m"
+#define ESC_WHITE( __txt ) "\033[0;37m"__txt"\033[0m"
+
+#define ESC_BBLACK( __txt ) "\033[0;1;30m"__txt"\033[0m"
+#define ESC_BRED( __txt ) "\033[0;1;31m"__txt"\033[0m"
+#define ESC_BGREEN( __txt ) "\033[0;1;32m"__txt"\033[0m"
+#define ESC_BYELLOW( __txt ) "\033[0;1;33m"__txt"\033[0m"
+#define ESC_BBLUE( __txt ) "\033[0;1;34m"__txt"\033[0m"
+#define ESC_BMAGENTA( __txt ) "\033[0;1;35m"__txt"\033[0m"
+#define ESC_BCYAN( __txt ) "\033[0;1;36m"__txt"\033[0m"
+#define ESC_BWHITE( __txt ) "\033[0;1;37m"__txt"\033[0m"
+
 //! Get the largest value.
 #define MAXint( a, b ) ((a>b)?(a):(b))
 
@@ -37,7 +59,7 @@ extern "C" {
 //! Convert the macros name to the constant string.
 #define _STR_( m ) #m
 
-//!	Concatinate two constant strings.
+//! Concatinate two constant strings.
 #define CONCAT( m, n ) m ## n
 
 //! String length for qstr() and vstr().

@@ -16,7 +16,7 @@
 #include "ku2/types.h"
 #include "ds/abtree/abtree.h"
 
-static tree_t *reses, *restypes;
+static ku_tree_t *reses, *restypes;
 
 static kucode_t res_uload( res_t *res )
 {

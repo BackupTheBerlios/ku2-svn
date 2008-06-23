@@ -64,7 +64,8 @@ struct STRUCT_CFG_SESSION
 	ku_flag32_t flags;
 					//!< Session flags;
 	FILE *cfgf;		//!< File handle.
-	tree_t *qtree;	//!< Query tree (predefined variable rules).
+	ku_tree_t *qtree;
+					//!< Query tree (predefined variable rules).
 	int cfg_line;	//!< Current file line.
 	const char *cfg_stepid;
 					//!< Last step id (see \ref CFG_STEP).

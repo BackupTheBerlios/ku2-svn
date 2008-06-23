@@ -19,9 +19,9 @@
 #include "other/other.h"
 #include "ku2/host.h"
 
-static void ab_rotate_left( tree_t *tree, tree_node_t *node )
+static void ab_rotate_left( ku_tree_t *tree, ku_tree_node_t *node )
 {
-	tree_node_t *t = node->right;
+	ku_tree_node_t *t = node->right;
 	pstart();
 	
 	if ( t != NULL )
@@ -41,7 +41,7 @@ static void ab_rotate_left( tree_t *tree, tree_node_t *node )
 		}	else
 		{
 			//	ACD стиль
-			tree_node_t *d = t->left;
+			ku_tree_node_t *d = t->left;
 			d->parent = node->parent;
 			t->parent = d;
 			node->parent = d;
@@ -82,9 +82,9 @@ static void ab_rotate_left( tree_t *tree, tree_node_t *node )
 	pstop();
 }
 
-static void ab_rotate_right( tree_t *tree, tree_node_t *node )
+static void ab_rotate_right( ku_tree_t *tree, ku_tree_node_t *node )
 {
-	tree_node_t *t = node->left;
+	ku_tree_node_t *t = node->left;
 	pstart();
 	
 	if ( t != NULL )
@@ -104,7 +104,7 @@ static void ab_rotate_right( tree_t *tree, tree_node_t *node )
 		}	else
 		{
 			//	ACD стиль
-			tree_node_t *d = t->right;
+			ku_tree_node_t *d = t->right;
 			d->parent = node->parent;
 			t->parent = d;
 			node->parent = d;
@@ -145,12 +145,12 @@ static void ab_rotate_right( tree_t *tree, tree_node_t *node )
 	pstop();
 }
 
-tree_t *abtree_create( ku_comp_f func, UNUSED_VAR(ku_flag32_t flags) )
+ku_tree_t *ku_abtree_create( ku_comp_f func, UNUSED_VAR(ku_flag32_t flags) )
 {
-	tree_t *tree;
+	ku_tree_t *tree;
 	pstart();
 	
-	tree = (tree_t*)dmalloc(sizeof(tree_t));
+	tree = (ku_tree_t*)dmalloc(sizeof(ku_tree_t));
 	if ( tree == NULL )
 	{
 		KU_SET_ERROR(KE_MEMORY);
@@ -163,19 +163,19 @@ tree_t *abtree_create( ku_comp_f func, UNUSED_VAR(ku_flag32_t flags) )
 	preturn tree;
 }
 
-kucode_t abtree_free( tree_t *tree, ku_act_f freef )
+kucode_t ku_abtree_free( ku_tree_t *tree, ku_act_f freef )
 {
 	pstart();
 	
-	abtree_clear(tree, freef);
+	ku_abtree_clear(tree, freef);
 	dfree(tree);
 	
 	preturn KE_NONE;
 }
 
-kucode_t abtree_clear( tree_t *tree, ku_act_f freef )
+kucode_t ku_abtree_clear( ku_tree_t *tree, ku_act_f freef )
 {
-	tree_node_t *a = tree->root, *b;
+	ku_tree_node_t *a = tree->root, *b;
 	pstart();
 	
 	while ( a != NULL )
@@ -206,14 +206,14 @@ kucode_t abtree_clear( tree_t *tree, ku_act_f freef )
 	preturn KE_NONE;
 }
 
-kucode_t abtree_ins( tree_t *tree, const void *data )
+kucode_t ku_abtree_ins( ku_tree_t *tree, const void *data )
 {
-	tree_node_t *cur = tree->root;;
-	tree_node_t *p = NULL, *newnode;
+	ku_tree_node_t *cur = tree->root;;
+	ku_tree_node_t *p = NULL, *newnode;
 	pstart();
 	
 	//	создание элемента
-	newnode = (tree_node_t*)dmalloc(sizeof(tree_node_t));
+	newnode = (ku_tree_node_t*)dmalloc(sizeof(ku_tree_node_t));
 	if ( newnode==NULL )
 		KU_ERRQ(KE_MEMORY);
 	newnode->left = newnode->right = NULL;
@@ -282,8 +282,8 @@ kucode_t abtree_ins( tree_t *tree, const void *data )
 	preturn KE_NONE;
 }
 
-kucode_t abtree_replace( tree_t *tree, const void *odata, const void *ndata,
-						ku_act_f freef )
+kucode_t ku_abtree_replace( ku_tree_t *tree, const void *odata,
+						    const void *ndata, ku_act_f freef )
 {
 	DO_NOT_USE(tree);
 	DO_NOT_USE(odata);
@@ -293,10 +293,10 @@ kucode_t abtree_replace( tree_t *tree, const void *odata, const void *ndata,
 	preturn KE_NOIMPLEM;
 }
 
-kucode_t abtree_rem( tree_t *tree, const void *data, ku_act_f freef )
+kucode_t ku_abtree_rem( ku_tree_t *tree, const void *data, ku_act_f freef )
 {
-	tree_node_t *cur = tree->root;
-	tree_node_t *p;
+	ku_tree_node_t *cur = tree->root;
+	ku_tree_node_t *p;
 	pstart();
 	
 	//	поиск элемента
@@ -416,9 +416,9 @@ kucode_t abtree_rem( tree_t *tree, const void *data, ku_act_f freef )
 	preturn KE_NONE;
 }
 
-void *abtree_search( tree_t *tree, const void *data )
+void *ku_abtree_search( ku_tree_t *tree, const void *data )
 {
-	tree_node_t *cur = tree->root;
+	ku_tree_node_t *cur = tree->root;
 	pstart();
 	
 	while ( cur != NULL )
@@ -439,9 +439,9 @@ void *abtree_search( tree_t *tree, const void *data )
 	preturn NULL;
 }
 
-kucode_t abtree_goto_first( tree_t *tree )
+kucode_t ku_abtree_goto_first( ku_tree_t *tree )
 {
-	tree_node_t *a = tree->root;
+	ku_tree_node_t *a = tree->root;
 	pstart();
 	
 	if ( a != NULL )
@@ -457,9 +457,9 @@ kucode_t abtree_goto_first( tree_t *tree )
 	preturn KE_NONE;
 }
 
-void *abtree_goto_next( tree_t *tree )
+void *ku_abtree_goto_next( ku_tree_t *tree )
 {
-	tree_node_t *a = tree->cur;
+	ku_tree_node_t *a = tree->cur;
 	pstart();
 	
 	if ( a != NULL )
@@ -471,7 +471,7 @@ void *abtree_goto_next( tree_t *tree )
 				tree->cur = tree->cur->left;
 		}	else
 		{
-			tree_node_t *b;
+			ku_tree_node_t *b;
 			
 			do
 			{
@@ -488,9 +488,9 @@ void *abtree_goto_next( tree_t *tree )
 	preturn a->data;
 }
 
-void *abtree_unused_index( tree_t *tree, ku_interval_f intf, int *pos )
+void *ku_abtree_unused_index( ku_tree_t *tree, ku_interval_f intf, int *pos )
 {
-	tree_node_t *cur = tree->root;
+	ku_tree_node_t *cur = tree->root;
 	void *left = NULL, *right = NULL;
 	uint available[2];
 	pstart();

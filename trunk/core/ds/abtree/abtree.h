@@ -1,10 +1,16 @@
-/***************************************************************************
- *            abtree.h
- *
- *  Fri Aug 25 20:12:16 2006
- *  Copyright  2006  J. Anton
- *  kane@mail.berlios.de
- ****************************************************************************/
+/*
+		abtree.h
+		Fri Aug 25 20:12:16 2006
+		Mon Jun 23 10:32:53 2008
+
+	This file is the part of Kane Utilities 2.
+	See licencing agreement in a root direcory for more details.
+	http://developer.berlios.de/projects/ku2/
+
+	Copyright, 2008
+		J. Anton (Jeļkins Antons) aka Kane
+		kane@mail.berlios.de
+*/
 
 /*!
 	\file
@@ -12,14 +18,28 @@
 	
 	This is the realization of Auto-Balanced tree.
 	\author J. Anton
-	\date Wed Feb 07 10:06 2007
-	\version 1.2.0
 */
 
 #ifndef KU__ABTREE_H__
 #define KU__ABTREE_H__
-#ifdef __cplusplus
-extern "C" {
+#include "ku2/host.h"
+KU_BEGIN_DECLS
+
+/*
+	After version 1.7.2 a prefix ku_* was added
+	to the types and functions
+*/
+#ifdef KU_COMPAT_1_7_2
+#	define tree_t				ku_tree_t
+#	define abtree_create		ku_abtree_create
+#	define abtree_free			ku_abtree_free
+#	define abtree_clear			ku_abtree_clear
+#	define abtree_ins			ku_abtree_ins
+#	define abtree_replace		ku_abtree_replace
+#	define abtree_rem			ku_abtree_rem
+#	define abtree_goto_first	ku_abtree_goto_first
+#	define abtree_goto_next		ku_abtree_goto_next
+#	define abtree_unused_index	ku_abtree_unused_index
 #endif
 
 #include "ku2/ecode.h"
@@ -40,17 +60,17 @@ struct STRUCT_TREE_NODE
 		*parent;	//!< Parent node.
 	uint lcnt,		//!< Amount of the left children.
 		rcnt;		//!< Amount of the right children.
-}	tree_node_t;
+}	ku_tree_node_t;
 
 //! Tree header.
 typedef
 struct STRUCT_TREE
 {
 	ku_comp_f cmpf;	//!< Comparing function.
-	tree_node_t
+	ku_tree_node_t
 		*root,		//!< Root of the tree.
 		*cur;		//!< Current element.
-}	tree_t;
+}	ku_tree_t;
 
 //! Create a auto-balanced tree instance.
 /*!
@@ -62,7 +82,7 @@ struct STRUCT_TREE
 	\note Parameter \a flags is not used.
 	\sa abtree_free().
 */
-tree_t *abtree_create( ku_comp_f func, ku_flag32_t flags );
+ku_tree_t *ku_abtree_create( ku_comp_f func, ku_flag32_t flags );
 
 //! Free a auto-balanced tree instance.
 /*!
@@ -72,7 +92,7 @@ tree_t *abtree_create( ku_comp_f func, ku_flag32_t flags );
 	\return Always \a KE_NONE.
 	\sa abtree_create() and abtree_clear().
 */
-kucode_t abtree_free( tree_t *tree, ku_act_f freef );
+kucode_t ku_abtree_free( ku_tree_t *tree, ku_act_f freef );
 
 //! Clear the tree.
 /*!
@@ -82,7 +102,7 @@ kucode_t abtree_free( tree_t *tree, ku_act_f freef );
 	\return Always \a KE_NONE.
 	\sa abtree_free().
 */
-kucode_t abtree_clear( tree_t *tree, ku_act_f freef );
+kucode_t ku_abtree_clear( ku_tree_t *tree, ku_act_f freef );
 
 //! Insert data to the tree.
 /*!
@@ -94,7 +114,7 @@ kucode_t abtree_clear( tree_t *tree, ku_act_f freef );
 	\retval KE_DOUBLE Element with the selected data already exists.
 	\sa abtree_replace() and abtree_rem().
 */
-kucode_t abtree_ins( tree_t *tree, const void *data );
+kucode_t ku_abtree_ins( ku_tree_t *tree, const void *data );
 
 //! Replace the data in the tree.
 /*!
@@ -109,8 +129,8 @@ kucode_t abtree_ins( tree_t *tree, const void *data );
 	in the tree can be freed: \e odata is used as a searching pattern.
 	\sa abtree_ins() and abtree_rem().
 */
-kucode_t abtree_replace( tree_t *tree, const void *odata, const void *ndata,
-						ku_act_f freef );
+kucode_t ku_abtree_replace( ku_tree_t *tree, const void *odata,
+						    const void *ndata, ku_act_f freef );
 
 //! Remove data from the tree.
 /*!
@@ -124,17 +144,18 @@ kucode_t abtree_replace( tree_t *tree, const void *odata, const void *ndata,
 	in the tree can be freed: \e data is used as a searching pattern.
 	\sa abtree_ins() and abtree_replace().
 */
-kucode_t abtree_rem( tree_t *tree, const void *data, ku_act_f freef );
+kucode_t ku_abtree_rem( ku_tree_t *tree, const void *data, ku_act_f freef );
 
 //! Search for the selected data.
 /*!
 	Searches for the selected data and returns the found ones.
+	Current position is set to the found data, or \e NULL otherwise.
 	\param tree Tree to deal with.
 	\param data Data to be searched.
 	\return Data, if found, else \e NULL.
 	\note \ref kucode is not affected.
 */
-void *abtree_search( tree_t *tree, const void *data );
+void *ku_abtree_search( ku_tree_t *tree, const void *data );
 
 //! Move the current position to the smallest element (first one).
 /*!
@@ -146,7 +167,7 @@ void *abtree_search( tree_t *tree, const void *data );
 	\note \ref kucode is not affected.
 	\sa abtree_goto_next().
 */
-kucode_t abtree_goto_first( tree_t *tree );
+kucode_t ku_abtree_goto_first( ku_tree_t *tree );
 
 //! Get data of the current element and move to the next one.
 /*!
@@ -158,7 +179,7 @@ kucode_t abtree_goto_first( tree_t *tree );
 	\note \ref kucode is not affected.
 	\sa abtree_goto_first().
 */
-void *abtree_goto_next( tree_t *tree );
+void *ku_abtree_goto_next( ku_tree_t *tree );
 
 //! Get the first unused index in the tree.
 /*!
@@ -173,9 +194,7 @@ void *abtree_goto_next( tree_t *tree );
 	available.
 	\note \ref kucode is not affected.
 */
-void *abtree_unused_index( tree_t *tree, ku_interval_f intf, int *pos );
+void *ku_abtree_unused_index( ku_tree_t *tree, ku_interval_f intf, int *pos );
 
-#ifdef __cplusplus
-}
-#endif
+KU_END_DECLS
 #endif

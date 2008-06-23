@@ -10,3 +10,5 @@
 		J. Anton (Jeļkins Antons) aka Kane
 		kane@mail.berlios.de
 */
+
+#include "ds/graph/graph.h"
