@@ -55,6 +55,7 @@ struct STRUCT_GRAPH_VERTEX
 			struct STRUCT_GRAPH_VERTEX
 				*near;
 					//!< Linked (near) graph vertexes.
+		};
 	};
 }	ku_graph_vertex_t;
 

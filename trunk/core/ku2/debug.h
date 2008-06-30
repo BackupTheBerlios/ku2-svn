@@ -26,6 +26,8 @@ extern "C" {
 
 #ifdef DEBUG
 
+#include <stdlib.h>
+
 void ku_printf_debug( const char *file, const char *func, int line, char *fmt, ... ) __THROW;
 void ku_pavoid_debug( const char *file, const char *func, int line ) __THROW;
 void ku_func_debug( int status ) __THROW;

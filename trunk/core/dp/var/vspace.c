@@ -195,7 +195,7 @@ static vspace_t *vspace_get_leaf( vspace_t *space, const char *path, char **leaf
 			break;
 		cur++;
 	
-		space = abtree_search(space->spaces, &search_space);
+		space = ku_abtree_search(space->spaces, &search_space);
 		if ( space->spaces == NULL )
 			KU_ERRQ_VALUE(KE_NOTFOUND, NULL);
 	}
@@ -218,7 +218,7 @@ const var_t *vspace_getv( vspace_t *space, const char *path )
 		KU_SET_ERROR(KE_NOTFOUND);
 		preturn NULL;
 	}
-	var = abtree_search(space->vars, &search_var);
+	var = ku_abtree_search(space->vars, &search_var);
 	if ( var == NULL )
 		{ preturn NULL; }
 	
@@ -239,7 +239,7 @@ vspace_t *vspace_gets( vspace_t *space, const char *path )
 		KU_SET_ERROR(KE_NOTFOUND);
 		preturn NULL;
 	}
-	space = abtree_search(space->spaces, &search_space);
+	space = ku_abtree_search(space->spaces, &search_space);
 	if ( space == NULL )
 		{ preturn NULL; }
 	

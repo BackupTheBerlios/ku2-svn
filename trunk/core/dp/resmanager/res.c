@@ -33,7 +33,7 @@ static res_t *res_search( const char *name )
 	res_t *res;
 
 	searchres.name = name;
-	res = abtree_search(reses, &searchres);
+	res = ku_abtree_search(reses, &searchres);
 
 	return res;
 }
@@ -120,7 +120,7 @@ kucode_t res_add( const char *path, const char *name, int type, void *param,
 	pstart();
 	
 	searchtype.type = type;
-	rtype = abtree_search(restypes, &searchtype);
+	rtype = ku_abtree_search(restypes, &searchtype);
 	if ( rtype == NULL )
 		KU_ERRQ(KE_INVALID);
 	

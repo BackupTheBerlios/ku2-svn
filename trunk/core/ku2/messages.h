@@ -85,6 +85,29 @@ goto __ku_parse_w##__message
 #define KU_LEAVE_BLOCK \
 goto __ku_block_end
 
+	
+	
+	
+	
+#define KU_DEFINE_TAIL( __id ) \
+__label__ __ku_tail_W##__id
+
+#define KU_BEGIN_TAIL \
+{ \
+	__label__ __ku_tail_end; \
+	goto __ku_tail_end \
+
+#define KU_END_TAIL \
+	__ku_tail_end:; \
+}
+
+#define KU_TAIL( __id ) \
+__ku_tail_W##id
+	
+	
+	
+	
+	
 #ifdef __cplusplus
 }
 #endif

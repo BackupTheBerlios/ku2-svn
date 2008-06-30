@@ -501,7 +501,7 @@ kucode_t cfg_process( cfg_session_t *session )
 			if ( *st.prefix != 0 ) // дополнение префикса к идентификатору
 				sq.id = qstr(st.prefix, cur); else
 				sq.id = cur;
-			st.q = abtree_search(session->qtree, &sq);
+			st.q = ku_abtree_search(session->qtree, &sq);
 		}	else
 			st.q = NULL;
 		if ( st.q == NULL )
