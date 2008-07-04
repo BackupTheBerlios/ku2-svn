@@ -83,7 +83,7 @@ preturn KU_GET_ERROR()
 
 //! Set the error code and return it from the function.
 #define KU_ERRQ( __ecode ) \
-preturn (KU_SET_ERROR(__ecode));
+preturnp("error: %d", __ecode) (KU_SET_ERROR(__ecode));
 
 //! Set the error code and return the value from the function.
 #define KU_ERRQ_VALUE(__ecode, __value) \
