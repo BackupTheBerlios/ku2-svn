@@ -79,17 +79,20 @@ ku_get_error()
 
 //! Return the last error code from the function.
 #define KU_ERRQ_PASS() \
-preturn KU_GET_ERROR()
+preturnp("passed error") KU_GET_ERROR()
+
+#define KU_ERRQ_PASS_VALUE(__value) \
+preturnp("passed error") __value
 
 //! Set the error code and return it from the function.
 #define KU_ERRQ( __ecode ) \
-preturnp("error: %d", __ecode) (KU_SET_ERROR(__ecode));
+preturnp("error: %d", __ecode) (KU_SET_ERROR(__ecode))
 
 //! Set the error code and return the value from the function.
 #define KU_ERRQ_VALUE(__ecode, __value) \
 { \
 	KU_SET_ERROR(__ecode); \
-	preturn __value; \
+	preturnp("error: %d", __ecode) __value; \
 }
 
 #define KU_ERRQ_BLOCKED() \
