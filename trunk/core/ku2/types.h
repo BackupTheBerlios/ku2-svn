@@ -84,9 +84,9 @@ int (*ku_comp_f)( const void *a, const void *b );
 /*!
 	This function type is used to calulate the intervals between data and left
 	limit, and data and right limit.
-	\param left Left limit.
+	\param left Left limit or \e NULL for possible minimum.
 	\param data Data.
-	\param right Right limit.
+	\param right Right limit or \e NULL for possible maximum.
 	\param [out] interval Two integer`s array: \n
 	\b interval[0] between data and left limit. \n
 	\b interval[1] between data and right limit.

@@ -21,6 +21,22 @@ static int vertex_comp_f( const void *a, const void *b )
 	return ((ku_graph_vertex_t*)a)->id - ((ku_graph_vertex_t*)b)->id;
 }
 
+static void vertex_interval_f( const void *left, \
+							   const void *data, \
+							   const void *right, \
+							   uint *interval )
+{
+	if ( left )
+		interval[0] = ((ku_graph_vertex_t*)data)->id - \
+					  ((ku_graph_vertex_t*)left)->id - 1;
+		interval[0] = ((ku_graph_vertex_t*)data)->id;
+	
+	if ( right )
+		interval[0] = ((ku_graph_vertex_t*)right)->id - \
+					  ((ku_graph_vertex_t*)data)->id - 1;
+		interval[0] = ((uint)-2) - ((ku_graph_vertex_t*)data)->id;
+}
+
 ku_graph_t *ku_graph_create( ku_comp_f func, ku_flag32_t flags )
 {
 	ku_graph_t *graph;
@@ -59,7 +75,10 @@ kucode_t ku_graph_clear( ku_graph_t *graph, ku_act_f freef )
 	
 	int vertex_free_f( void *data )
 	{
-		_
+		pdebug("data: %p, freef: %p\n", data, freef);
+		if ( freef )
+			freef(((ku_graph_vertex_t*)data)->data);
+		dfree(data);
 		return 0;
 	}
 	
@@ -71,14 +90,99 @@ kucode_t ku_graph_clear( ku_graph_t *graph, ku_act_f freef )
 
 uint ku_graph_ins( ku_graph_t *graph, const void *data )
 {
+	ku_graph_vertex_t *vertex;
+	uint id;
+	int pos;
 	pstartp("graph: %p, data: %p", graph, data);
-	KU_ERRQ_VALUE(KE_NOIMPLEM, (uint)-1);
+	
+	// Поиск идентификатора:
+	vertex = ku_abtree_unused_index(graph->vertexes, vertex_interval_f, &pos);
+	if ( vertex == NULL )
+		KU_ERRQ_VALUE(KE_FULL, (uint)-1);
+	id = vertex->id + (pos > 0 ? 1 : -1);
+	
+	// Выделение памяти и присоединение к графу:
+	vertex = (ku_graph_vertex_t*)dmalloc(sizeof(ku_graph_vertex_t));
+	if ( vertex == NULL )
+		KU_ERRQ_VALUE(KE_MEMORY, (uint)-1);
+	
+	vertex->id = id;
+	vertex->data = (void*)data;
+	vertex->tmp = 0;
+	if ( graph->orient )
+	{
+		vertex->next_cnt = vertex->prev_cnt = 0;
+		vertex->next = vertex->prev = NULL;
+	}	else
+	{
+		vertex->near_cnt = 0;
+		vertex->near = NULL;
+	}
+	
+	if ( ku_abtree_ins(graph->vertexes, vertex) != KE_NONE )
+	{
+		dfree(vertex);
+		KU_ERRQ_PASS_VALUE((uint)-1);
+	}
+	
+	preturnp("id: %u", id) id;
 }
 
 kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 					   ku_act_f freef, ku_flag32_t flags )
 {
+	ku_graph_vertex_t *vertex, pattern;
 	pstartp("graph: %p, id: %p, freef: %p, flags: %u", graph, id, freef, flags);
+	
+	// Поиск вершины:
+	pattern.id = id;
+	vertex = ku_abtree_search(graph->vertexes, &pattern);
+	if ( vertex == NULL )
+		KU_ERRQ(KE_NOTFOUND);
+	
+	// Перенос ссылок (дуг):
+	if ( (flags&KUF_GRAPH_TRANSP) == KUF_GRAPH_TRANSP )
+	{
+		int i, j, total = 0;
+		if ( graph->orient )
+		{
+			//for ( i = 0; i < 
+		}	else
+		{
+			// Подсчёт количества связей:
+			for ( i = 0; i < vertex->near_cnt; i++ )
+			{
+				if ( vertex->near[i] == vertex )
+					continue;
+				vertex->near[i]->tmp++;
+			}
+			
+			// Каждого соседа..
+			for ( i = 0; i < vertex->near_cnt; i++ )
+			{
+				if ( vertex->near[i] == vertex )
+					continue;
+				
+				// .. меняем количество соседних вершин:
+				if ( vertex->near[i]->tmp != vertex->near[i]->near_cnt )
+				{
+					ku_graph_vertex_t **nv;
+					nv = (ku_graph_vertex_t**)drealloc(vertex->near[i]->near
+				}
+				
+				// ..пересоединяем с _каждым_ _другим_
+				//   соседом удаляемой вершины:
+				for ( j = 0; j < vertex->near_cnt; j++ )
+				{
+					if ( (i == j) || (vertex->near[j] == vertex) )
+						continue;
+					
+					
+				}
+			}
+		}
+	}
+	
 	KU_ERRQ(KE_NOIMPLEM);
 }
 

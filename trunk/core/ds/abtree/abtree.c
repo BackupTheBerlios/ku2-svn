@@ -493,7 +493,7 @@ void *ku_abtree_unused_index( ku_tree_t *tree, ku_interval_f intf, int *pos )
 	ku_tree_node_t *cur = tree->root;
 	void *left = NULL, *right = NULL;
 	uint available[2];
-	pstart();
+	pstartp("tree: %p, intf: %p, pos: %p", tree, intf, pos);
 	
 	for (;;)
 	{
@@ -501,18 +501,22 @@ void *ku_abtree_unused_index( ku_tree_t *tree, ku_interval_f intf, int *pos )
 		if ( cur->lcnt < available[0] )
 		{
 			if ( cur->lcnt )
-				cur = cur->left; else
-				break;
+			{
+				right = cur->data;
+				cur = cur->left;
+			}	else break;
 		}	else
 		if ( cur->rcnt < available[1] )
 		{
 			if ( cur->rcnt )
-				cur = cur->right; else
-				break;
+			{
+				left = cur->data;
+				cur = cur->right;
+			}	else break;
 		}	else
-			preturn NULL;
+			preturnp("NULL") NULL;
 	}
 	
 	*pos = available[0] ? -1 : 1;
-	preturn cur->data;
+	preturnp("*pos: %d, data: %p", *pos, cur->data) cur->data;
 }

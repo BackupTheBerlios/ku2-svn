@@ -18,16 +18,28 @@
 
 #ifndef KU__OTHER_H__
 #define KU__OTHER_H__
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "ku2/hosts.h"
+KU_BEGIN_DECLS
 
 #include "ku2/ecode.h"
 #include "ku2/types.h"
 
-#define ESC_BOLD( __txt ) "\033[1m"__txt"\033[0m"
-#define ESC_UNDERLINED( __txt ) "\033[4m"__txt"\033[0m"
-#define ESC_BLINK( __txt ) "\033[5m"__txt"\033[0m"
+//! \name ESC sequences for setting the text output attributes.
+//! \@{
+#define ESC_BEGIN( __txt ) "\033[0m"__txt
+#define ESC_END( __txt ) __txt"\033[0m"
+#define ESC_CBLACK( __txt ) "\033[30m"__txt
+#define ESC_CRED( __txt ) "\033[31m"__txt
+#define ESC_CGREEN( __txt ) "\033[32m"__txt
+#define ESC_CYELLOW( __txt ) "\033[33m"__txt
+#define ESC_CBLUE( __txt ) "\033[34m"__txt
+#define ESC_CMAGENTA( __txt ) "\033[35m"__txt
+#define ESC_CCYAN( __txt ) "\033[36m"__txt
+#define ESC_CWHITE( __txt ) "\033[37m"__txt
+
+#define ESC_BOLD( __txt ) "\033[0;1m"__txt"\033[0m"
+#define ESC_UNDERLINED( __txt ) "\033[0;4m"__txt"\033[0m"
+#define ESC_BLINK( __txt ) "\033[0;5m"__txt"\033[0m"
 
 #define ESC_BLACK( __txt ) "\033[0;30m"__txt"\033[0m"
 #define ESC_RED( __txt ) "\033[0;31m"__txt"\033[0m"
@@ -46,6 +58,7 @@ extern "C" {
 #define ESC_BMAGENTA( __txt ) "\033[0;1;35m"__txt"\033[0m"
 #define ESC_BCYAN( __txt ) "\033[0;1;36m"__txt"\033[0m"
 #define ESC_BWHITE( __txt ) "\033[0;1;37m"__txt"\033[0m"
+//! \@}
 
 //! Get the largest value.
 #define MAXint( a, b ) ((a>b)?(a):(b))
@@ -210,7 +223,5 @@ kucode_t ku_strtobool( const char *str, int *i );
 */
 uint ku_pow10ui( uint pow );
 
-#ifdef __cplusplus
-}
-#endif
+KU_END_DECLS
 #endif
