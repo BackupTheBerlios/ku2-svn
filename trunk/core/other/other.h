@@ -18,7 +18,7 @@
 
 #ifndef KU__OTHER_H__
 #define KU__OTHER_H__
-#include "ku2/hosts.h"
+#include "ku2/host.h"
 KU_BEGIN_DECLS
 
 #include "ku2/ecode.h"

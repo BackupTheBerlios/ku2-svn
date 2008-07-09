@@ -134,6 +134,14 @@ kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 	ku_graph_vertex_t *vertex, pattern;
 	pstartp("graph: %p, id: %p, freef: %p, flags: %u", graph, id, freef, flags);
 	
+	// >>>>>>>>>>>>>>>>>>>>>>>>>
+	// Онулить используемые временные переменные:
+	void __clear_tmp_vars( void )
+	{
+		
+	}
+	// <<<<<<<<<<<<<<<<<<<<<<<<<
+	
 	// Поиск вершины:
 	pattern.id = id;
 	vertex = ku_abtree_search(graph->vertexes, &pattern);
@@ -143,32 +151,59 @@ kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 	// Перенос ссылок (дуг):
 	if ( (flags&KUF_GRAPH_TRANSP) == KUF_GRAPH_TRANSP )
 	{
-		int i, j, total = 0;
+		uint i, j, k, total = 0;
 		if ( graph->orient )
 		{
 			//for ( i = 0; i < 
 		}	else
 		{
-			// Подсчёт количества связей:
+			// Подсчёт количества связей у соседей:
 			for ( i = 0; i < vertex->near_cnt; i++ )
 			{
 				if ( vertex->near[i] == vertex )
 					continue;
 				vertex->near[i]->tmp++;
+				total++;
 			}
 			
-			// Каждого соседа..
+			// Для каждого соседа..
 			for ( i = 0; i < vertex->near_cnt; i++ )
 			{
-				if ( vertex->near[i] == vertex )
+				ku_graph_vertex_t *const v_near = vertex->near[i];
+				
+				if ( v_near == vertex )
 					continue;
 				
+				// .. ищем одну связку с удаляемой вершиной:
+				for ( k = 0; v_near->near[k] != vertex; k++ );
+				v_near->near[k] = NULL;
+				
 				// .. меняем количество соседних вершин:
-				if ( vertex->near[i]->tmp != vertex->near[i]->near_cnt )
+				if ( v_near->tmp != v_near->near_cnt )
 				{
+					uint ncnt = // новое кол-во дуг у вершины
+						(v_near->near_cnt - v_near->tmp) + // кол-во свободных от удаляемой вершины дуг
+						 v_near->tmp * (total-1);			 // кол-во связанных с удал. вершиной дуг
+#warning esli udaljajemaja ver6ina ne s 4em ne svjazana, to budet fignja
 					ku_graph_vertex_t **nv;
-					nv = (ku_graph_vertex_t**)drealloc(vertex->near[i]->near
-				}
+					
+					nv = (ku_graph_vertex_t**) \
+						  drealloc(v_near->near, \
+								   sizeof(ku_graph_vertex_t*)*ncnt);
+					if ( nv == NULL )
+					{
+						__clear_tmp_vars();
+						KU_ERRQ(KE_MEMORY);
+					}
+					
+					// .. очищаем новые связки:
+					for ( j = v_near->near_cnt; j < ncnt; j++ )
+						v_near->near[j] = NULL;
+					
+					v_near->near = nv;
+					v_near->near_cnt = ncnt;
+				}	else
+					k = 0;
 				
 				// ..пересоединяем с _каждым_ _другим_
 				//   соседом удаляемой вершины:
@@ -177,7 +212,9 @@ kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 					if ( (i == j) || (vertex->near[j] == vertex) )
 						continue;
 					
-					
+					while ( v_near->near[k] != NULL )
+						k++;
+					v_near->near[k] = vertex->near[j];
 				}
 			}
 		}
