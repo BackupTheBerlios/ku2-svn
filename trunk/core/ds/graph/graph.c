@@ -46,7 +46,7 @@ ku_graph_t *ku_graph_create( ku_comp_f func, ku_flag32_t flags )
 	if ( graph == NULL )
 		KU_ERRQ_VALUE(KE_MEMORY, NULL);
 	
-	graph->orient = ((flags&KUF_GRAPH_ORIENT) == KUF_GRAPH_ORIENT) ? 1 : 0;
+	graph->directed = ((flags&KUF_GRAPH_DIRECTED) == KUF_GRAPH_DIRECTED) ? 1 : 0;
 	graph->cmpf = func;
 	graph->cur = NULL;
 	if ( (graph->vertexes = ku_abtree_create(vertex_comp_f, 0)) == NULL )
@@ -109,7 +109,7 @@ uint ku_graph_ins( ku_graph_t *graph, const void *data )
 	vertex->id = id;
 	vertex->data = (void*)data;
 	vertex->tmp = 0;
-	if ( graph->orient )
+	if ( graph->directed )
 	{
 		vertex->next_cnt = vertex->prev_cnt = 0;
 		vertex->next = vertex->prev = NULL;
@@ -135,10 +135,14 @@ kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 	pstartp("graph: %p, id: %p, freef: %p, flags: %u", graph, id, freef, flags);
 	
 	// >>>>>>>>>>>>>>>>>>>>>>>>>
-	// Онулить используемые временные переменные:
-	void __clear_tmp_vars( void )
+	// Освободить память вершины:
+	int vertex_free_f( void *data )
 	{
-		
+		pdebug("data: %p, freef: %p\n", data, freef);
+		if ( freef )
+			freef(((ku_graph_vertex_t*)data)->data);
+		dfree(data);
+		return 0;
 	}
 	// <<<<<<<<<<<<<<<<<<<<<<<<<
 	
@@ -152,9 +156,10 @@ kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 	if ( (flags&KUF_GRAPH_TRANSP) == KUF_GRAPH_TRANSP )
 	{
 		uint i, j, k, total = 0;
-		if ( graph->orient )
+		if ( graph->directed )
 		{
-			//for ( i = 0; i < 
+			#warning Not implemented yet (Directed graph transponation)
+			KU_ERRQ(KE_NOIMPLEM);
 		}	else
 		{
 			// Подсчёт количества связей у соседей:
@@ -165,62 +170,82 @@ kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 				vertex->near[i]->tmp++;
 				total++;
 			}
+			/*
+			 *	UP TO NOW:
+			 *	 vertex->near[i]->tmp == кол-во дуг соседа, соеденённых с удаляемой в.
+			 *	 total == кол-во дуг (не петель!) у удаляемой вершины
+			 */
 			
-			// Для каждого соседа..
+			// Для каждого ранее нерассмотренного соседа..
 			for ( i = 0; i < vertex->near_cnt; i++ )
 			{
 				ku_graph_vertex_t *const v_near = vertex->near[i];
+				uint new_near_cnt;
 				
-				if ( v_near == vertex )
+				if ( (v_near == vertex) || (v_near->tmp == 0) )
 					continue;
 				
-				// .. ищем одну связку с удаляемой вершиной:
-				for ( k = 0; v_near->near[k] != vertex; k++ );
-				v_near->near[k] = NULL;
+				// .. ищем новое кол-во дуг (после транспонации):
+				new_near_cnt =
+					(v_near->near_cnt - v_near->tmp) + // кол-во свободных от удаляемой вершины дуг
+					 v_near->tmp * (total-1);		   // кол-во связанных с удал. вершиной дуг
 				
 				// .. меняем количество соседних вершин:
-				if ( v_near->tmp != v_near->near_cnt )
+				if ( new_near_cnt != v_near->near_cnt )
 				{
-					uint ncnt = // новое кол-во дуг у вершины
-						(v_near->near_cnt - v_near->tmp) + // кол-во свободных от удаляемой вершины дуг
-						 v_near->tmp * (total-1);			 // кол-во связанных с удал. вершиной дуг
-#warning esli udaljajemaja ver6ina ne s 4em ne svjazana, to budet fignja
-					ku_graph_vertex_t **nv;
+					ku_graph_vertex_t **new_vertex_list;
 					
-					nv = (ku_graph_vertex_t**) \
-						  drealloc(v_near->near, \
-								   sizeof(ku_graph_vertex_t*)*ncnt);
-					if ( nv == NULL )
+					/*
+						Если текущий сосед является единственным у удаляемой
+						вершины, то кол-во дуг у него уменьшится.
+					*/
+					if ( total == 1 )
 					{
-						__clear_tmp_vars();
+						for ( k = 0; v_near->near[k] != vertex; k++ );
+						v_near->near[k] = v_near->near[v_near->near_cnt-1];
+					}
+					
+					// .. меняем размер списка дуг:
+					new_vertex_list = (ku_graph_vertex_t**) \
+						drealloc(v_near->near, \
+								 sizeof(ku_graph_vertex_t*)*new_near_cnt);
+					if ( new_vertex_list == NULL )
+					{
+						uint i;
+						// Очистка временных переменных:
+						for ( i = 0; i < vertex->near_cnt; i++ )
+							vertex->near[i]->tmp = 0; 
 						KU_ERRQ(KE_MEMORY);
 					}
 					
 					// .. очищаем новые связки:
-					for ( j = v_near->near_cnt; j < ncnt; j++ )
-						v_near->near[j] = NULL;
+					for ( j = v_near->near_cnt; j < new_near_cnt; j++ )
+						v_near->near[j] = vertex;
 					
-					v_near->near = nv;
-					v_near->near_cnt = ncnt;
-				}	else
-					k = 0;
+					v_near->near = new_vertex_list;
+					v_near->near_cnt = new_near_cnt;
+				}
 				
 				// ..пересоединяем с _каждым_ _другим_
 				//   соседом удаляемой вершины:
-				for ( j = 0; j < vertex->near_cnt; j++ )
-				{
-					if ( (i == j) || (vertex->near[j] == vertex) )
-						continue;
-					
-					while ( v_near->near[k] != NULL )
-						k++;
-					v_near->near[k] = vertex->near[j];
-				}
+				while ( --v_near->tmp >= 0 )
+					for ( j = k = 0; j < vertex->near_cnt; j++ )
+					{
+						if ( (i == j) || (vertex->near[j] == vertex) )
+							continue;
+						
+						while ( v_near->near[k] != vertex )
+							k++;
+						v_near->near[k++] = vertex->near[j];
+					}
 			}
 		}
 	}
 	
-	KU_ERRQ(KE_NOIMPLEM);
+	// Удаление вершины:
+	ku_avoid(ku_abtree_rem(graph->vertexes, vertex, vertex_free_f) != KE_NONE);
+	
+	preturn KE_NONE;
 }
 
 kucode_t ku_graph_link( ku_graph_t *graph,

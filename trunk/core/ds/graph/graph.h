@@ -64,7 +64,7 @@ struct STRUCT_GRAPH_VERTEX
 typedef
 struct STRUCT_GRAPH
 {
-	int orient;		//!< Is this graph oriented?
+	int directed;	//!< Is this graph oriented?
 	ku_comp_f cmpf;	//!< Comparing function.
 	ku_tree_t *vertexes;
 					//!< List of vertexes, indexed by id.
@@ -75,10 +75,10 @@ struct STRUCT_GRAPH
 //! \name Graph flags.
 //! @{
 /*!
-	Graph should be oriented. \n
+	Graph should be directed. \n
 	Used in ku_graph_create().
 */
-#define KUF_GRAPH_ORIENT	1
+#define KUF_GRAPH_DIRECTED	1
 
 /*!
 	Create links in both directions when linking.
