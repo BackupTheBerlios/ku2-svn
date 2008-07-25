@@ -65,14 +65,14 @@ cfg_session_t *cfg_open( const char *file, ku_flag32_t flags )
 kucode_t cfg_close( cfg_session_t *session )
 {
 	pstart();
-
+	
 	fclose(session->cfgf);
 	if ( session->qtree )
 		abtree_free(session->qtree, qtree_free);
 	if ( session->vsp )
 		vspace_undef(session->vsp);
 	dfree(session);
-
+	
 	preturn KE_NONE;
 }
 
@@ -176,7 +176,7 @@ kucode_t cfg_query( cfg_session_t *session, const char *rules, ... )
 			mode = 0;
 			comp = len_fmt;
 		}
-
+		
 		// создание и добавление запроса в сессию
 		q = (cfg_query_t*)dmalloc(sizeof(cfg_query_t) + \
 								  sizeof(char)*(len_id+len_fmt+2) + \
@@ -187,17 +187,17 @@ kucode_t cfg_query( cfg_session_t *session, const char *rules, ... )
 		q->id = ((char*)q)+sizeof(cfg_query_t);
 		q->fmt = ((char*)q->id)+sizeof(char)*(len_id+1);
 		q->ptr = (void**)(((char*)q->fmt)+sizeof(char)*(len_fmt+1));
-
+		
 		strncpy(q->id, b_id, len_id);
 		q->id[len_id] = 0;
 		strncpy(q->fmt, b_fmt, len_fmt);
 		q->fmt[len_fmt] = 0;
 		q->comp = comp;
 		q->mode = mode;
-
+		
 		for ( i = 0; i < (uint)(len_fmt); i++ )
 			q->ptr[i] = va_arg(va, void*);
-
+		
 		if ( abtree_ins(session->qtree, q) != KE_NONE )
 		{
 			dfree(q);
@@ -205,7 +205,7 @@ kucode_t cfg_query( cfg_session_t *session, const char *rules, ... )
 		}
 	}
 	va_end(va);
-
+	
 	preturn KE_NONE;
 	
 __cfg_inherited_error:
@@ -226,7 +226,7 @@ static inline char *cfg_readnext( const char **p )
 {
 	static char buf[CFG_BUFFER];
 	char *c = buf;
-
+	
 	cfg_sksp(p);
 	if ( **p == '"' )
 	{
@@ -235,9 +235,10 @@ static inline char *cfg_readnext( const char **p )
 		if ( *((*p)++) == 0 ) return NULL;
 	}	else
 	{
-		while ( isalnum(**p) || (**p == '_') ) *(c++) = *((*p)++);
+		while ( (isalnum(**p) || ispunct(**p)) && \
+			    !((**p == ',') || (**p == ';')) ) *(c++) = *((*p)++);
 	}
-
+	
 	cfg_sksp(p);
 	*c = 0;
 	return buf;
