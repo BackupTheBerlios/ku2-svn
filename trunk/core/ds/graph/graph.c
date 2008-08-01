@@ -131,7 +131,7 @@ uint ku_graph_ins( ku_graph_t *graph, const void *data )
 kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 					   ku_act_f freef, ku_flag32_t flags )
 {
-	ku_graph_vertex_t *vertex, pattern;
+	ku_graph_vertex_t *vertex;
 	pstartp("graph: %p, id: %p, freef: %p, flags: %u", graph, id, freef, flags);
 	
 	// >>>>>>>>>>>>>>>>>>>>>>>>>
@@ -147,8 +147,7 @@ kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 	// <<<<<<<<<<<<<<<<<<<<<<<<<
 	
 	// Поиск вершины:
-	pattern.id = id;
-	vertex = ku_abtree_search(graph->vertexes, &pattern);
+	vertex = ku_graph_vertex(graph, id);
 	if ( vertex == NULL )
 		KU_ERRQ(KE_NOTFOUND);
 	
@@ -248,11 +247,38 @@ kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 	preturn KE_NONE;
 }
 
+static inline int __ku_graph_link( ku_graph_t *graph,
+								   ku_graph_vertex_t *vertex,
+								   ku_graph_vertex_t *dest )
+{
+	
+}
+
 kucode_t ku_graph_link( ku_graph_t *graph,
 					    uint start_node, uint end_node, ku_flag32_t flags )
 {
+	ku_graph_vertex *start, *end;
 	pstartp("graph: %p, start: %u, end: %u, flags: %u",
 			graph, start_node, end_node, flags);
+	
+	if ( ((start = ku_graph_vertex(graph, start_node)) == NULL) ||
+		 ((end = ku_graph_vertex(graph, end_node)) == NULL) )
+		KU_ERRQ(KE_NOTFOUND);
+	
+	if ( graph->directed )
+	{
+		// Создаём связку:
+		
+		
+		// Если необходимо, создаём связку в обратную сторону:
+		if ( (flags&KUF_GRAPH_DBL_LINK) == KUF_GRAPH_DBL_LINK )
+		{
+		}
+	}	else
+	{
+		
+	}
+	
 	KU_ERRQ(KE_NOIMPLEM);
 }
 
@@ -302,4 +328,15 @@ void *ku_graph_search_by_data( ku_graph_t *graph, const void *data )
 {
 	pstartp("graph: %p, data: %p", graph, data);
 	KU_ERRQ_VALUE(KE_NOIMPLEM, NULL);
+}
+
+ku_graph_vertex_t *ku_graph_vertex( ku_graph_t *graph, uint id )
+{
+	ku_graph_vertex_t *vertex, pattern;
+	pstartp("graph: %p, id: %u", graph, id);
+	
+	pattern.id = id;
+	vertex = ku_abtree_search(graph->vertexes, &pattern);
+	
+	preturnp("vertex: %p", vertex) vertex;
 }

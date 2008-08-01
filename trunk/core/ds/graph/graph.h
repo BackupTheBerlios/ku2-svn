@@ -73,7 +73,7 @@ struct STRUCT_GRAPH
 }	ku_graph_t;
 
 //! \name Graph flags.
-//! @{
+//! \{
 /*!
 	Graph should be directed. \n
 	Used in ku_graph_create().
@@ -82,7 +82,7 @@ struct STRUCT_GRAPH
 
 /*!
 	Create links in both directions when linking.
-	Has effect only if graph is oriented. \n
+	Has effect only if graph is directed. \n
 	Used in ku_graph_link().
 */
 #define KUF_GRAPH_DBL_LINK	2
@@ -98,7 +98,7 @@ struct STRUCT_GRAPH
 	Used in ku_graph_rem().
 */
 #define KUF_GRAPH_TRANSP	4
-//! @}
+//! \}
 
 //! Create a graph instance.
 ku_graph_t *ku_graph_create( ku_comp_f func, ku_flag32_t flags );
@@ -124,6 +124,16 @@ kucode_t ku_graph_clear( ku_graph_t *graph, ku_act_f freef );
 uint ku_graph_ins( ku_graph_t *graph, const void *data );
 
 //! Remove a particular vertex (using its ID) from the graph.
+/*!
+	Removes a vertex with specified ID from the graph.
+	\param graph Graph to deal with.
+	\param id Vertex ID to be deleted.
+	\param freef Function to free vertex data, \e NULL for doing nothing.
+	\param flags Flags. \n Valid flags are: \ref KUF_GRAPH_TRANSP.
+	\retval KE_NONE No error.
+	\retval KE_NOTFOUND No vertex with specified ID was found.
+	\retval KE_MEMORY Failed to reallocate space for list of linked vertexes.
+*/
 kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 					   ku_act_f freef, ku_flag32_t flags );
 
@@ -141,6 +151,8 @@ void *ku_graph_goto_prev( ku_graph_t *graph, uint index );
 
 void *ku_graph_search( ku_graph_t *graph, uint id );
 void *ku_graph_search_by_data( ku_graph_t *graph, const void *data );
+
+ku_graph_vertex_t *ku_graph_vertex( ku_graph_t *graph, uint id );
 
 KU_END_DECLS
 #endif
