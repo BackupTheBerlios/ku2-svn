@@ -85,17 +85,24 @@ int (*ku_comp_f)( const void *a, const void *b );
 	This function type is used to calulate the intervals between data and left
 	limit, and data and right limit.
 	\param left Left limit or \e NULL for possible minimum.
-	\param data Data.
+	\param data Data or \e NULL to search for minimum or maximum.
 	\param right Right limit or \e NULL for possible maximum.
 	\param [out] interval Two integer`s array: \n
 	\b interval[0] between data and left limit. \n
 	\b interval[1] between data and right limit.
-	\note For [3, 6, 12] function should return [2, 5].
+	\return If \b data is not \e NULL then \e NULL is returned. If both
+		\b data is \e NULL then  the second minimum is returned.
+	\note For instance for set of integers [1..20]: \n
+	- For [3, 6, 12] function should set intervals to [2, 5]
+		and return \e NULL. \n
+	- For [NULL, 6, 7] function should set intervals to [5, 0]
+		and return \e NULL. \n
+	- For [NULL, NULL, 7] function should return pointer to 2.
 	\note \ref kucode should not be changed.
 */
 typedef
-void (*ku_interval_f)( const void *left, const void *data, const void *right, \
-					   uint *interval );
+void *(*ku_interval_f)( const void *left, const void *data, \
+					   const void *right, uint *interval );
 
 //! Action function.
 /*!

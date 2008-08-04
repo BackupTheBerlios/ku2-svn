@@ -81,9 +81,13 @@ struct STRUCT_GRAPH
 #define KUF_GRAPH_DIRECTED	1
 
 /*!
-	Create links in both directions when linking.
+	- Create links in both directions when linking.
 	Has effect only if graph is directed. \n
 	Used in ku_graph_link().
+	
+	- Remove links in both directions when unlinking.
+	Has effect only if graph is directed. \n
+	Used in ku_graph_ulink().
 */
 #define KUF_GRAPH_DBL_LINK	2
 
@@ -98,6 +102,12 @@ struct STRUCT_GRAPH
 	Used in ku_graph_rem().
 */
 #define KUF_GRAPH_TRANSP	4
+
+/*!
+	Remove all links between two vertexes rather then only one. \n
+	Used in ku_graph_ulink().
+*/
+#define KUF_GRAPH_ALL_LINK	8
 //! \}
 
 //! Create a graph instance.
@@ -138,8 +148,23 @@ kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 					   ku_act_f freef, ku_flag32_t flags );
 
 //! Link two vertexes together (using their IDs).
+/*!
+	Links two vertexes together (using their IDs).
+	\param graph Graph to deal with.
+	\param start_node ID of the linking start node.
+	\param end_node ID of the end node:
+		the node to which start node is linked.
+	\param flags Flags. \n Valid flags are: \ref KUF_GRAPH_DBL_LINK.
+	\retval KE_NONE No error.
+	\retval KE_NOTFOUND No vertex with specified ID was found.
+	\retval KE_MEMORY Failed to reallocate space for list of linked vertexes.
+*/
 kucode_t ku_graph_link( ku_graph_t *graph,
 					    uint start_node, uint end_node, ku_flag32_t flags );
+
+//! Unlink two linked vertexes (using their IDs).
+kucode_t ku_graph_ulink( ku_graph_t *graph,
+						 uint start_node, uint end_node, ku_flag32_t flags );
 
 kucode_t ku_graph_push( ku_graph_t *graph );
 kucode_t ku_graph_pop( ku_graph_t *graph );
@@ -152,7 +177,7 @@ void *ku_graph_goto_prev( ku_graph_t *graph, uint index );
 void *ku_graph_search( ku_graph_t *graph, uint id );
 void *ku_graph_search_by_data( ku_graph_t *graph, const void *data );
 
-ku_graph_vertex_t *ku_graph_vertex( ku_graph_t *graph, uint id );
+ku_graph_vertex_t *ku_graph_get_vertex( ku_graph_t *graph, uint id );
 
 KU_END_DECLS
 #endif

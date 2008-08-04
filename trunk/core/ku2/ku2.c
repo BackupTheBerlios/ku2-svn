@@ -40,7 +40,7 @@ void ku_printf_debug( const char *file, const char *func, int line, char *fmt, .
 
 void ku_pavoid_debug( const char *file, const char *func, int line )
 {
-	plog(gettext(ESC_BRED("Not avoided expression >> %s: %d [%s]\n")),
+	plog(gettext(ESC_BRED("Not avoided expression >> %s: %d [%s]")"\n"),
 		 file,
 		 line,
 		 func);
@@ -55,7 +55,7 @@ void *ku_malloc_debug( size_t size )
 		sizes += size;
 	}
 	#ifdef DEBUG_MEMORY
-	printf(ESC_BLUE("MALLOC : %p sized %d (total %d)\n"), ptr, size, mallocs);
+	printf(ESC_BLUE("MALLOC : %p sized %d (total %d)")"\n", ptr, size, mallocs);
 	#endif
 	return ptr;
 }
@@ -65,7 +65,7 @@ void ku_free_debug( void *__ptr )
 	free(__ptr);
 	mallocs--;
 	#ifdef DEBUG_MEMORY
-	printf(ESC_BLUE("FREE   : %p (total left %d)\n"), __ptr, mallocs);
+	printf(ESC_BLUE("FREE   : %p (total left %d)")"\n", __ptr, mallocs);
 	#endif
 }
 
@@ -73,7 +73,7 @@ void *ku_realloc_debug( void *__ptr, size_t size )
 {
 	void *ptr = realloc(__ptr, size);
 	#ifdef DEBUG_MEMORY
-	printf(ESC_BLUE("REALLOC: %p changed to %p sized %d (total %d)\n"),
+	printf(ESC_BLUE("REALLOC: %p changed to %p sized %d (total %d)")"\n",
 		   __ptr, ptr, size, mallocs);
 	#endif
 	return ptr;
@@ -83,7 +83,7 @@ void ku_memory_stat( void )
 {
 	plog(gettext(ESC_BBLUE("Memory status:\n" \
 		"\tbytes allocated: %d\n" \
-		"\tblocks: %u.\n")), sizes, mallocs);
+		"\tblocks: %u.")"\n"), sizes, mallocs);
 }
 
 void ku_func_debug( int status )
@@ -100,13 +100,13 @@ void ku_pstart_debug( const char *func, char *fmt, ... )
 			printf("   ");
 		ku_func_lvl++;
 		if ( fmt == NULL )
-			printf(ESC_BYELLOW("### ==> %s >>>\n"), func); else
+			printf(ESC_BYELLOW("### ==> %s >>>")"\n", func); else
 		{
 			va_list ap;
 			va_start(ap, fmt);
 			printf(ESC_BYELLOW("### ==> %s( "), func);
 			vprintf(fmt, ap);
-			printf(ESC_BYELLOW(" ) >>>\n"));
+			printf(ESC_BYELLOW(" ) >>>")"\n");
 			va_end(ap);
 		}
 	}
@@ -119,20 +119,20 @@ void ku_pstop_debug( const char *func, char *fmt, ... )
 		uint i;
 		if ( --ku_func_lvl == (uint)-1 )
 		{
-			printf(ESC_RED("NEGATIVE LEVEL ERROR ### <== %s <<<\n"), func);
+			printf(ESC_RED("NEGATIVE LEVEL ERROR ### <== %s <<<")"\n", func);
 			ku_func_lvl = 0;
 			return;
 		}
 		for ( i = 0; i < ku_func_lvl; i++ )
 			printf("   ");
 		if ( fmt == NULL )
-			printf(ESC_YELLOW("### <== %s <<<\n"), func); else
+			printf(ESC_YELLOW("### <== %s <<<")"\n", func); else
 		{
 			va_list ap;
 			va_start(ap, fmt);
 			printf(ESC_YELLOW("### <== %s( "), func);
 			vprintf(fmt, ap);
-			printf(ESC_YELLOW(" ) <<<\n"));
+			printf(ESC_YELLOW(" ) <<<")"\n");
 			va_end(ap);
 		}
 	}

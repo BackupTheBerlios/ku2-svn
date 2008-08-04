@@ -25,7 +25,7 @@ KU_BEGIN_DECLS
 #include "ku2/types.h"
 
 //! \name ESC sequences for setting the text output attributes.
-//! \@{
+//! \{
 #define ESC_BEGIN( __txt ) "\033[0m"__txt
 #define ESC_END( __txt ) __txt"\033[0m"
 #define ESC_CBLACK( __txt ) "\033[30m"__txt
@@ -58,7 +58,7 @@ KU_BEGIN_DECLS
 #define ESC_BMAGENTA( __txt ) "\033[0;1;35m"__txt"\033[0m"
 #define ESC_BCYAN( __txt ) "\033[0;1;36m"__txt"\033[0m"
 #define ESC_BWHITE( __txt ) "\033[0;1;37m"__txt"\033[0m"
-//! \@}
+//! \}
 
 //! Get the largest value.
 #define MAXint( a, b ) ((a>b)?(a):(b))

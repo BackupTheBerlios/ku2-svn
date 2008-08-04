@@ -16,25 +16,34 @@
 #include "ku2/memory.h"
 #include "ds/graph/graph.h"
 
+static const ku_graph_vertex_t second_min_vertex = {
+	.id = 1
+};
+
 static int vertex_comp_f( const void *a, const void *b )
 {
 	return ((ku_graph_vertex_t*)a)->id - ((ku_graph_vertex_t*)b)->id;
 }
 
-static void vertex_interval_f( const void *left, \
-							   const void *data, \
-							   const void *right, \
-							   uint *interval )
+static void *vertex_interval_f( const void *left, \
+							    const void *data, \
+							    const void *right, \
+							    uint *interval )
 {
+	if ( data == NULL )
+		return (void*)(&second_min_vertex);
+	
 	if ( left )
 		interval[0] = ((ku_graph_vertex_t*)data)->id - \
-					  ((ku_graph_vertex_t*)left)->id - 1;
+					  ((ku_graph_vertex_t*)left)->id - 1;	else
 		interval[0] = ((ku_graph_vertex_t*)data)->id;
 	
 	if ( right )
-		interval[0] = ((ku_graph_vertex_t*)right)->id - \
-					  ((ku_graph_vertex_t*)data)->id - 1;
-		interval[0] = ((uint)-2) - ((ku_graph_vertex_t*)data)->id;
+		interval[1] = ((ku_graph_vertex_t*)right)->id - \
+					  ((ku_graph_vertex_t*)data)->id - 1;	else
+		interval[1] = ((uint)-2) - ((ku_graph_vertex_t*)data)->id;
+	
+	return NULL;
 }
 
 ku_graph_t *ku_graph_create( ku_comp_f func, ku_flag32_t flags )
@@ -147,7 +156,7 @@ kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 	// <<<<<<<<<<<<<<<<<<<<<<<<<
 	
 	// Поиск вершины:
-	vertex = ku_graph_vertex(graph, id);
+	vertex = ku_graph_get_vertex(graph, id);
 	if ( vertex == NULL )
 		KU_ERRQ(KE_NOTFOUND);
 	
@@ -239,6 +248,9 @@ kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 					}
 			}
 		}
+	}	else
+	{
+		#warning Links should be removed here!
 	}
 	
 	// Удаление вершины:
@@ -247,38 +259,97 @@ kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 	preturn KE_NONE;
 }
 
-static inline int __ku_graph_link( ku_graph_t *graph,
-								   ku_graph_vertex_t *vertex,
-								   ku_graph_vertex_t *dest )
+/*
+	Соединить 2 вершины.
+	В случае ошибки памяти функция возвращает -1, при этом,
+		изначальная структура вершин не меняется.
+	В случае успеха, функция возвращает 0.
+*/
+static inline int __ku_graph_link( ku_graph_vertex_t *vertex,
+								   ku_graph_vertex_t *dest,
+								   int directed )
 {
+	ku_graph_vertex_t
+		***next, **next_vl,		// List of Next Vertexes
+		***prev, **prev_vl;		// List of Previous Vertexes
+	uint *next_cnt, *prev_cnt;
 	
+	if ( directed )
+	{
+		next = &vertex->next;
+		next_cnt = &vertex->next_cnt;
+		prev = &dest->prev;
+		prev_cnt = &dest->prev_cnt;
+	}	else
+	{
+		next = &vertex->near;
+		next_cnt = &vertex->near_cnt;
+		prev = &dest->near;
+		prev_cnt = &dest->near_cnt;
+	}
+	
+	next_vl = (ku_graph_vertex_t**) \
+		drealloc(*next, sizeof(ku_graph_vertex_t*) * (vertex->next_cnt+1));
+	if ( next_vl == NULL )
+		return -1;
+	
+	prev_vl = (ku_graph_vertex_t**) \
+		drealloc(*prev, sizeof(ku_graph_vertex_t*) * (dest->prev_cnt+1));
+	if ( prev_vl == NULL )
+	{
+		// Возвращаем vertex->next на место:
+		*next = (ku_graph_vertex_t**) \
+			drealloc(next_vl, sizeof(ku_graph_vertex_t*) * vertex->next_cnt);
+		if ( *next == NULL )
+		{
+			// Если вдруг не удалось обратно уменьшить размер выделенной
+			// памяти под vertex->next, то оставляем в пямяти место под
+			// один лишний элемент, который не будет учитываться другими
+			// функциями (vertex->next_cnt остаётся неизменным)
+			*next = next_vl;
+		}
+		return -1;
+	}
+	
+	(*next = next_vl)[*next_cnt++] = dest;
+	(*prev = prev_vl)[*prev_cnt++] = vertex;
+	
+	return 0;
 }
 
 kucode_t ku_graph_link( ku_graph_t *graph,
 					    uint start_node, uint end_node, ku_flag32_t flags )
 {
-	ku_graph_vertex *start, *end;
+	ku_graph_vertex_t *start, *end;
 	pstartp("graph: %p, start: %u, end: %u, flags: %u",
 			graph, start_node, end_node, flags);
 	
-	if ( ((start = ku_graph_vertex(graph, start_node)) == NULL) ||
-		 ((end = ku_graph_vertex(graph, end_node)) == NULL) )
+	if ( ((start = ku_graph_get_vertex(graph, start_node)) == NULL) ||
+		 ((end = ku_graph_get_vertex(graph, end_node)) == NULL) )
 		KU_ERRQ(KE_NOTFOUND);
 	
-	if ( graph->directed )
+	// Создаём связку:
+	if ( __ku_graph_link(start, end, graph->directed) == -1 )
+		KU_ERRQ(KE_MEMORY);
+	
+	// Если необходимо, создаём связку в обратную сторону:
+	if ( graph->directed && ((flags&KUF_GRAPH_DBL_LINK) == KUF_GRAPH_DBL_LINK) )
 	{
-		// Создаём связку:
-		
-		
-		// Если необходимо, создаём связку в обратную сторону:
-		if ( (flags&KUF_GRAPH_DBL_LINK) == KUF_GRAPH_DBL_LINK )
+		if ( __ku_graph_link(end, start, 1) == -1 )
 		{
+#warning Here should be restored status quo
+			KU_ERRQ(KE_MEMORY);
 		}
-	}	else
-	{
-		
 	}
 	
+	preturn KE_NONE;
+}
+
+kucode_t ku_graph_ulink( ku_graph_t *graph,
+						 uint start_node, uint end_node, ku_flag32_t flags )
+{
+	pstartp("graph: %p, start: %u, end: %u, flags: %u",
+			graph, start_node, end_node, flags);
 	KU_ERRQ(KE_NOIMPLEM);
 }
 
@@ -330,7 +401,7 @@ void *ku_graph_search_by_data( ku_graph_t *graph, const void *data )
 	KU_ERRQ_VALUE(KE_NOIMPLEM, NULL);
 }
 
-ku_graph_vertex_t *ku_graph_vertex( ku_graph_t *graph, uint id )
+ku_graph_vertex_t *ku_graph_get_vertex( ku_graph_t *graph, uint id )
 {
 	ku_graph_vertex_t *vertex, pattern;
 	pstartp("graph: %p, id: %u", graph, id);
