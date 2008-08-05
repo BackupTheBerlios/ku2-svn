@@ -114,6 +114,9 @@ void *(*ku_interval_f)( const void *left, const void *data, \
 typedef
 int (*ku_act_f)( void *data );
 
+typedef
+void *(*ku_actP_f)( void *data );
+
 #ifdef __cplusplus
 }
 #endif

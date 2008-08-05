@@ -11,6 +11,8 @@
 		kane@mail.berlios.de
 */
 
+#include <stdio.h>
+
 #include "ku2/ecode.h"
 #include "ku2/debug.h"
 #include "ku2/memory.h"
@@ -311,12 +313,13 @@ static inline int __ku_graph_link( ku_graph_vertex_t *vertex,
 		return -1;
 	}
 	
-	(*next = next_vl)[*next_cnt++] = dest;
-	(*prev = prev_vl)[*prev_cnt++] = vertex;
+	(*next = next_vl)[(*next_cnt)++] = dest;
+	(*prev = prev_vl)[(*prev_cnt)++] = vertex;
 	
 	return 0;
 }
 
+#warning If start_node and end_node are the same, then there is an error..
 kucode_t ku_graph_link( ku_graph_t *graph,
 					    uint start_node, uint end_node, ku_flag32_t flags )
 {
@@ -410,4 +413,53 @@ ku_graph_vertex_t *ku_graph_get_vertex( ku_graph_t *graph, uint id )
 	vertex = ku_abtree_search(graph->vertexes, &pattern);
 	
 	preturnp("vertex: %p", vertex) vertex;
+}
+
+void ku_graph_printout( ku_graph_t *graph, ku_actP_f outf )
+{
+	ku_graph_vertex_t *vertex;
+	pstartp("graph: %p, outf: %p", graph, outf);
+	
+	ku_abtree_goto_first(graph->vertexes);
+	
+	while ( (vertex = ku_abtree_goto_next(graph->vertexes)) != NULL )
+	{
+		uint i;
+		
+		if ( outf )
+			printf("ID: %u; DATA: %s; ", \
+				   vertex->id, (char*)outf(vertex->data)); else
+			printf("ID: %u; ", vertex->id);
+		
+		if ( graph->directed )
+		{
+			printf("NEXT: ");
+			if ( vertex->next_cnt > 0 )
+			{
+				for ( i = 0; i < vertex->next_cnt; i++ )
+					printf("%u; ", vertex->next[i]->id);
+			}	else
+				printf("(none); ");
+			printf("PREV: ");
+			if ( vertex->prev_cnt > 0 )
+			{
+				for ( i = 0; i < vertex->prev_cnt; i++ )
+					printf("%u; ", vertex->prev[i]->id);
+			}	else
+				printf("(none); ");
+			printf("\n");
+		}	else
+		{
+			printf("LINK: ");
+			if ( vertex->near_cnt > 0 )
+			{
+				for ( i = 0; i < vertex->near_cnt; i++ )
+					printf("%u; ", vertex->near[i]->id);
+				printf("\n");
+			}	else
+				printf("(none)\n");
+		}
+	}
+	
+	pstop();
 }

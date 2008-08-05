@@ -179,5 +179,7 @@ void *ku_graph_search_by_data( ku_graph_t *graph, const void *data );
 
 ku_graph_vertex_t *ku_graph_get_vertex( ku_graph_t *graph, uint id );
 
+void ku_graph_printout( ku_graph_t *graph, ku_actP_f outf );
+
 KU_END_DECLS
 #endif
