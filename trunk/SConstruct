@@ -1,13 +1,13 @@
 #
 #	SConstruct file for Kane Utilities 2
-#		J. Anton, Copyright 2007
+#		J. Anton, Copyright 2007+
 #
 
 scenarios = []
 
-build = ARGUMENTS.get("build", "modules,tools")
+build = ARGUMENTS.get("build", "core,modules,tools")
 notbuild = ARGUMENTS.get("notbuild", "")
-if not "core" in notbuild:
+if "core" in build and not "core" in notbuild:
 	scenarios += ["core/SConstruct"]
 if "modules" in build and not "modules" in notbuild:
 	scenarios += ["modules/SConstruct"]

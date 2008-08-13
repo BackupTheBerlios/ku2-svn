@@ -1,0 +1,109 @@
+#
+#	SConstruct file for tcon
+#		J. Anton, Copyright 2008+
+#
+
+###
+#	Initialisation
+###
+env = Environment(CPPPATH = ["."])
+
+###
+#	System settings
+###
+sysset = ARGUMENTS.get("system", "auto")
+
+###
+#	Platform depended variables and actions
+###
+if env["PLATFORM"] == "win32" and (sysset == "vc" or sysset == "auto"):
+	env.Append(CCFLAGS = ["/W3", "/MD", "/Wp64"], \
+		CPPDEFINES = ["_CRT_SECURE_NO_DEPRECATE", "WIN32", "VCPP"])
+		#LINKFLAGS = ["/SUBSYSTEM:WINDOWS"])
+	debug_ccflags = ["/ZI"]
+	release_ccflags = ["/O2"]
+	release_linkflags = []
+elif env["PLATFORM"] == "win32" and sysset == "mingw":
+	env.Tool("mingw")
+	env.Append(CCFLAGS = ["-Wall", "-Wextra", "-Werror-implicit-function-declaration"],
+		CPPDEFINES = ["POSIX", "_GNU_SOURCE"])
+	debug_ccflags = ["-g3", "-ggdb3", "-pg", "-dm"]
+	release_ccflags = ["-O2"]
+	release_linkflags = ["-s"]
+elif env["PLATFORM"] == "posix" and sysset == "auto":
+	env.Append(CCFLAGS = ["-Wall", "-Wextra", "-Werror-implicit-function-declaration"],
+		CPPDEFINES = ["POSIX", "_GNU_SOURCE"])
+	debug_ccflags = ["-g3", "-ggdb3", "-pg"]
+	release_ccflags = ["-O2"]
+	release_linkflags = ["-s"]
+else:
+	print "Unsupported platform: " + env["PLATFORM"] + " (" + sysset + ")"
+	Exit()
+
+###
+#	Checking header files
+###
+conf = Configure(env)
+if not conf.CheckCHeader("stdio.h"):
+	Exit()
+if not conf.CheckCHeader("unistd.h"):
+	Exit()
+if not conf.CheckCHeader("stdlib.h"):
+	Exit()
+if not conf.CheckCHeader("sys/socket.h"):
+	Exit()
+if not conf.CheckCHeader("errno.h"):
+	Exit()
+if not conf.CheckCHeader("netdb.h"):
+	Exit()
+if not conf.CheckCHeader("string.h"):
+	Exit()
+if not conf.CheckCHeader("sys/types.h"):
+	Exit()
+if not conf.CheckCHeader("fcntl.h"):
+	Exit()
+if not conf.CheckCHeader("ctype.h"):
+	Exit()
+if not conf.CheckCHeader("sys/ioctl.h"):
+	Exit()
+env = conf.Finish()
+
+###
+#	Getting building mode
+#	Possible modes:
+#		debug - build with debugging
+#		release - build with optimisations and witout debuggin
+###
+mode = ARGUMENTS.get("mode", "debug")
+if mode == "debug":
+	env.Append(CCFLAGS = debug_ccflags, CPPDEFINES = ["DEBUG"])
+elif mode == "release":
+	env.Append(CCFLAGS = release_ccflags)
+	env.Append(LINKFLAGS = release_linkflags)
+	debug = ""
+else:
+	print "Invalid mode ( debug|release )"
+	Exit()
+
+###
+#	Getting the install root and prefix
+###
+install_root = ARGUMENTS.get("root", "/")
+install_prefix = ARGUMENTS.get("prefix", "/usr/")
+
+###
+#	tcon sources
+###
+sources = Split("""
+	tcon.c
+	""")
+
+###
+#	Building and Installing
+###
+tcon = env.Program("tcon", sources)
+
+env.Alias("install", install_root+install_prefix)
+env.Install(install_root+install_prefix+"/bin/", tcon)
+
+Default(tcon)
