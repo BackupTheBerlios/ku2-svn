@@ -12,8 +12,6 @@
 	
 	This file contains common used utilities.
 	\author J. Anton
-	\date Mon Aug 21 22:23:15 2006
-	\version 1.1.0
 */
 
 #ifndef KU__OTHER_H__
@@ -106,9 +104,23 @@ char *qstr( const char *s1, const char *s2 );
 	\note Function is not thread-safe.
 	\warning Function does not perform any buffer overflow check. If \b DEBUG is
 	defined then the warning will be sent to the \e stdout.
-	\sa vstr_adv() and qstr().
+	\sa vstrts(), vstr_adv() and qstr().
 */
 char *vstr( const char *fmt, ... );
+
+//! Create a string from the format (thread-safe version).
+/*!
+	Creates a string using the specified format, like the printf() function.
+	\param fmt Format.
+	\return Pointer to the created string.
+	\note Created string does not need to be freed.
+	\note Created string should be shorter then \ref QSTR_STRSIZE.
+	\note Function is not thread-safe.
+	\warning Function does not perform any buffer overflow check. If \b DEBUG is
+	defined then the warning will be sent to the \e stdout.
+	\sa vstr(), vstr_adv() and qstr().
+*/
+char *vstrts( const char *fmt, ... );
 
 //! Create a string from the format (advanced).
 /*!

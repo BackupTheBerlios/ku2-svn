@@ -18,6 +18,7 @@
 #include "other.h"
 #include "ku2/gettext.h"
 #include "ku2/ecode.h"
+#include "ku2/host.h"
 
 #ifdef DEBUG
 #include "io/log/log.h"
@@ -43,6 +44,24 @@ char *vstr( const char *fmt, ... )
 	va_list ap;
 	static char _vstr_[QSTR_STRCNT][QSTR_STRSIZE];
 	static int i = -1;
+	va_start(ap, fmt);
+	if ( (++i) >= QSTR_STRCNT ) i = 0;
+	vsprintf(_vstr_[i], fmt, ap);
+	va_end(ap);
+	#ifdef DEBUG
+	if ( strlen(_vstr_[i]) >= QSTR_STRSIZE )
+	{
+		plog(gettext("WARNING(vstr): buffer overflow detected!"));
+	}
+	#endif
+	return _vstr_[i];
+}
+
+char *vstrts( const char *fmt, ... )
+{
+	va_list ap;
+	static THREAD(char _vstr_[QSTR_STRCNT][QSTR_STRSIZE]);
+	static THREAD(int i) = -1;
 	va_start(ap, fmt);
 	if ( (++i) >= QSTR_STRCNT ) i = 0;
 	vsprintf(_vstr_[i], fmt, ap);
