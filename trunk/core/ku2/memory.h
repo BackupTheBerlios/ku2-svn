@@ -67,6 +67,8 @@ ku_memory_stat()
 */
 #define dfree( ptr ) free(ptr)
 
+#define drealloc( ptr, size ) realloc(ptr, size)
+
 //! Logs a memory status.
 /*!
 	Logs currently allocation statistics (\b DEBUG mode): bytes and blocks allocated.

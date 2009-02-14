@@ -29,13 +29,7 @@ char *qstr( const char *s1, const char *s2 )
 	static char _qstr_[QSTR_STRCNT][QSTR_STRSIZE];
 	static int i = -1;
 	if ( (++i) >= QSTR_STRCNT ) i = 0;
-	sprintf(_qstr_[i], "%s%s", s1, s2);
-	#ifdef DEBUG
-	if ( strlen(_qstr_[i]) >= QSTR_STRSIZE )
-	{
-		plog(gettext("WARNING(qstr): buffer overflow detected!"));
-	}
-	#endif
+	snprintf(_qstr_[i], QSTR_STRSIZE, "%s%s", s1, s2);
 	return _qstr_[i];
 }
 
@@ -46,14 +40,8 @@ char *vstr( const char *fmt, ... )
 	static int i = -1;
 	va_start(ap, fmt);
 	if ( (++i) >= QSTR_STRCNT ) i = 0;
-	vsprintf(_vstr_[i], fmt, ap);
+	vsnprintf(_vstr_[i], QSTR_STRSIZE, fmt, ap);
 	va_end(ap);
-	#ifdef DEBUG
-	if ( strlen(_vstr_[i]) >= QSTR_STRSIZE )
-	{
-		plog(gettext("WARNING(vstr): buffer overflow detected!"));
-	}
-	#endif
 	return _vstr_[i];
 }
 
@@ -97,9 +85,9 @@ void qdir( char *path )
 
 uint ku_mtime( void )
 {
-    struct timeb ttm;
-    ftime(&ttm);
-    return (uint)(ttm.time*1000+ttm.millitm);
+	struct timeb ttm;
+	ftime(&ttm);
+	return (uint)(ttm.time*1000+ttm.millitm);
 }
 
 char *ku_ttime( void )

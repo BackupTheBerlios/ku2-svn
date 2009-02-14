@@ -30,5 +30,7 @@
 	#define gettext( str ) str
 #endif
 
+#define _ gettext
+
 /*! \endcond */
 #endif
