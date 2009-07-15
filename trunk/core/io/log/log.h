@@ -92,7 +92,11 @@ kucode_t ku_touchlog( ku_log *thelog ) __THROW;
 	\note No newline symbol at the end of the message is added.
 	\sa openlog(), closelog(), plog_adv() and flushlog().
 */
-void ku_plog( ku_log *thelog, uint16_t code, const char *function, const char *info, const char *fmt, ... ) __THROW;
+void ku_plog( ku_log *thelog,
+              uint16_t code,
+              const char *function,
+              const char *info,
+              const char *fmt, ... ) __THROW;
 
 //! Print a log message with the function name.
 /*!

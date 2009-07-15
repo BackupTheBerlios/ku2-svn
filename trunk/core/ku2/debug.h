@@ -130,7 +130,7 @@ if ( expr ) \
 #endif	//	DEBUG
 
 //! Print a CHECK POINT message if DEBUG is defined.
-#define _ pdebug("CHECK POINT\n");
+#define __ pdebug("CHECK POINT\n");
 
 #ifdef __cplusplus
 }
