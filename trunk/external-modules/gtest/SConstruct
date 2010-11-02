@@ -1,0 +1,22 @@
+# coding: utf-8
+#
+#		SConstruct
+#		Sat Nov  7 20:24:42 2009
+#
+#	This file is the part of the Master Thesis.
+#	Academia: RTU, DITF (Latvia, Riga)
+#
+#	Authorship, 2009
+#		Antons Jeļkins
+#		  antons.jelkins@rtu.lv
+#		  kane@mail.berlios.de
+#
+
+Import("env")
+env = env.Clone()
+
+#	gtest library/framework
+gtest = {}
+gtest["core"] = env.StaticLibrary("gtest", ["gtest-all.cc", "gmock-all.cc"])
+gtest["main"] = env.StaticLibrary("gtest-main", "gmock-main.cc")
+Return("gtest")

@@ -1,0 +1,27 @@
+# coding: utf-8
+#
+#		SConstruct
+#		Sat Nov  7 20:24:42 2009
+#
+#	This file is the part of the Master Thesis.
+#	Academia: RTU, DITF (Latvia, Riga)
+#
+#	Authorship, 2009
+#		Antons Jeļkins
+#		  antons.jelkins@rtu.lv
+#		  kane@mail.berlios.de
+#
+
+Import("env", "mode")
+env = env.Clone()
+
+#	Disable debugging on release:
+if mode == "release":
+	env.Append(CPPDEFINES = ["NDEBUG"])
+
+#	We are only reading INI files:
+env.Append(CPPDEFINED = ["INI_READONLY"])
+
+#	minIni library
+minIni = env.StaticLibrary("minIni", "minIni.c")
+Return("minIni")

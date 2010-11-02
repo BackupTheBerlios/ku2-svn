@@ -1,0 +1,18 @@
+# coding: utf-8
+#
+#		SConstruct
+#		Sat Nov  7 20:24:42 2009
+#
+#	This file is the part of the Master Thesis.
+#	Academia: RTU, DITF (Latvia, Riga)
+#
+#	Authorship, 2009
+#		Antons Jeļkins
+#		  antons.jelkins@rtu.lv
+#		  kane@mail.berlios.de
+#
+
+external = {}
+external["gtest"] = SConscript("gtest/SConstruct")
+external["minIni"] = SConscript("minIni/SConstruct")
+Return("external")

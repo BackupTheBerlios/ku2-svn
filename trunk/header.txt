@@ -1,0 +1,12 @@
+/*
+ *	FILE_NAME
+ *
+ * This file is the part of Kane Utilities 2.
+ * See licensing agreement in a root directory for more details.
+ * http://developer.berlios.de/projects/ku2/
+ *
+ * Copyright, 2010
+ *	J. Anton (Jeļkins Antons) aka Kane
+ *	kane@mail.berlios.de
+ */
+ 
