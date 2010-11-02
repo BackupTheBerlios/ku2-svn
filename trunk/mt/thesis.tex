@@ -1,0 +1,58 @@
+\documentclass[master-thesis]{rtu-thesis}
+% pagenumperpart
+
+\title{Paralēlās skaitļošanas un MPI tehnoloģijas izmantošana lielu
+       grafu pārmeklēšanai sistēmās ar izkliedētu atmiņu}
+\author{Antons Jeļkins}
+\group{II DMD-3}
+\idnumber{051RDB098}
+
+%\hyphenation{ang-lis-ki}
+
+\begin{document}
+\frontmatter
+\maketitle
+\tableofcontents
+\input{part_1_intro/annotation}
+
+\mainmatter
+\part{Ievads}
+\input{part_1_intro/01_intro}
+
+\part{Paralelitāte}
+\input{part_2_parallel/01_parallel_computing}
+\input{part_2_parallel/02_architectures}
+\input{part_2_parallel/03_paralleling}
+\input{part_2_parallel/04_finding_concurrency.tex}
+\input{part_2_parallel/05_use_case.tex}
+\input{part_2_parallel/06_graph_problems.tex}
+\input{part_2_parallel/07_finding_concurrency.tex}
+\input{part_2_parallel/08_algorithm_structure.tex}
+\input{part_2_parallel/09_supporting_structures.tex}
+\input{part_2_parallel/10_implementation_mechanisms.tex}
+\input{part_2_parallel/11_MPI.tex}
+\input{part_2_parallel/12_performance.tex}
+
+\part{Programmatūras detalizēts projektējums}
+\input{part_3_program/requirements}
+\input{part_3_program/architecture}
+\input{part_3_program/projectstructure}
+\input{part_3_program/tools}
+\input{part_3_program/detaileddesign}
+\input{part_3_program/classes}
+
+\part{Nobeigums}
+\section{Secinājumi}
+
+\listoffigures
+\listoftables
+\input{part_4_finish/definitions}
+\input{part_4_finish/bibliography}
+
+\part{Pielikumi}\appendix
+\input{app_A_programs/programs}
+\input{app_B_fileformats/fileformats}
+\input{app_C_userguide/userguide}
+
+\end{document}
+

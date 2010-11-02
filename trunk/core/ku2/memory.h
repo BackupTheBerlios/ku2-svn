@@ -1,50 +1,53 @@
-/***************************************************************************
- *            memory.h
+/*
+ *	memory.h
  *
- *  Mon Aug 28 12:15:35 2006
- *  Copyright  2006  J. Anton
- *  kane@mail.berlios.de
- ****************************************************************************/
+ * This file is the part of Kane Utilities 2.
+ * See licensing agreement in a root directory for more details.
+ * http://developer.berlios.de/projects/ku2/
+ *
+ * Copyright, 2006
+ *	J. Anton (Jeļkins Antons) aka Kane
+ *	kane@mail.berlios.de
+ */
 
 /*!
-	\file
-	\brief Memory allocation functions and definitions.
-	
-	This file contains the functions and definitions for memory allocations.
-	\author J. Anton
-	\date Mon Aug 28 12:16:34 2006
-	\version 1.1.0
-*/
+ * \file
+ * \author J. Anton
+ * \date Mon Aug 28 12:16:34 2006
+ * \brief Memory allocation functions and definitions.
+ *
+ * This file contains the functions and definitions for memory allocations.
+ */
 
 #ifndef KU__MEMORY_H__
 #define KU__MEMORY_H__
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "host.h"
+KU_BEGIN_DECLS
 
-#ifdef DEBUG
 #include <stdlib.h>
 
+#ifdef DEBUG
+// Debug malloc:
 void *ku_malloc_debug( size_t size );
-void ku_free_debug( void *__ptr );
-void *ku_realloc_debug( void *__ptr, size_t size );
-void ku_memory_stat( void );
-
 #define dmalloc( size ) \
 ku_malloc_debug(size)
 
+// Debug free:
+void ku_free_debug( void *__ptr );
 #define dfree( ptr ) \
 ku_free_debug(ptr)
 
+// Debug realloc:
+void *ku_realloc_debug( void *__ptr, size_t size );
 #define drealloc( ptr, size ) \
 ku_realloc_debug(ptr, size)
 
+// Print memory status:
+void ku_memory_stat( void );
 #define dlogmemstat() \
 ku_memory_stat()
 
-#else	//	DEBUG
-#include <stdlib.h>
-
+#else	// DEBUG
 //! Allocate memory.
 /*!
 	Allocates \a size bytes of memory.
@@ -52,7 +55,7 @@ ku_memory_stat()
 	\note If \b DEBUG is defined then the function will count the amount of
 	allocations and the total memory has been allocated. If \b DEBUG_MEMORY
 	is defined then debug information will be written to the \e stdout.
-	\sa dfree() and dlogmemstat().
+	\sa malloc(), drealloc(), dfree() and dlogmemstat().
 */
 #define dmalloc( size ) malloc(size)
 
@@ -63,10 +66,20 @@ ku_memory_stat()
 	\note If \b DEBUG is defined then the function will count the amount of
 	allocations and the total memory has been allocated. If \b DEBUG_MEMORY
 	is defined then debug information will be written to the \e stdout.
-	\sa dmalloc() and dlogmemstat().
+	\sa free(), dmalloc() drealloc() and dlogmemstat().
 */
 #define dfree( ptr ) free(ptr)
 
+//! Reallocate the memory.
+/*!
+ * Reallocates the memory pointed by \a ptr to a new \a size.
+ * \param ptr Pointer to the memory being reallocated.
+ * \param size New size of the memory.
+ * \note If \b DEBUG is defined then the function will count the amount of
+ *       allocations and the total memory has been allocated. If \b DEBUG_MEMORY
+ *       is defined then debug information will be written to the \e stdout.
+ * \sa realloc(), dmalloc(), dfree() and dlogmemstat().
+ */
 #define drealloc( ptr, size ) realloc(ptr, size)
 
 //! Logs a memory status.
@@ -77,9 +90,7 @@ ku_memory_stat()
 */
 #define dlogmemstat()
 
-#endif	//	DEBUG
+#endif	// DEBUG
 
-#ifdef __cplusplus
-}
-#endif
+KU_END_DECLS
 #endif

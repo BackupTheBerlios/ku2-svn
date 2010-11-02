@@ -27,6 +27,10 @@ KU_BEGIN_DECLS
 #include "ku2/types.h"
 #include "ds/abtree/abtree.h"
 
+//! Identifier of the graph node.
+typedef
+uint graph_node_id_t;
+
 //! Graph vertex.
 typedef
 struct STRUCT_GRAPH_VERTEX

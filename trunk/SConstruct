@@ -5,7 +5,7 @@
 
 scenarios = []
 
-build = ARGUMENTS.get("build", "core,modules,tools")
+build = ARGUMENTS.get("build", "core")
 notbuild = ARGUMENTS.get("notbuild", "")
 if "core" in build and not "core" in notbuild:
 	scenarios += ["core/SConstruct"]

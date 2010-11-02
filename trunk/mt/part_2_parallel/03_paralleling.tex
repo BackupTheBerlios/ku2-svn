@@ -1,0 +1,153 @@
+\hyphenation{sa-da-la pie-ņem-tie priekš-ro-cī-bas}
+
+\section{Algoritmu paralelizēšana}
+Šī sadaļa ir veltīta paralēlo algoritmu izveidošanas aspektiem. Tā ir
+balstīta uz informāciju no literatūras avota \cite{PatParProg} par paralēlās
+programmēšanas projektēšanas šabloniem.
+
+Algoritma paralelizēšanas jēga ir pārveidot secīgo algoritmu, kas ir paredzēts
+SISD sistēmām, par tādu algoritmu, kas būtu spējīgs izmantot MIMD sistēmu
+priekšrocības, lai, piemēram, palielinātu savu ātrdarbību, atrodot rezultātu
+mazākajā laikā.
+
+\subsection{Izmantojamā laiksakritība}
+Vienīgais ceļš pie paralēlās skaitļošanas prakstiskās pielietošanas ved caur
+izmantojamo laiksakrītību \engl{exploitable concurrency}. Lai gan var teikt, ka
+laiksakrītības potenciāls eksistē jebkurā skaitļošanas problēmā, ja šī problēma
+var tikt sadalīta vairākās apakšproblēmās, kas droši un bez kļūdām var tikt
+atrisinātas vienlaicīgi. Pie tam, atrisinot problēmu ir iegūti tie
+paši rezultāti, kadi būtu bijuši, ja tā tiktu atrisināta klasiskajā secīgajā
+veidā. Taču, lai spētu to reāli pielietot programmatūrā, ir jābūt spējīgam
+strukturēt programmas kodu tā, lai tas izteiktu un vēlāk, izpildes laikā,
+izmantotu laiksakrītību, proti, ļautu izpildīt apakšproblēmas tiešam paralēli.
+Citiem vārdiem sakot, laiksakrītībai ir jābūt izmantojamai.
+
+Lielāka daļa lielu skaitļošanas problēmu satur izmantojamo laiksakrītību.
+Programmētājs, balstoties uz šādas problēmas analīzi un tajā
+identificētu izmantojamo laiksakrītību, veido paralēlu algoritmu vai pārveido
+(paralelizē) secīgu algoritmu un implementē to kādā paralēlās programmēšanas vidē.
+Kad tāda programma tiek palaista sistēmā ar vairākiem procesoriem, tiek gaidīts,
+ka tai vajadzēs mazāk laika, lai atrastu rezultātu. Turklāt, vairāku procesoru
+esamība dod iespēju atrisināt lielāka apjoma problēmu risināšanu nekā tas
+ir iespējams uz vienprocesora datora.
+
+Vienkāršam piemēram pieņemsim, ka vajag izskaitļot elementu summu no lielas
+datu kopas. Ja ir pieejami vairāki procesori, tad tā vietā, ka saskaitīt
+visu elementu vērtības pēc kārtas \seefig{par:sum_seq}, datu kopa var tikt sadalīta apakškopās.
+Tad, katrā no šīm kopām vienlaicīgi dažādos procesoros tiek atrasta šīs
+apakškopas elementu summa. Beigās, šīs daļējās summas tiek saskaitītas,
+lai iegūtu galīgo atbildi \seefig{par:sum_par}. Šāda veida risinājums ļauj iegūt pieprasītu
+summu ātrāk (kā ir redzams attēlos: 3 pret 7 laika vienībām). Tāpat, kas arī ir svarīgs,
+ja katram procesoram ir sava lokālā atmiņa
+(tas ir, sistēmu ar izkliedētu atmiņu gadījumā), tad tie spētu strādāt ar
+lielāka izmēra datu kopām.
+
+\numfig{Secīga datu kopas elementu summēšāna}{par:sum_seq}{0.55}{img/arraySummSeq}
+\numfig{Paralēla datu kopas elementu summēšana}{par:sum_par}{0.51}{img/arraySummPar}
+
+Šis piemērs parāda paralēlas skaitļošanas un programmēšanas būtību. Mērķis
+ir izmantot priekšrocības, kuras dod laiksakritība un vairāku procesoru sistēmas,
+lai atrisinātu problēmu ātrāk (pārkapjot viena procesora veikstpējas ierobežojumus)
+un/vai aptrisitānu lielāka apjoma problēmu (pārkapjot atmiņas apjoma ierobežojumus).
+Programmētāja uzdevums
+šaja kontekstā ir identificēt laiksakritību problēmā, strukturēt algoritmu,
+kas izmantos atrasto laiksakritību, un realizēt algoritmu programmas veidā
+piemērotā paralēlas skaitļošanas vidē. Galu galā, problēma tiek atrisināta,
+palaistot izstrādātu programmu paralēlajā sistēmā.
+
+Izskatās pietiekami vienkārši, taču, paralēlā programmēšana rada unikālas
+problēmas un prasa no programmētāja vairāk iemaņu un pūļu, lai tiktu no
+tām vaļā. Laiksakritīgi uzdevumi bieži ir savstarpēji sasaistīti un
+visdažādos veidos atkarīgi viens no otra. Šīs sasaistes un atkarības ir
+pareizi jāpārvalda, jo kārtība, kadā uzdevumi tiek izpildīti var nenoteiktā
+veidā ietekmēt gala rezultātus. Šādu uzvedību devē par sacīkstes stāvokļiem
+\engl{race condition}, un par to plašāk tiks pastastīs talāk. Bet tagad atgriezamies
+pie elementu summešanas. Pieņemsim, ka runa ir par darbībām ar reāliem nevis
+veseliem skaitliem. Tad, ņēmot vērā, ka dators darbojas ar šādiem skaitļiem tikai
+ar noteikto precezitāti \inbold{ATSAUCE}, gala rezultāti var atšķirties atkarībā
+no summēšanas kartības.
+
+Pat gadījumā, ja paralēlā programma ir ,,pareiza`` gan no sacīkstes stāvokļu,
+gan no citu paralēlās programmēšanas loģikas aspektu viedokļa, tā var neattaisnot
+izstrādātāja cērības, piemēram, veiktspējas uzlabošanas ziņā. Īstenībā, programmas
+veikstspēja var par pazemināties. Viens no tā iemesliem varētu būt, ka virsteriņš,
+ko izraisa laiksakritības pārvaldība, ir parāk liels un ,,apēd`` lielāku daļu
+sistēmas resursu. Tāpat, uzdevumu sadalīšana pa procesoriem ne vienmēr ir tik
+triviāla kā summēšanas piemērā, jo paralēlā algorita efektivitāte ir atkarīgā arī
+no tā, kā tas ,,atbilst`` paralēlajam datoram, uz kā tas tiek palaists. Algoritms
+var būt ļoti efektīvs uz vienas datora arhitektūras, bet pilnīgi nelietojams uz citas.
+
+\subsection{Projektēšanas šabloni un šablonu valodas}
+Lai atvieglotu darbu programmētājam, kas raksta paralēlās programmas, proti,
+veido paralēlos algoritmus, tika izstrādāti paralēlās programmēšanas projektēšanas
+šabloni \engl{design patterns for parallel programming}, kas pēc būtības ir
+vadlīniju kopums, kas apraksta, kā programmētājam vajag rīkoties noteiktajā uzdevumu
+atrisināšanas stādijā noteiktajā kontekstā. Šie šabloni apkopo bieži sastopamas
+situācijas un problēmas un ar tām saistītus ekspertu viedokļus un pieredzi.
+
+Bez risinājuma ir svarīgs arī šablona nosaukums jeb vārds. Tas formē dotajai
+problēmvidei specifisku vārdnīcu, kas uzlabo komunikāciju starp šīs problēmsfēras
+projektētājiem, programmētājiem un citām iesaistītām personām un samazina
+pārpratumu varbūtību, kas galu galā vēd pie kvalitatīvāka produkta.
+
+Kā papildinājums projektēšanas šabloniem eksistē šablonu valoda \engl{pattern language}.
+Tā organizē šablonus noteiktajā secībā, kā solis pa solim ved valodas lietotāju
+caur šabloniem, tādā veidā ļaujot izveidot sarežģītākās sistēmas. Katrā lēmuma
+punkta projektētājs izvēlas viņam nepieciešamu šablonu. Katrs šablons, savukārt, ved pie
+nākama lēmumu punkta, tas ir, pie citiem šabloniem, un tā rekursīvi talāk.
+Rezultātā tiek iegūts algoritmu gala projektējums, kas var tikt identificēts ar
+izvēlētu lēmumu kopu un to secību. Šie lēmumi un to secība ir algoritma konfigurācijas
+daļa.
+
+\subsection{Šablonu valoda paralēlajai programmēšanai}
+Paralēlajai programmēšanai specifiskā šablonu valoda, proti, paralēlā algoritma
+projektēšanas process var tikt sadalīts, kā tas tiek parādīts \reffig{par:pat_overview}
+attēlā, četros secīgos etapos: laiksakritības
+atrašana \engl{finding concurrency}, algoritma struktūru \engl{algorithm
+structure}, atbalsta struktūru \engl{supporting structures} un realizācijas
+mehānismu \engl{implementation mechanisms} izvēle.
+
+\numfig{Šablonu valodas pārskats}{par:pat_overview}{0.35}{img/patternOverview}
+
+Laiksakritības atrašanas etaps ir saistīts ar problēmas strukturizāciju ar mērķi identificēt
+iespējamo laiksakritību. Šajā līmenī projektētājs fokusējas uz augsta līmeņa algoritmiskiem
+jautājumiem un pārdomā vairākas potenciālas paralelitātes iespējas šajā problēmā.
+
+%Laiksakritības identificēšana sākas ar problēmas dekompozīciju neatkarīgajās daļās, kuras
+%var apstrādāt paralēli. Dekompozīcija var tikt veikta pēc uzdevumiem (ja eksistē uzdevumi,
+%kas var tikt izpildīti paralēli) un pēc datiem (ja eksistē dati, ko var apstrādāt paralēli).
+%Tad iegūtās daļas tiek analizētas, proti, tās tiek noteiktā veidā sagrupētas, tiek atrastas
+%atkarības starp daļām un to grupām (piemēram, temporālas atkarības) un tiek atrisinātas
+%problēmas ar datu koplietošanu. Pareiza uzdevuma dekompozīcija un analīze ir īpaši svarīga,
+%jo no tās lielā mērā ir atkarīga rezultējoša projektējuma kvalitāte un kā secinājums~–-
+%algoritma veiktspēja.
+
+Algoritma struktūras etaps ir saistīts ar algoritmizācijas stratēģijas jeb algoritma
+struktūras izvēli, kas vislabāk atbilstu iepriekšējā solī atrastajai potenciālajai paralelitātei.
+Šajā līmenī projektētājs pārdomā, kā var izmantot vēl joprojām abstraktās paralelitātes iespējas.
+
+%Algoritma struktūra var būt organizēta pēc uzdevumiem (uzdevumu paralelitātes un skaldi un
+%valdi šabloni), pēc datiem (ģeometriskās dekompozīcijas un rekursīvu datu šabloni) un pēc
+%datu plūsmas (konveijera un notikumu sakņotas dekompozīcijas šabloni).
+
+Atbalsta struktūru etapā sākas algoritma pārveidošana programmā. Šis etaps ir vidusstadija
+starp algoritma struktūras izvēli un realizācijas mehānismiem. Tas ir saistīts ar divām svarīgām
+šablonu grupām: ar šabloniem, kas atspoguļo pieejas programmas loģiskajai strukturēšanai
+(kā loģiski organizēt skaitļošanu?) un šabloniem, kas atspoguļo bieži izmantojamās koplietojamas
+datu struktūras (kā efektīvi koplietot datus?).
+
+%Pie programmas loģiskām struktūrām pieder tādas pieejas kā SPMD, vedējs-sekotājs (vedējs
+%sadala uzdevumus starp sekotājiem, angliski: master/worker), ciklu paralēlisms (paņēmieni,
+%kā paralelizēt ciklus) un sadalīt-un-apvienot (pēc nepieciešamības programma sadalās vairākās
+%paralēlajās daļās, bet beigās atkal apvienojas vienā instancē, angliski: fork/join).
+
+%Savukārt, pie datu struktūrām attiecas šādi šabloni: koplietojami dati (apraksta vispārīgus
+%datu koplietošanas principus), koplietojama rinda (specializēts koplietojamu datu gadījums)
+%un izkliedēts masīvs (apraksta, kā sadalīt lielu datu masīvu starp skaitļošanas elementiem).
+
+Realizācijas mehānismu etaps ir saistīts ar to, kā augstākajos līmeņos atrastie risinājumi
+un pieņemtie lēmumi tiek kartēti uz noteiktām programmēšanas valodām un/vai programmēšanas
+vidēm. Šajā etapā algoritma izstrādātājam ir jāpielieto (varbūt, arī jāimplementē) konkrētus
+procesu un pavedienu pārvaldības (piemēram, pavedienu un procesu izveidošanas un iznīcināšanas)
+un sadarbošanās (piemēram, semaforu, barjeru vai ziņojumu nodošanas) mehānismus.
+

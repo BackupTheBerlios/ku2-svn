@@ -1,0 +1,141 @@
+\hyphenation{ser-ve-rus pa-ra-lē-lais}
+
+\section{Paralēlās skaitļošanas arhitektūra}
+Eksistē vairākas paralēlās skaitļošanas arhitektūras, tādas kā darba staciju tīkli,
+tipisku personālo datoru klasteri, paralēlie lieldatori, simetriskās un asimetriskās
+multiprocesoru sistēmas \cite{PatParProg}.
+
+\subsection{Flina taksonomija}
+Viens no visbiežāk izmantojamiem veidiem, kā var klasificēt un raksturot paralēlos
+datorus, ir Flina taksonomija \engl{Flynn`s taxonomy}. Tā apraksta jebkuru datoru
+divās dimensijās: instrukcijas un dati. Katra no šīm dimensijām var pieņemt divas
+vērtības: viena vai vairākas. Rezultātā ir izdalīti četri datoru tipi: SISD, SIMD,
+MISD, MIMD \seefig{flynns-taxonomy} \cite{PatParProg, IntParComp}:
+\numfig{Flina taksonomija}{flynns-taxonomy}{0.7}{img/flynn}
+\begin{dotlist}
+	\item Viena instrukcija, vieni dati \engl{Single Instruction, Single Data, SISD}.
+		Tas ir parastais secīgais dators, kur vienā laika momentā procesors izpilda
+		vienu programmas instrukciju un darbojas tikai ar vienu datu plūsmu \seefig{SISD}.
+		\numfig{SISD}{SISD}{0.8}{img/SISD}
+	\item Viena instrukcija, vairāki dati \engl{Single Instruction, Multiple Data, SIMD}.
+		Tas ir paralēlais dators. Tas vienā laika momentā izpilda vienu instrukciju,
+		kas vienlaikus apstrādā vairākus datu elementus (tās ir tā sauktās vektora
+		operācijas) \seefig{SIMD}. Šī koncepcija vislabāk ir piemērota dažiem specifiskiem uzdevumiem,
+		piemēram, attēlu vai digitālu signālu apstrādei, taču tīrā veida tiek
+		izmantota reti.
+		\numfig{SIMD}{SIMD}{0.8}{img/SIMD}
+	\item Vairākas instrukcijas, vieni dati \engl{Multiple Instruction, Single Data, MISD}.
+		Tas ir paralēlais dators, kas izpilda vairākas instrukcijas vienā laika
+		momentā, apstrādājot vienu un to pašu datu plūsmu \seefig{MISD}. Šāda koncepcija var
+		būt izmantota, lai, piemēram, vienlaikus pielietotu dažādus kriptogrāfijas
+		algoritmus, lai atšifrētu ieejošu ziņojumu vai signālu. Praksē šādu sistēmu
+		eksistē ļoti maz.
+		\numfig{MISD}{MISD}{0.8}{img/MISD}
+	\item Vairākas instrukcijas, vairāki dati \engl{Multiple Instruction, Multiple Data, MIMD}.
+		Šī tipa paralēlie datori izpilda vienlaikus vairākas instrukcijas. Katra
+		no šīm instrukcijām neatkarīgi strādā ar savu datu plūsmu. Tas ir populārākais
+		paralēlo datoru paveids, kam pieder lielāka daļa modernu paralēlu sistēmu.
+\end{dotlist}
+
+\subsection{Daudzprocesoru sistēmu topoloģijas}
+Visiem datoriem ar vairākiem procesoriem ir noteikts veids kā šie procesori sadarbojas viens
+ar otru. Šie veidi atšķiras ar to, kā procesori tiek ,,loģiski izvietoti``, proti, ar to,
+kā un un ar ko procesori var apmainīties ar datiem, tādā veidā veidojot komunikācijas tīkla
+topoloģiju \cite{ParProgInC}. Dažās sistēmās starpprocesoru komunikācijas tīkls tiek izmantots, lai piekļūtu
+kopējai atmiņai. Citās sistēmās~-- lai sūtītu ziņojumus.
+
+\subsubsection{Koplietojama un komutējama vides}
+Procesoru sadarbošanās paralēlajā datorā var notikt izmantojot koplietojamu vai komutējamu
+vidi \engl{shared or switched media} \cite{ParProgInC}. \emph{Koplietojāmā vidē} tikai viens
+ziņojums var tikt sūtīs vienā laikā brīdī. Tās darbības princips ir šāds: procesors raidā
+savu ziņojumu šajā vidē, pārējie procesori ,,klausās`` \emph{katru} ziņojumu un atlasa tikai
+tos, kas ir domāti tieši šim konkrētajam procesoram. Ethernet ir plaši pazīstams koplietojāmas
+vides piemērs.
+
+Parasti šādās vidēs netiek centralizēti koodrinēts, kādam procesoram un kad ir jāsūta sāvs
+ziņojums. Turpretīm, katrs process pats izlēmj, kad viņš var sākt pārsūtījumu. Viņš ,,klausās``
+vidi kāmēr nekonstatē, ka tā netiek pašlaik izmantota, tad mēģina veikt pārsūtījumu. Ja
+divi (vai vairāki) procesori vienlaicīgi mēģina nosūtīt ziņojumus, tad notiek ziņojumu sadursme,
+kas nozīme, ka ziņojumi ir jāpārsūta. Šajā gadījumā katrs procesors gaida nejauši izvēlētu
+laiku un atkārto mēģinājumu \cite{ParProgInC}. Ziņojumu sadursmes var dramatīski samazināt
+augsti noslogotas koplietojāmas vides veiktspēju.
+
+Savukārt, \emph{komutējama pārraides vide} atbalsta tiešas procesors-procesors komunikācijas.
+Katram procesoram ir savs ,,ceļš`` līdz komutatoram. Salīdzinot ar koplietojamu vidi, komutatoram
+ir divas svarīgas priekšrocības. Pirmkārt, tas atbalsta vienlaicīgu datu pārraidi starp dažādiem
+procesoru pāriem, un, otrkārt, tas ļauj mērogot komunikācijas tīklu, iekļāujot tajā arvien
+vairāk procesoru.
+
+Komutatoru tīkls var būt atspoguļots ar grafu, kur virsotnes ir procesori un komutatori,
+bet loki~-- komunikācijas ceļi. Katrs procesors ir savienots ar vienu komutatoru. Komutatori
+savieno procesorus un/vai citus komutatorus.
+
+\subsection{MIMD detalizēts apraksts}
+Flina taksonomijas MIMD kategorija ir ļoti plaša un vispārīga. Līdz ar to tā
+parasti tiek sadalīta atbilstoši atmiņas organizācijai sistēmās ar kopēju atmiņu
+\engl{shared memory}, ar izkliedētu atmiņu \engl{distributed memory}, hibrīdās
+sistēmās un gridos \cite{IntParComp, PatParProg}.
+
+Kopējas atmiņas gadījumā visi procesori strādā vienotā adrešu telpā, tas ir, tie
+visi var piekļūt vienai un tai pašai adresei atmiņā jeb vienam un tam pašam datu
+elementam. Procesoru sadarbošanās notiek lasot un rakstot kopējos mainīgos.
+
+Viena kopējas atmiņas sistēmu klase tiek saukta par simetriskiem multiprocesoriem
+jeb SMP (angliski: symmetric multiprocesors). Šādās sistēmās visi procesori ir
+savienoti ar kopēju atmiņu tādā veidā, ka jebkura procesora piekļuve jebkuram
+atmiņas elementam notiek ar vienādu ātrumu. SMP sistēmas programmēt ir visvienkāršāk,
+jo programmētājam nevajag sadalīt datu struktūras pa procesoriem. Taču palielinoties
+procesoru skaitam, palielinās noslodze uz atmiņu, tas ir, procesors-atmiņa kopnes
+caurlaides spēja ir nopietns ierobežojošs faktors. Tas ir iemesls kāpēc SMP sistēmas
+paliek efektīvas tikai pie neliela procesoru skaita.
+
+Cita svarīga klase ir sistēmas ar nevienmērīgu pieeju atmiņai jeb NUMA \engl{nonuniform
+memory access}. Šajās sistēmās procesori tāpat kopīgi lieto atmiņu, taču,
+piekļuves laiks šai atmiņai ir atkarīgs no tā, cik fiziski ,,tuvi`` vai “tāli” no
+procesora atrodas konkrēts atmiņas elements. Citiem vārdiem sakot, katra atmiņas
+daļa ir asociēta ar kādu noteiktu procesoru vai procesoriem. Lai samazinātu atmiņas
+nevienmērīguma efektu, katram procesoram ir kešatmiņa un mehānisms, kas nodrošina
+tās viendabību (koherenci). Šī pieeja ļauj zināmā mērā izvairīties no šaurās vietas,
+kas ir saistītas ar kopnes noslodzi, un palielināt procesoru skaitu sistēmā. Bet
+no otras puses, tā komplicē programmēšanu. Ja programmētājs grib uzrakstīt programmu,
+kas rādītu maksimālu veiktspēju, viņam ir jārūpējas par datu izvietošanu atmiņā
+un kešatmiņas efektiem. Kaut gan, NUMA sistēmu programmēšana neatšķiras no SMP
+sistēmu programmēšanas.
+
+Izkliedētas atmiņas gadījumā katram procesoram ir savs atmiņas bloks. Tas nozīme
+to, ka katrs procesors darbojas savā izolētā adrešu telpā un nevar tiešā veidā
+iejaukties cita procesora atmiņā. Procesori sadarbojas, izmantojot ziņojumu nodošanu
+(ziņojumu sūtīšanu un saņemšanu) pa kopni jeb maģistrāli, kas savieno procesorus.
+
+Atkarībā no topoloģijas un procesoru savienošanas veida un tajā izmantojamām
+tehnoloģijām, komunikācijas ātrums var mainīties no gandrīz tik pat ātram kā
+kopējas atmiņas gadījumā (paralēlajos lieldatoros) līdz salīdzinoši lēnam kā tas
+ir, piemēram, personālo datoru klasteros, kas ir savienoti ar Ethernet tīklu.
+Programmētājam tiešā veidā ir jāprogrammē visas komunikācijas (ziņojumu nodošanu)
+starp procesoriem un jānodarbojas ar datu sadalīšanu jeb izkliedēšanu starp tiem.
+
+Datori ar izkliedētu atmiņu tradicionāli tiek sadalīti divās klasēs: paralēlajos
+lieldatoros un klasteros. Paralēlajos lieldatoros procesori un tīkla infrastruktūra
+atrodas ciešā sasaistē un veido specializētu struktūru paralēlajai skaitļošanai.
+Šīs sistēmas ir ļoti mērogojamas, dažos gadījumos tās ļauj skaitļošanā iesaistīt
+vairākus tūkstošus procesorus vienlaicīgi.
+
+Klasteri ir izkliedētas atmiņas sistēmas, kas ir veidotas no tipiskajiem datoriem,
+savienojot tos ar standartu tīklu. Līdz ar šo datortīklu tehnoloģiju uzlabošanu,
+šādas sistēmas kļūst arvien jaudīgākas. Klasteri ir salīdzinoši lēts veids kā
+organizācija var izmantot iespēju pielietot paralēlo skaitļošanu.
+
+Hibrīdās sistēmas ir kopējas un izkliedētas atmiņas sistēmu apvienojums. Vairākas
+skaitļošanas apakšsistēmas ar kopējas atmiņas arhitektūru savā starpā tiek savienotas
+ar kopni vai tīklu. Šādā veidā tiek veidota viena sistēma ar izkliedētu atmiņu.
+
+Gridi ir sistēmas, kas savā darbībā izmanto izkliedētus, heterogēnus resursus
+(skaitļošanas serverus, glabātuvi, servisus), kas ir savienoti ar lokālo (LAN)
+un/vai teritoriālo (WAN) tīklu. Bieži savienošana notiek izmantojot Internetu.
+Gridi var tikt uzskatīti par klasteru vai hibrīdo MIMD mašīnu speciālo gadījumu.
+Taču, atšķirībā no klasteriem, gridos visiem resursiem nav jābūt pārvaldītiem no
+vienas vietas, tas ir, resursi pieder vairākām organizācijām, kas tos uztur un
+nosaka to izmantošanas politikas. Lai izmantotu šādas sistēmas, ir jāizveido speciāla
+starpprogrammatūra, kas pārvalda grida darbību un komunikāciju virstēriņu starp
+resursiem.
+

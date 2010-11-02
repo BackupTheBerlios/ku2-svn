@@ -1,0 +1,128 @@
+\section{Izstrādes rīki}\label{section:program:tools}
+Šajā sadaļā tiek apkopota informācija par visiem programmatūras rīkiem, kas ir
+izmantoti maģistra darba izstrādei.
+
+\subsection{Subversion}
+Interneta vietne: \emph{http://subversion.tigris.org/}
+
+\noindent
+Subversion ir bezmaksas atvērtā pirmteksta versiju kontroles sistēma. Tas
+nozīme, ka Subversion pārvalda datnes un direktorijas, kā arī tajās
+izdarītas izmaiņas laikā. Tas ļauj jebkurā laikā atgriezties pie vecākām datu
+versijām vai apskatīties vēsturi, kā šie dati bija mainījušies. Šī iemesļa dēļ
+versiju kontroles sistēmu var uzskatīt par kaut ko līdzīgu ,,laika mašīnai``
+\cite{SVNBook}.
+
+Subversion var strādāt tīklā, līdz ar ko, to paralēli var izmantot vairākos datoros.
+Šajā gadījumā visas izmaiņas datos, kas tika veiktas vienā no datoriem, tiek
+sinhronizētas ar visām citām datu kopijām. Šī Subversion (un citu versiju kontroles
+sistēmu) īpatnība plaši tiek izmantota programmatūras projektos ar vairākiem
+izstrādātājiem. Tā kā dati ir zem veriju kontroles, vienmēr var atcelt jaunākās
+izmaiņas, ja tās noveda pie ta, ka projekts kļuva nedarbspējīgs.
+
+Taču Subversion var izmantot arī viens izstrādātājs, ja viņam ir daudzas darba
+stacijas, kur viņš izstrādā projektu. Es izmantoju Subversion tieši šiem nolūkiem.
+
+\subsection{SCons}
+Interneta vietne: \emph{http://www.scons.org/}
+
+\noindent
+SCons ir atvērtā pirmteksta programmatūras savākšanas rīks \engl{software
+construction tool}. SCons ir uzlabots, platformneatkarīgs aizvietojums klasiskajai
+\emph{Make} utilitai ar integrētu funcionalitāti līdzīgi \emph{autoconf/automake}
+\cite{SCons}. Citiem vārdiem sakot, šī utilita pārvalda programmatūras
+kompilēšanas procedūru, ievērojot komponenšu savstarpējas atkarības un citus
+aspektus, kas ir vajadzīgas, lai no vairākiem pirmtekstiem, konfigurācijas datnēm
+un resursiem savāktu programmu vai programmu pakotni kā vienu veselu.
+
+Scons programmai ir šādas galvenas īpašības \cite{SCons}:
+\begin{dotlist}
+	\item Konfigurāciju datnes (skripti, kas kontrolē savākšanas procesu) ir
+		Python valodā rakstītas programmas. Tas ļāuj efektīvi pielāgot rīku konkrētajam
+		projektam.
+	\item Automātikska komponenšu un moduļu atkarību analīze C un C++ valodām.
+	\item Iebūvēts atbalsts C, C++, D, Java, Fortran, Yacc, Lex, Qt, SWIG un \LaTeX
+		formātiem.
+	\item Iebūvēts versiju kontroles sistēmu atbalsts.
+	\item Microsoft Visual Studio atbalsts. Iespēja ģenerēt Visual Studio projektus.
+	\item Paralēlas programmas savākšanas atbalsts. Dažādi moduļi var tikt kompilēti
+		paralēli.
+	\item Strādā Linux, citās POSIX sistēmās (iekļaujot AIX, *BSD, HP/UX, IRIX un
+		Solaris), Windows NT, Mac OS X un OS/2.
+\end{dotlist}
+
+%\subsection{GNU Compiler Collection}
+%\subsection{MinGW}
+%\subsection{Microsoft Visual C}
+\subsection{Qt}
+Interneta vietne: \emph{http://qt.nokia.com/}
+
+Qt (,,kju-te`` vai ,,kjut``) ir platformneatkarīgs programmatūras un lietotāja
+saskarnes izstrādes ietvars. Izmantojot Qt ir iespējams izstrādāt kross-platformus
+lietojumus ar grafisko lietotāju saskarni ar ,,uzraksti vienreiz, kompilē visur``
+pieeju. Tas nozīme, ka vienreiz uzrakstīta programma var tikt pārkompilēta un palaista
+Windows, Linux, Mac OS X un citās operētājsistēmās \cite{QtNokia}.
+
+Tādas kompānijas un organizācijas kā Adobe®, Boeing®, Google®, IBM®, Motorola®,
+NASA un Skype® izmanto Qt C++ ietvaru savos projektos.
+
+Qt ir pilnīgi objektorientēts. Qt sastāvā ir liels skaits lietotāju saskarnes
+elementu jeb vidžetu \engl{widget}, ko var izmantot sarežģītu saskarņu veidošanai.
+
+%Qt’s cross-platform GUI applications
+%can support all the user interface functionality required by modern applications, such as menus,
+%context menus, drag and drop, and dockable toolbars. Desktop integration features
+%provided by Qt can be used to extend applications into the surrounding desktop environment,
+%taking advantage of some of the services provided on each platform.%
+
+%Qt has excellent support for multimedia and 3D graphics. Qt is the de facto standard
+%GUI framework for platform-independent OpenGL® programming. Qt’s painting system offers
+%high quality rendering across all supported platforms. A sophisticated canvas framework
+%enables developers to create interactive graphical applications that take advantage of Qt’s
+%advanced painting features.
+
+%Qt makes it possible to create platform-independent database applications using standard data-
+%bases. Qt includes native drivers for Oracle®, Microsoft® SQL Server, Sybase® Adap-
+%tive Server, IBM DB2®, PostgreSQLTM, MySQL®, Borland® Interbase, SQLite, and ODBC-compliant
+%databases. Qt includes database-specific widgets, and any built-in or custom widget can be made
+%data-aware.
+
+%Qt programs have native look and feel on all supported platforms using Qt’s styles and themes
+%support. From a single source tree, recompilation is all that is required to produce
+%applications for Windows® XP®and Windows VistaTM, Mac OS X®, Linux®, SolarisTM, HP-UXTM,
+%and many other versions of Unix® with X11TM. Qt’s qmake build tool produces makefiles or .dsp
+%files appropriate to the target platform.
+
+%Since Qt’s architecture takes advantage of the underlying platform, many customers use Qt for
+%single-platform development on Windows, Mac OS X, and Unix because they prefer Qt’s approach.
+%Qt includes support for important platform-specific features, such as ActiveX® on Windows, and
+%MotifTM on Unix.
+
+%Qt uses UnicodeTM throughout and has considerable support for internationalization.
+%Qt includes Qt Linguist and other tools to support translators. Applications can easily use and mix
+%text in Arabic, Chinese, English, Hebrew, Japanese, Russian, and other languages supported by
+%Unicode.
+
+%Qt includes a variety of domain-specific classes. For example, Qt has an XML module that
+%includes SAX and DOM classes for reading and manipulating data stored in XML-based formats.
+%Objects can be stored in memory using Qt’s STL-compatible collection classes, and
+%handled using styles of iterators used in Java® and the C++ Standard Template Library (STL).
+%Local and remote file handling using standard protocols are provided by Qt’s input/output and
+%networking classes.
+
+%Qt applications can have their functionality extended by plugins and dynamic libraries.
+%Plugins provide additional codecs, database drivers, image formats, styles, and widgets. Plugins
+%and libraries can be sold as products in their own right.
+
+%The QtScript module enables applications to be scripted with Qt Script, an ECMAScript-
+%based language related to JavaScript. This technology allows developers to give users restricted
+%access to parts of their applications for scripting purposes.
+
+%Qt is a mature C++ framework that is widely used around the world. In addition to Qt’s many
+%commercial uses, the Open Source edition of Qt is the foundation of KDE, the Linux desktop en-
+%vironment. Qt makes application development a pleasure, with its cross-platform build system,
+%visual form design, and elegant API.
+
+%\subsection{Doxygen}
+%\subsection{XeLaTeX}
+

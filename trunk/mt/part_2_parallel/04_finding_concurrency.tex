@@ -1,0 +1,66 @@
+\section{Laiksakrītības atrašana}
+Programmatūras projektērājs var strādāt dažādās problēmsfērās. Un jebkūrā no
+šīm sfērām projektēšanas process sakās ar problēmas domēnu \engl{problem domain},
+proti, ar tādiem elementiem un jēdzieniem, kas
+tiešā veidā ir ar to saistīti un kurus izmanto šīs problēmvides eksperti savā
+ikdienas darbā. Šajā līmenīnī runa var būt, piemēram, par atomiem, vēju virzieniem
+vai saules stārojumu cikliem nevis par šo parādību atspoguļojumiem datu
+struktūrās un procedūrās. Šo otro galu devē par programmas domēnu \engl{program
+domain}. Tā kā projektēšanas mērķis ir programmatūra, kas pēc būtības ir
+dotā šaura problēmsfēras apgabala projekcija uz matēmatiskiem un datora abstrākcijām,
+tad kādā brīdī ir jānotiek pārējai no problēmas domēna un programmas domēnu.
+Lai gan var šķiet, ka pārējai uz programmas domēnu ir jānotiek pēc iespējas
+ātrāk, projektētājs, kas pārāk ātri aiziet no problēmas domēna var palaist garām
+vērtīgas projektēšanas iespējas.
+
+Tas ir īpaši aktuāli paralēlajā programmēšanā. Kā jau vairākkārt bija teikts,
+paralēlas programmas mēģina atrisināt
+lielākas problēmas mazākā laikā vienlaicīgi atrisinot dažādas šīs problēmas daļas
+dažādos skaitļošanas elementos. Tomēr, tas var izdoties, tikai ja problēma satur
+izmantojamo laiksakrītību, tas ir, uzdevumus, kas \emph{reāli} var tikt izpildīti paralēli.
+Taču, pēc tā brīža, kad problēma jau nonāka programmas domēnā, varētu būt ļoti grūti
+saredzēt papildus un, var būt, labākas iespējas izmantot laiksakrītību.
+
+Tas nozīme, ka programmētājam ir jāsak paralēla risinājuma projektēšana ar problēmas
+analīzi problēmas domēnā. Šāda analīze ietilpst projektēšānas šablonu valodas
+laiksakrītības atrašanas fāzē, un tās mērķis ir atrast izmantojamu laiksakrītību.
+
+Viens no svārīgākiem jautājumiem, uz kuru algoritma projektētājam ir jāatbild
+pirms ķerties pie darba ir ,,vai ir vērts to darīt?''. Citiem vārdiem sakot,
+vai problēma ir pietiekami apjomīga un tās risinājuma vērtīgums ir pietiekami liels,
+lai pielietotu spēku un patērētu laiku, lai atrisinātu to ātrāk? Tieši tāpēc šī
+darba ietvaros runa ir par lieliem grafiem, jo grafa ar, piemēram, 20 virsotnēm pārmeklēšana
+ir perfekti atrisinājama vienprocesoru sistēmās. Jā tas tā ir, tad nākamais solis ir
+pārliecināties, ka problēmas pamata īpašības un tajā iesaistīti datu elementi ir
+labi saprotami. Problēmsfērasnumfig laba saprašana ir nepieciešama, jo tā palīdz projektētājam
+savlaicīgi identificēt un ņemt vērā šai problēmvidei raksturīgus ierobežojumus,
+grutības, zemudens akmeņus, iespējas un citas stipras un vājas puses. Pēdējkārt, projektētājam ir
+jāidentificē problēmas daļas, kas prasa lielākas skaitļošānas resursus un koncentrēties
+uz šo daļu paralelizēšānu.
+
+Tad, pēc \cite{PatParProg} šabloni šajā fazē var tikt organizētas trijās grupās:
+\begin{dotlist}
+	\item \inbold{Dekompozīcija.} Divi dekompozīcijas šabloni, uzdevumu dekompozīcija
+		un datu dekompozīcija, tiek izmantoti problēmas sadalīšanai daļās, kuras
+		var tikt izpildītas vienlaicīgi.
+	\item \inbold{Atkarību analīze.} Šī grupa sastāv no trīm šabloniem, kas palīdz grupēt
+		uzdevumus un analizēt atkarības starp tiem: uzdevumu grupēšana, uzdevumu
+		kartošana un datu koplietošana. Parasti šos šablonus pielieto tieši
+		norādītajā secībā, taču realitātē bieži ir nepieciešams pārskatīt iepriekš
+		pieņemtus lēmumus un atgriezties uz vienu vai diviem soļiem atpakaļ.
+	\item \inbold{Projektējuma novērtēšana.} Pēdējais šablons šajā fāzē ir saistīts
+		ar projektētāja analīzi par to, kas jau bija līdz šim izdarīts, pirms
+		virzities tālāk uz algoritma struktūras fāzi. Šis šablons ir svarīgs,
+		jo lielā gadījumu skaitā gādās, ka labākais projektējums nav atrasts pēc
+		pirmā mēģinajuma. Jo ātrāk tiks atklātas algoritma projektējuma nepilnvērtības,
+		jo vieglāk to būs izlabot.
+\end{dotlist}
+
+Kopīga laiksakrītības atrašanas fāzes shēma tiek parādīta \reffig{finding_concurrency}
+attēlā.
+\numfig{Laiksakritības atrašanas etaps}{finding_concurrency}{0.9}{img/findingConcurrency}
+Pirmie trīs posmi (lietderības novērtēšana, problēmas saprašana un paralelizējamas
+daļas identificēšana) ir veltīti problēmvidei kā tādai. Tāpēc nākamajās sadaļās
+tiks apskatīta problēmsfēra, proti, grafi un to pārmeklēšana. Pēdējie trīs posmi atbilst
+šablonu valodai. Tie detalizētāk tiks apskatīti pēc problēmsfēras apraksta.
+

@@ -1,0 +1,75 @@
+\section{Grafu paralelizēšanas problēmas}
+Grafu algoritmu paralelizēšanas procesā var rasties grūtības, kas izriet no grafu algoritmu
+īpatnībām, kas atšķir tos no citiem algoritmu veidiem, piemēram, matricu reizināšanas algoritma.
+Grafu algoritmi ir uz datiem sakņotas skaitļošanas piemērs
+\cite{GraphTheory,HandbookOfGraphTheory,Zettaflops}. Citiem vārdiem sakot,
+tie pārsvarā nodarbojas ar datu jeb grafu virsotņu pārmeklēšanu, tas ir, ar pārējām pa saitēm
+jeb lokiem, nevis ar intensīvu skaitļošanu. Piemēram, Deikstras algoritma pamatā ir virsotnes
+svara noteikšana un virsotņu iezīmes atjaunināšana, bet tas nenodarbojas ar sarežģītām un
+intensīvām matemātiskām operācijām kā, piemēram, matricu reizināšanā vai Furjē transformācijā.
+
+\subsection{Horizonta tuvums}
+Tas arī nozīme, ka algoritms lielu laiku patērē datu piekļuvei un atjaunināšanai. Pie tam,
+nepieciešamais datu apjoms ir salīdzinoši neliels (piemēram, tikai virsotnes iezīme un
+blakusvirsotņu saraksts) un nākamie dati, kam būs vajadzīga piekļuve, ir atkarīgi tikai no
+tekošajiem datiem (blakusvirsotņu saraksta), tas ir, piekļuve datiem atmiņā pārsvarā ir haotiska
+un nav prognozējama. Nav iespējams iepriekš droši noteikt to datu izvietošanos atmiņā,
+kas būs vajadzīgi pēc viena soļa. Citiem vārdiem sakot, grafu algoritmu redzamības
+horizonts virsotņu un to datu izvietošanos atmiņā ziņā ir ļoti tuvs, proti, viena
+soļa attālumā. Tas ir attēlots \reffig{horizon} attēlā.
+
+\numfig{Virsotņu izvietošanās redzamības horizonts}{horizon}{0.8}{img/horizon}
+
+\subsection{Tīkla aizture}
+Secīgajos datoros un paralēlajās sistēmās ar kopēju atmiņu tas nav tik būtisks
+jautājums, kaut gan tas samazina kešatmiņas izmantošanas iespējas un iespaido algoritma ātrdarbību.
+Taču sistēmās ar izkliedētu atmiņu piekļuve datiem ir ļoti svarīgs aspekts, jo tā ir ļoti
+dārga operācija. Ja nepieciešami dati ir pieejami lokāli, proti, atrodas lokalajā
+operatīvajā atmiņā, tad piekļuves laiks šiem datiem sastāv no pārbaudes, ka dati
+tiešām ir lokāli, un datu nolasīšanas no operatīvās atmiņas \seeeqn{read_time}.
+Otrā komponente pati par sevi sastāv no darbībām, kas ir saistītas ar virtuālās
+atmiņas organizāciju \cite{OSC}, taču tas nav būtisks apskatāmā kontekstā.
+
+\numeqn{read_time}{t_\mathit{piekļuve} = t_\mathit{pārbaude} + t_\mathit{nolasīšana}}
+
+
+Ja nepieciešamie dati nav pieejami lokāli, proti, tie atrodas uz cita skaitļošanas
+elementa, programmai ir jāpieprasa un jāsaņem šie dati izmantojot ziņojumus. Tā kā algoritms
+ir uz datiem sakņots, tas visu laiku ģenerē daudz mazu ziņojumu. Tas nozīme, ka būtisku iespaidu
+uz algoritma veiktspēju atstāj tīkla laika aizture (latentums). Laika aizture ir konstants laiks,
+kas ir nepieciešamas, lai izveidotu ziņojumu [5; 12]. Šis laiks ir liels salīdzinājumā ar
+tīkla caurlaides spēju, citiem vārdiem sakot, ir izdevīgāk sūtīt vienu lielu ziņojumu nekā
+vairākus mazus.
+
+\subsection{Grafa sadalīšana}
+Otrā problēma ir grafa sadalīšana (izkliedēšana) starp skaitļošanas elementiem. Tās mērķis
+ir sadalīt grafu tā, lai minimizētu vajadzību pēc “svešu” virsotņu pieprasījumiem. Ideālajā
+gadījumā grafs tiek sadalīts gandrīz pilnīgi neatkarīgos apakšgrafos, kas noved komunikāciju
+virstēriņu līdz minimumam. Taču vispārīgā situācijā tas nav viegli izdarāms, jo, lai iegūtu
+efektīvu sadalījumu, ir jāņem vērā grafa struktūra: grafa virsotņu topoloģija (kā virsotnes
+tiek izvietotas “telpā”, kādas virsotnes ir ciešāk saistītas, utml.) un loku semantika (kāda
+ir šī loka nozīme, vai tas norāda uz īpašību, vai tas ir “daļa no” attieksme, vai tas parāda
+iespējamo pāreju, utml.). Ja šī informācija nav apriori zināma, tad grafa sadalīšana nevar tikt
+efektīvi izdarīta “uzreiz” vienā piegājienā, bet ir nepieciešama papildus grafa analīze, kas
+palielina algoritma izpildīšanas laiku. Šajā gadījumā var izrādīties, ka izdevīgāk būtu slikti
+sadalīt grafu un pazaudēt vairāk laika komunikācijā nekā ilgi meklēt labu sadalījumu un
+nezaudēt neko komunikācijā. Taču, ja ir zināms, ka grafa virsotnes ir punkti divdimensiju
+telpā, bet loki ir attālumi starp šiem punktiem, tad grafa sadalīšana pēc ģeogrāfiskās pazīmes
+(telpu sadala vairākos apgabalos) var dot labus rezultātus. Cits piemērs, ja grafs ir koks,
+tad šajā gadījumā var pielietot skaldi un valdi šablonu (no algoritma projektēšanas algoritma
+struktūras etapa) un piešķirt katru koka zaru (tas ir, apakškoku, kas ir neatkarīgs no citiem
+apakškokiem) savam skaitļošanas elementam.
+
+\subsection{Sinhronizācija}
+Viena pieeja, kā zināmā mērā var izvairīties no liela komunikāciju skaita, kas ir saistītas
+ar datu pieprasījumiem, ir lokālu kopiju izmantošana. Tas nozīme, ka process lasa un raksta
+vērtības lokālajā kopijā nevis vienmēr sūta pieprasījumus pa tīklu. No tā izriet pēdējais
+jautājums, uz ko ir jāatbild: kā sinhronizēt lokālās kopijas. Citiem vārdiem sakot, ir nepieciešams
+mehānisms, kas nodrošinātu, lai visu skaitļošanas elementu lokālās grafu kopijas saturi būtu
+savā starpā saskaņoti un nerastos sacīkstes stāvokļi (situācijas, kad dati var tikt bojāti
+“nepareizas” (neparedzētas) operāciju izpildes kārtības dēļ [13], angliski: race conditions).
+Sinhronizācijas realizācija ir ļoti svarīga datu korektumam un sistēmas kopējai ātrdarbībai.
+Līdz ar ko ir rūpīgi jāizlemj, ko sinhronizēt (kādas noteiktās virsotnes vai visu grafu), ar
+ko sinhronizēt (ar visiem skaitļošanas elementiem vai tikai ar to daļu), cik bieži sinhronizēt
+un kā realizēt atkāpšanos, ja notika sinhronizācijas kļūda sacīkstes stāvokļa dēļ (piemēram,
+ja divi procesi mēģina vienlaikus atjaunināt grafa virsotni utml.).

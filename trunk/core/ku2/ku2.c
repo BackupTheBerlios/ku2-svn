@@ -1,9 +1,8 @@
 /*
 		ku2.c
-		Mon Jun 23 07:57:58 2008
 
 	This file is the part of Kane Utilities 2.
-	See licencing agreement in a root direcory for more details.
+	See licensing agreement in a root directory for more details.
 	http://developer.berlios.de/projects/ku2/
 
 	Copyright, 2008
@@ -11,14 +10,24 @@
 		kane@mail.berlios.de
 */
 
+/*!
+ * \file
+ * \mainpage
+ * It is a documentation for Kane Utilities 2.
+ *
+ * Current version is 2.0.
+ */
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "ku2/ecode.h"
 #include "ku2/debug.h"
 #include "ku2/types.h"
 #include "ku2/gettext.h"
+#include "ku2/memory.h"
 #include "other/other.h"
 #include "io/log/log.h"
 
@@ -55,7 +64,7 @@ void *ku_malloc_debug( size_t size )
 		sizes += size;
 	}
 	#ifdef DEBUG_MEMORY
-	printf(ESC_BLUE("MALLOC : %p sized %d (total %d)")"\n", ptr, size, mallocs);
+	printf(ESC_BLUE("MALLOC : %p sized %ld (total %d)")"\n", ptr, size, mallocs);
 	#endif
 	return ptr;
 }
@@ -73,7 +82,7 @@ void *ku_realloc_debug( void *__ptr, size_t size )
 {
 	void *ptr = realloc(__ptr, size);
 	#ifdef DEBUG_MEMORY
-	printf(ESC_BLUE("REALLOC: %p changed to %p sized %d (total %d)")"\n",
+	printf(ESC_BLUE("REALLOC: %p changed to %p sized %ld (total %d)")"\n",
 		   __ptr, ptr, size, mallocs);
 	#endif
 	return ptr;
@@ -138,12 +147,90 @@ void ku_pstop_debug( const char *func, char *fmt, ... )
 	}
 }
 
-kucode_t ku_set_error( kucode_t __ecode )
+
+/*******************************************************************************
+	Error handling (ecode.h).
+*******************************************************************************/
+
+//! Last error description.
+static KU_THREAD_LOCAL(struct KU_STRUCT_ERRDESC)
 {
-	return kucode = __ecode;
+	kucode_t ecode;        //!< Error code.
+	char *text;            //!< Error text.
+	int memerr;            //!< Memory error (during setting an error) indicator.
+}	ku_errdesc;
+
+//! Initialise mt_errdesc.
+static void KU_CONSTRUCTOR(ku_errdesc_init( void ))
+{
+	ku_errdesc.ecode = KE_NONE;
+	ku_errdesc.text = NULL;
+	ku_errdesc.memerr = 0;
 }
 
-kucode_t ku_get_error( void )
+//! Clean-up ku_errdesc.
+static void KU_DESTRUCTOR(ku_errdesc_clean( void ))
 {
-	return kucode;
+	if ( (ku_errdesc.text != NULL) && !ku_errdesc.memerr )
+		dfree(ku_errdesc.text);
+	dlogmemstat();
+}
+
+kucode_t ku_serror( kucode_t ecode, const char *etext )
+{
+	ku_errdesc.ecode = ecode;
+
+	if ( etext != NULL )
+	{
+		int __len = strlen(etext) + 1;
+		char *__text;
+
+		__text = drealloc(ku_errdesc.text, __len);
+		if ( __text == NULL ) // Failed to allocate memory for error text:
+		{
+			// Freeing the old error text:
+			if ( (ku_errdesc.text != NULL) && !ku_errdesc.memerr )
+				dfree(ku_errdesc.text);
+
+			ku_errdesc.ecode = KE_MEMORY;
+			ku_errdesc.text = _("Failed to allocate memory for error message!");
+			ku_errdesc.memerr = 1;
+		}	else // realloc() succeeded:
+		{
+			memcpy(__text, etext, __len);
+			ku_errdesc.text = __text;
+			ku_errdesc.memerr = 0;
+		}
+	}	else
+	{
+		// Freeing the old error text:
+		if ( (ku_errdesc.text != NULL) && !ku_errdesc.memerr )
+			dfree(ku_errdesc.text);
+
+		ku_errdesc.text = NULL;
+		ku_errdesc.memerr = 0;
+	}
+
+	return ecode;
+}
+
+void ku_rerror( void )
+{
+	ku_serror(KE_NONE, NULL);
+}
+
+const char *ku_gerrtx( void )
+{
+	if ( ku_errdesc.text == NULL )
+	{
+		return _("(error text was not set)");
+	}	else
+	{
+		return ku_errdesc.text;
+	}
+}
+
+kucode_t ku_gerrcode( void )
+{
+	return ku_errdesc.ecode;
 }

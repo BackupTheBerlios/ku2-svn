@@ -1,0 +1,34 @@
+\subsection{gentsp}
+\emph{gentsp} --- nejaušā veidā ģenerē komivojažiera problēmu (TSP).
+\begin{shell}[commandchars=\\\{\}]
+% gentsp --type \underline{TSP tips} -n \underline{virsotņu skaits} -o \underline{izejas datne}
+\end{shell}
+
+\subsubsection*{Apraksts}
+Programma \emph{gentsp} izmanto nejaušo skaitļu generatoru, lai izveidotu noteikta
+tipa komivojažiera problēmas instanci ar noteiktiem parametriem. Pēc noklusēšanas
+rezultāts tiek izvadīts standarta izejā.
+
+\subsubsection*{Parametri}
+\DefineShortVerb{\@}
+\begin{desclist}
+	\item @--about@ \\
+		izvadīt uz ekrāna informāciju par programmatūru: versiju, autoru, utt;
+	\item @--help@ \\
+		izvadīt uz ekrāna palīdzību programmas izmantošanā: programmas palaišana,
+		parametru apraksts, utt;
+	\item @--type [:TSP type:]@ \\
+		izvelēties generējamās komivojažiera problēmas tipu, iespējamie	tipi ir šādi:
+		\begin{desclist}
+			\item @geom@ --- ģeomētriskā TSP (vērtība pēc noklusēšanas);
+		\end{desclist}
+	\item @--geom@ \\ generēt ģeomētrisko TSP (@--type geom@ alternatīva);
+	\item @--nodes [0-9]+@ vai @-n [0-9]+@ \\
+		noteikt virsotņu skaitu (pēc noklusēšanas -- 15);
+	\item @--output [:filename:]@ vai @-o [:filename:]@ \\
+		noteikt izejas datni (pēc noklusēšanas -- standarta izeja \underline{stdout}).
+\end{desclist}
+\UndefineShortVerb{\@}
+
+\subsubsection*{Izmantošanas piemēri}
+

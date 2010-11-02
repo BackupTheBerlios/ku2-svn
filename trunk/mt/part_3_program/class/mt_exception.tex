@@ -1,0 +1,40 @@
+\subsection{MtException}
+Klase \verb+MtException+ atspoguļo izņēmumu.
+\begin{includes}
+#include <QString>
+#include "mt.h"
+\end{includes}
+
+\publicmethods
+\begin{memblist}
+	\membX{}{MtException}{mt\_ecode\_t code, const QString \&text}{nothrow}
+	\membX{mt\_ecode\_t}{code}{}{const, nothrow}
+	\membX{QString}{text}{}{const, nothrow}
+\end{memblist}
+
+\classdescription
+Šī klase tiek izmantota klienta programmatūrā kā primārais kļūdu nodošanas un
+par kļūdu apziņošanas mehānisms.
+
+Komponente, kas grib paziņot par kļūdu, ,,met`` šo izņēmumu, norādot kļūdas kodu
+un tekstu šīs klases konstruktorā:
+\begin{code}
+if ( someErrorCondition )
+	throw MtException(MTE_ERROR_CODE, tr("Error text"));
+\end{code}
+
+Savukārt, komponente, kas grib apstrādāt kļūdas ziņojumu, ,,ķer`` doto izņēmumu.
+Informāciju par kļūdu var saņemt no \verb+code+ un \verb+text+ metodēm:
+\begin{code}[commandchars=^\{\}]
+try ^{
+	^ldots
+^} catch ( MtException e ) ^{
+	printMessage("Error code: %d; error text: %s",
+	             e.code(), e.text());
+^}
+\end{code}
+
+\methoddescription
+\method{asd}%\verb|MtException(mt_ecode_t code, const QString &text)|}
+Izveido izņēmumu ar kodu \emph{code} un tekstu \emph{text}.
+

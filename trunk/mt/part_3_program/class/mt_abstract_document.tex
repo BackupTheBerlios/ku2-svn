@@ -1,0 +1,47 @@
+\subsection{MtAbstractDocument}
+Klase \verb|MtAbstractDocument| atspoguļo abstraktu dokumentu: grafu, uzdevumu
+vai risinājumus.
+\begin{includes}
+#include <QObject>
+#include "MtException.hh"
+\end{includes}
+
+\publicmethods
+\begin{memblist}
+	\membX{}{MtAbstractDocument}{QObject *parent = 0}{explicit, nothrow}
+	\membX{void}{open}{const QString \&fileName}{throw MtException}
+	\membX{void}{save}{}{throw MtException}
+	\memb{void}{close}{}
+	\membX{QString}{caption}{}{const, nothrow}
+	\membX{void}{setCaption}{const QString \&caption}{nothrow}
+	\membX{QString}{fileName}{}{const, nothrow}
+	\membX{void}{setFileName}{const QString \&fileName}{throw MtException}
+	\membX{bool}{isModified}{}{const, nothrow}
+\end{memblist}
+
+\protectedmethods
+\begin{memblist}
+	\membX{void}{modify}{}{nothrow}
+\end{memblist}
+
+\signals
+\begin{memblist}
+	\memb{void}{opened}{}
+	\memb{void}{saved}{}
+	\memb{void}{closed}{}
+	\memb{void}{modified}{}
+\end{memblist}
+
+\classdescription
+Šī klase definē abstraktu dokumentu, ar ko var strādāt klienta programmatūra.
+Šo klasi atvasina abstrakti grafu, uzdevumu un rezultātu dokumenti.
+
+Abstraktam dokumentam tiek definētas šādas darbības: ielādēt dokumentu no datnes
+(\verb|open()|), saglabāt to datnē (\verb|save()|) vai vienkārši aizvērt (\verb|close()|).
+Jauna dokumenta izveidošanai ir jābūt implementētai atvasinātajās klasēs.
+
+Abstraktam dokumentam piemīt šādas īpašības: nosaukums (\verb|caption|),
+datnes vārds (\verb|fileName|) un modifikācijas flags (\verb|isModified|).
+
+\methoddescription
+

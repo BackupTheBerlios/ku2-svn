@@ -1,0 +1,59 @@
+\section{Īsākā ceļa meklēšana}
+Viena no grafu teorijas problēmām ir īsākā ceļa meklēšana. Šīs problēmas
+būtība ir atrast tādu ceļu starp divām grafa virsotnēm, kur šajā ceļā iekļāuto
+loku svaru summa tiek minimizēta. Piemēram, pie šo problēmu klases pieder problēma,
+kā atrast ātrāko ceļu no viena punkta uz citu punktu ceļu kartē. Šajā gadījumā,
+grafa virsotnes atspoguļo punktus kartē, bet loki~-- ceļus, kas savieno šos punktus.
+Loku svari ir laiks, ko aizņem ceļošana no viena punkta un citu.
+
+Formāli: ir dots svērtais grafs ($V$~-- virsotņu kopa, $E$~-- loku kopa, $f$~--
+loku svaru funkcija, $E \rightarrow \Re$) un viens elements $v \in V$. Ir jāatrod ceļš
+$P$ no $v$ līdz $v' \in V$, kur
+\[\sum_{e\in P} f(e)\]
+ir minimāls starp visiem iespējamiem ceļiem, kas savieno $v$ un $v'$.
+
+Šo problēmu dažreiz dēvē par viena pāra īsākā ceļa problēmu, lai atšķirtu to no
+šādiem dotās problēmas vispārinājumiem:
+\begin{dotlist}
+	\item Viena āvota īsākā ceļa problēma, kur ir jāatrod īsākie ceļi no vienas
+		grafa virsotnes $v$ līdz visām citām grafa virsotnēm.
+	\item Viena mērķa īsākā ceļa problēma, kur ir jāatrod īsākie ceļi no visām grafa
+		virsotnēm un vienu mērķa virsotni $v$. Šo problēmu var pārveidot par viena
+		āvota īsākā ceļa problēmu, nomainot loku orientācijas grafā.
+	\item Visu pāru īsāko ceļu problēma, kur ir jāatrod īsākie ceļi starp visiem
+		grafa virsotnēm $v$ un $v'$.
+\end{dotlist}
+
+Šiem vispārinājumiem eksistē ievērojami efektīvāki algoritmi nekā vienkārši pielietot
+viena pāra problēmas atrisināšanas algoritmus katram no atbilstošiem virsotņu pāriem.
+
+Īsākā ceļa algoritmiem ir vairāki pielietojumi. Piemēram, tos izmanto, lai atomātiski
+atrast ceļus starp fiziskām lokācijām.
+
+Cits pielietojums ir šāds. Ja kāda abstrakta sistēma tiek aprakstīta ar galīgo
+automātu, tad īsākā ceļa meklēšanas algoritms var tikt pielietots, lai atrastu
+optimālu izvēļu (soļu, pārēju) secību, lai sasniegtu noteikto gala mērķi, vai noteiktu
+minimālās laika robežas, kas ir nepieciešams šī mērķa sasniegšanai. Piemēram, ja
+grafa virsotnes atspoguļo Rubika kuba stāvokļus, bet loki~-- iespējamus soļus, tad
+īsākā ceļa algoritms var tikt pielietots, lai atrastu ceļu, ka atrisināt Rubika
+kubu ar minimālu soļu skaitu.
+
+%The traveling salesman problem is the problem of finding the shortest path that goes through every vertex exactly once, and returns to the start. Unlike the shortest path problem, which can be solved in polynomial time in graphs without negative cycles (edges with negative weights), the traveling salesman problem is NP-complete and, as such, is believed not to be efficiently solvable (see P = NP problem). The problem of finding the longest path in a graph is also NP-complete.
+
+%The Canadian traveller problem and the stochastic shortest path problem are generalizations where either the graph isn't completely known to the mover, changes over time, or where actions (traversals) are probabilistic.
+
+%The problems of recalculation of shortest paths arises if some graph transformations (e.g., shrinkage of nodes) are made with a graph.
+
+%\subsection{Deikstras algoritms}
+%Deikstras algoritms atrisina viena āvota īsākā ceļa problēmu.
+
+
+%Let the node we are starting be called an initial node. Let a distance of a node Y be the distance from the initial node to it. Dijkstra's algorithm will assign some initial distance values and will try to improve them step-by-step.
+
+%   1. Assign to every node a distance value. Set it to zero for our initial node and to infinity for all other nodes.
+%   2. Mark all nodes as unvisited. Set initial node as current.
+%   3. For current node, consider all its unvisited neighbours and calculate their distance (from the initial node). For example, if current node (A) has distance of 6, and an edge connecting it with another node (B) is 2, the distance to B through A will be 6+2=8. If this distance is less than the previously recorded distance (infinity in the beginning, zero for the initial node), overwrite the distance.
+%   4. When we are done considering all neighbours of the current node, mark it as visited. A visited node will not be checked ever again; its distance recorded now is final and minimal.
+%   5. Set the unvisited node with the smallest distance (from the initial node) as the next "current node" and continue from step 3.
+
+

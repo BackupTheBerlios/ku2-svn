@@ -1,0 +1,33 @@
+\DefineVerbatimEnvironment
+	{includes}
+	{Verbatim}
+	{
+		baselinestretch=1,
+		fontsize=\relsize{-1},
+		tabsize=4,
+		frame=lines
+	}
+
+\newenvironment{memblist}
+	{\begin{tabbing}\hspace{3cm}\=\kill}
+	{\end{tabbing}}
+
+\newcommand{\memb}[3]{\>#1\'\inbold{#2} (#3)\\}
+\newcommand{\membX}[4]{\>#1\'\inbold{#2} (#3) [#4]\\}
+
+\newcommand{\publictypes}{\subsubsection*{Publiskie tipi}}
+\newcommand{\publicmethods}{\subsubsection*{Publiskās metodes}}
+\newcommand{\protectedmethods}{\subsubsection*{Aizsargātās metodes}}
+\newcommand{\staticmethods}{\subsubsection*{Publiskās statiskās metodes}}
+\newcommand{\signals}{\subsubsection*{Signāli}}
+
+\newcommand{\classdescription}{\subsubsection*{Detalizēts klases apraksts}}
+\newcommand{\methoddescription}{\subsubsection*{Metožu apraksts}}
+\newcommand{\method}[1]{$\Longrightarrow$ #1\\}
+
+\newcommand{\inputclass}[1]{\input{part_3_program/class/#1}}
+
+\section{Klases}
+\inputclass{mt_exception}
+\inputclass{mt_abstract_document}
+

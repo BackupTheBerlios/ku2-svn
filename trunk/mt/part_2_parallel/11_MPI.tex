@@ -1,0 +1,47 @@
+\section{MPI}
+\emph{Ziņojumu nodošanas saskarne} jeb \emph{MPI} \engl{Message Passing Interface} pašlaik ir
+visplašāk izmantotais standarts paralēlajā skaitļošanā. Tā nav jauna programmēšanas valoda,
+tā ir apakšprogrammu jeb funkciju bibliotēka, kas primāri var tikt izmantota C un Fortran 77
+valodās rakstītās programmās. Šo standartu izstrādā un uztur atvērts, starptautisks forums,
+kas sastāv no industrijas, augstākās izglītības iestāžu un vairāku valsts laboratoriju pārstāvjiem.
+Tas reglamentē bibliotēkas lietojumprogrammas saskarni. Taču eksistē vairākas šī standarta
+realizācijas, piemēram, MPICH [6] vai MS-MPI [7]. MPI pamatā ir ziņojumu nodošana, kas ir
+viena no šobrīd visspēcīgākajām un pašlaik visplašāk pielietojamām paralēlās skaitļošanas
+paradigmām. Tas ir paredzēts sistēmām ar izkliedētu atmiņu un tās paveidiem [5].
+
+Šobrīd pēdējā standarta versija ir MPI 2.1. Tā tika pieņemta 2008. gada 4. septembrī [8].
+
+Triviāls MPI programmas darbības cikls var būt šāds [1; 5]:
+\begin{numlist}
+	\item Lietotājs “pasaka” operētājsistēmai palaist programmu. Tā “ievieto” izpildāmā koda
+		kopijas (instances) uz katra skaitļošanas elementa.
+	\item Katrs skaitļošanas elements sāk izpildīt savu instanci.
+	\item Programma inicializē MPI bibliotēku.
+	\item Programma identificē savu rangu (MPI terminoloģijā rangs ir unikāls numurs, kas
+		tiek piešķirts katrai instancei izpildīšanas sākumā) un kopējo programmas instanču skaitu.
+	\item Programmas instance ar rangu, kas tiek uzskatīts par galveno (piemēram, nulle),
+		saņem datus no lietotāja un sadala tos starp citām instancēm.
+	\item Parējās instances saņem datus, apstrādā tos un nosūta rezultātus atpakaļ.
+	\item Galvenā instance apvieno iegūtos rezultātus un nodod galīgos rezultātus lietotājam.
+	\item MPI bibliotēkas darbība tiek pabeigta un programma tiek apstādināta.
+\end{numlist}
+
+Kā var redzēt, uz visiem procesoriem tiek palaista viena un tā pati programma, kas savas
+iekšienē zarojas atbilstoši ranga vērtībai. Šī MIMD programmēšanas forma bieži tiek saukta
+kā: viena programma, vairāki dati \engl{Single Program, Multiple Data, SPMD} [1; 5].
+
+Lai gan MPI standartā ir aprakstītas vairāk nekā 120 funkcijas [1; 8], lai uzrakstītu
+strādājošo paralēlo programmu, ir nepieciešamas tikai dažas no tām [5]:
+\begin{dotlist}
+	\item MPI\_Init() un MPI\_Finalize(), bibliotēkas inicializēšana un pabeigšana,
+	\item MPI\_Comm\_rank(), sava ranga iegūšana,
+	\item MPI\_Comm\_size(), kopējo programmas instanču skaita iegūšana (maksimālais rangs - 1),
+	\item MPI\_Send(), ziņojuma sūtīšana,
+	\item MPI\_Recv(), ziņojuma saņemšana.
+\end{dotlist}
+
+\subsection{,,Sveiki, Pasaule!{}``}
+%hhhh\cite{ParProgMPI}, ddd.
+\subsection{Masveida komunikācijas}
+\subsection{Datu grupēšana}
+

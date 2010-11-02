@@ -1,0 +1,49 @@
+# coding: utf-8
+#
+#		SConstruct
+#		Sat Oct  3 23:19:37 2009
+#
+#	This file is the part of the Master Thesis.
+#	Academia: RTU, DITF (Latvia, Riga)
+#
+#	This file is based on some my previous
+#	works dated 2005-2009.
+#
+#	Authorship, 2009
+#		Antons Jeļkins
+#		  antons.jelkins@rtu.lv
+#		  kane@mail.berlios.de
+#
+
+import os
+env = Environment(ENV = {'PATH' : os.environ['PATH']})
+
+xelatex_bld = Builder(
+	action = "xelatex $SOURCE",
+	suffix = ".pdf",
+	src_suffix = ".tex")
+env.Append(BUILDERS = {"XeLaTeX" : xelatex_bld})
+
+dia_bld = Builder(
+	action = "dia -e $TARGET -s 1200x -t png $SOURCE",
+	suffix = ".png",
+	src_suffix = ".dia")
+env.Append(BUILDERS = {"Dia" : dia_bld})
+
+thesis = env.XeLaTeX("thesis")
+
+#	str2adjl building
+#str2adjl = env.Program("str2adjl", str2adjl_sources)
+#Default(str2adjl)
+
+#	Any headers to be installed for development package
+#includes = Split("""
+	#graph.h
+	#adjacency_list.h
+	#""")
+
+#	Installation
+#env.Install(install_root+"/lib/", graph_struct)
+#for c_inc in includes:
+	#c_inc_f = File(c_inc)
+	#env.Install(install_root+"/include/"+os.path.dirname(c_inc_f.path), c_inc_f)

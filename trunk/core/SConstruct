@@ -20,7 +20,7 @@ sysset = ARGUMENTS.get("system", "auto")
 ###
 if env["PLATFORM"] == "win32" and (sysset == "vc" or sysset == "auto"):
 	env.Append(CCFLAGS = ["/W3", "/MD", "/Wp64"], \
-		CPPDEFINES = ["_CRT_SECURE_NO_DEPRECATE", "WIN32", "VCPP"])
+		CPPDEFINES = ["_CRT_SECURE_NO_DEPRECATE", "KU_OS_WIN32", "KU_TOOL_VCPP"])
 		#LINKFLAGS = ["/SUBSYSTEM:WINDOWS"])
 	debug_ccflags = ["/ZI"]
 	release_ccflags = ["/O2"]
@@ -28,13 +28,13 @@ if env["PLATFORM"] == "win32" and (sysset == "vc" or sysset == "auto"):
 elif env["PLATFORM"] == "win32" and sysset == "mingw":
 	env.Tool("mingw")
 	env.Append(CCFLAGS = ["-Wall", "-Wextra", "-Werror-implicit-function-declaration"],
-		CPPDEFINES = ["POSIX", "_GNU_SOURCE"])
+		CPPDEFINES = ["POSIX", "_GNU_SOURCE", "KU_OS_WIN32"])
 	debug_ccflags = ["-g3", "-ggdb3", "-pg", "-dm"]
 	release_ccflags = ["-O2"]
 	release_linkflags = ["-s"]
 elif env["PLATFORM"] == "posix" and sysset == "auto":
 	env.Append(CCFLAGS = ["-Wall", "-Wextra", "-Werror-implicit-function-declaration"],
-		CPPDEFINES = ["POSIX", "_GNU_SOURCE"])
+		CPPDEFINES = ["POSIX", "_GNU_SOURCE", "KU_OS_POSIX"])
 	debug_ccflags = ["-g3", "-ggdb3", "-pg"]
 	release_ccflags = ["-O2"]
 	release_linkflags = ["-s"]
@@ -98,7 +98,6 @@ else:
 #	Getting list of add-ons to build with.
 #	Possible add-ons:
 #		gettext - use libintl support
-#		kucode - allow to use direct access to error variable
 #		thread_safe - build thread-safe functions
 ###
 def_feat = "thread_safe"
@@ -106,8 +105,6 @@ enable = ARGUMENTS.get("enable", "")
 disable = ARGUMENTS.get("disable", "")
 if ("gettext" in def_feat or "gettext" in enable) and not "gettext" in disable:
 	env.Append(CPPDEFINES = ["USE_GETTEXT"])
-if ("kucode" in def_feat or "kucode" in enable) and not "kucode" in disable:
-	env.Append(CPPDEFINES = ["ALLOW_KUCODE_ACCESS"])
 if ("thread_safe" in def_feat or "thread_safe" in enable) and not "thread_safe" in disable:
 	env.Append(CPPDEFINES = ["THREAD_SAFE", "_REENTRANT"])
 
@@ -122,15 +119,19 @@ install_prefix = ARGUMENTS.get("prefix", "/usr/")
 ###
 sources = Split("""
 	ku2/ku2.c
+	
 	ds/stack/stack.c
 	ds/arrseq/arrseq.c
+	ds/graph/adjacency_list.c
 	ds/graph/graph.c
 	ds/abtree/abtree.c
 	ds/list/dl_list.c
+	
 	dp/resmanager/res.c
 	dp/var/var.c
 	dp/var/vspace.c
 	dp/var/vlist.c
+	
 	other/other.c
 	io/cfgreader/cfg.c
 	io/dialogue/dialogue.c

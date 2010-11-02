@@ -1,0 +1,140 @@
+\hyphenation{re-ali-zēja ri-si-nā-ju-miem skait-ļo-ša-nas prog-ram-ma se-ci-nā-jums
+	pie-mē-ram}
+
+\section{Paralēlā skaitļošana}
+Vairāku gadu laikā dominēja datori, kas balstījās uz klasisko fon Neimana shēmu. Šī shēma
+tika nosaukta Ungāru matemātiķa Džona fon Neimana (\emph{John von Neumann}) vārdā, kurš
+pirmais savos rakstos 1945. gadā nosaka prasības mūsdienīgo elektronisko datoru arhitektūrai.
+Atbilstoši fon Neimana shēmai dators sastāv no operatīvās atmiņas, centrālā procesora (kas
+savukārt sastāv no vadības bloka un aritmētiski loģiskā bloka) un ievad/izvadierīcēm \seefig{von-neumann}.
+Saskaņā ar šīs shēmas klasisko izpratni vienīgā procesora vadības bloks nolasa instrukcijas un
+datus no datora operatīvās atmiņas, atšifrē un izpilda tās secīgi, vienu aiz otras. Aritmētiski
+loģiskais bloks izpilda pamat aritmētiskas operācijas. Ievade un izvade nodrošina saskarni
+ar cilvēku-operatoru \cite{IntParComp}.
+\numfig{Fon Neimana shēma}{von-neumann}{0.4}{img/vonNeumann}
+
+Šiem datoriem tika izveidoti vairāki algoritmi, un tika izstrādātas daudzas programmas, kas
+realizēja šos algoritmus. Visus tos algoritmus apvieno dogma, ka,
+\begin{dotlist}
+	\item pirmkārt, nākamais solis tiek izskaitļots tikai un vienīgi tad, kad ir pabeigta
+		iepriekšējā soļa izpildīšana, un,
+	\item otrkārt, process ir pilnīgi izolēts no ārējās pasaules, tas ir, neviens nevar
+		iejaukties un/vai pārtraukt doto procesu.
+\end{dotlist}
+Tas ir raksturīgs, piemēram, DOS videi.
+
+Nākamais etaps ir laiksakritība \engl{concurrency}. Ar šo terminu tiek apzīmēta programmēšanas
+pieeja, kad programmas projektē un izstrādā kā atsevišķu procesu kopu, kas sadarbojas viens
+ar otru. Šie procesi var tikt izpildīti jebkurā secībā, daudzuzdevumu operētājsistēmās, tādās
+kā \emph{Windows} vai \emph{Unix}, to izpildīšanas laiki var pārklāties \cite{TerminiConcurrency, ConcVsParall}.
+Līdz ar to rodas nepieciešamība pēc procesu sinhronizācijas un citu aspektu ievērošanas, kas
+nebija raksturīgi izolētām programmām. Taču laiksakritība attiecas vairāk uz programmatūras
+inženierijas koncepcijām, programmu arhitektūras risinājumiem un pieejas regulēšanu ierobežotiem
+resursiem nevis uz algoritmiskiem risinājumiem, kas, būtībā, palika secīgi. Tāpat datoru
+arhitektūra joprojām balstās uz fon Neimana shēmu, kur instrukcijas tiek izpildītas \emph{secīgi}.
+Laiksakrītību nodrošina konteksta pārslēgšana, kā laikā procesors pārslēdzās no vienas programmas
+izpildīšanas uz otras \cite{OSC}.
+
+Savukārt, atšķirībā no laiksakritības paralēlā skaitļošana, nākamais etaps, paredz, ka
+viena programma tiek vienlaikus izpildīta uz vairākiem procesoriem \cite{IntParComp, ConcVsParall,
+PatParProg, ParProgMPI}. Tas, līdzīgi kā laiksakritībā, prasa sinhronizācijas un sadarbības
+mehānismus un vairāku problēmu risināšanu. Paralēlās skaitļošanas būtība ir vairāku skaitļošanas
+elementu jeb procesoru paralēlā, proti, vienlaicīga, izmantošana ar nolūku palielināt sistēmas
+veiktspēju. Citiem vārdiem sakot, samazināt laiku, kas ir nepieciešams, lai izpildītu kādu
+uzdevumu \seefig{parallel-problem}.
+\numfig{Problēmas paralēlā risināšana}{parallel-problem}{0.8}{img/parallelProblem}
+Tas ir īpaši aktuāli,
+ja risināmā problēma prasa lielu skaitļošanas apjomu, ar ko pieņemamās laika robežās nevar
+tikt galā secīgais algoritms uz viena procesora. Turklāt, tikai vairāku procesoru esamība
+nav pietiekama, lai realizētu paralelitāti, jo pieejamie algoritmi tika izstrādāti citiem
+apstākļiem, citai skaitļošanas organizācijai, tie ir balstīti uz citiem principiem. Līdz ar
+to, paralēlā skaitļošana prasa ne tikai fizisko infrastruktūru (procesori un komunikācijas
+starp tiem), bet arī paralēlus algoritmus, kas prot efektīvi izmantot doto infrastruktūru.
+
+%Eksistē vairākas fundamentālas pieejas, kā var tikt realizēta paralēlā skaitļošana. No tām
+%visvairāk izplatītas ir MIMD (multiple instruction, multiple data; vairākas instrukcijas,
+%vairāki dati) sistēmas jeb sistēmas ar izkliedētu atmiņu (katram skaitļošanas elementam ir
+%sava adrešu telpa), kurās kā atsevišķas tiek izdalītas SPMD (single program, multiple data;
+%viena programma, vairāki dati) sistēmas. Šādu sistēmu programmēšanā izmanto MPI (message passing
+%interface; ziņojumu nodošanas saskarnes) tehnoloģiju \cite{IntParComp, PatParProg, ParProgMPI}.
+
+\subsection{Kur izmanto paralēlo skaitļošanu?}
+Paralēlā skaitļošana kā secīgās skaitļošanas tālākā attistība mēģina emulēt to, kas vienmēr
+tiek novērots dabīgajā pasaulē, kur daudzi komplicēti, savsarpēji saistīti notikumi norisās
+vienā laikā, bet joprojām kādā zināmā secībā. Piemēram \cite{IntParComp}:
+\begin{dotlist}
+	\item galaktiku formēšana,
+	\item planētu kustība,
+	\item laika apstākļu mainīšana, vētras, okeānu kustības,
+	\item tektoniskās aktivitātes,
+	\item ceļā satiksme,
+	\item fabrikas konvejiers,
+	\item būvdabri.
+\end{dotlist}
+
+Vēsturiski paralēlā skaitļošana tika uzskatīta par ,,skaitļošanas virsotni`` (\emph{the high
+end of computing}), un tika izmantota, lai modelētu sarežģītas zinātniskas un inženierijas
+reālās pasaules problēmas. Daži piemēri \cite{IntParComp}:
+\begin{dotlist}
+	\item atmosfēra, Zeme, vide,
+	\item fizika~-- atom- un kodolfizika, subatomu daliņas, lieli spiedieni un augstas temperatūras,
+	\item bioloģija, biotehnoloģijas, ģenētika,
+	\item ķīmija, molekulāras struktūras,
+	\item ģeoloģija, seismoloģija,
+	\item mehāniskā inženierija~-- konstrukcijas novērtēšana kritiskajos apstākļos,
+	\item elektriskā inženierija~-- elektrisku ķēžu projektēšana, mikroelektronika,
+	\item datorzinātnes, matemātika.
+\end{dotlist}
+
+Šodien paralēlā skaitļošana neierobežojas tikai ar zinātniskiem pētījumiem: tai eksistē arī
+visai dažādi komerciāli pielietojumi, kas prasa tadu pašu vai pat lielāku skaitļošanas jaudu
+un, kā secinājums, ātrākus datorus. Šie pielietojumi galvenokārt ir saistīti ar lielu datu
+apjomu apstrādi, piemēram~\cite{IntParComp}:
+\begin{dotlist}
+	\item datu bāzes tehnoloģijas, datizrace \engl{data mining},
+	\item naftas mekējumi,
+	\item datu meklēšana Internetā, tīmekļa sakņoti biznesa servisi,
+	\item attēli un diagnozes medicinā,
+	\item farmakoloģija,
+	\item starpvalstu korporāciju pārvaldība,
+	\item finanšu un ekonomikas modelēšana,
+	\item augsti kvalitatīva datorgrafika un virtuālā realitāte (tajā skaitā izklaidē),
+	\item tīkla video un multi-media tehnoloģijas.
+\end{dotlist}
+
+\subsection{Kāpēc izmanto paralēlo skaitļošanu?}
+Pastāv daudzi iemesli, kādēļ tiek izmantota paralēlā skaitļošana. Svarīgāki no tiem ir \cite{IntParComp}:
+\begin{dotlist}
+	\item Notaupīt laiku un/vai naudu. Šķiet loģiski, ka vairāku resursu izdalīšana kādam
+		uzdevumam samazinās tās izpildes laiku, potenciāli arī izmaksas. Paralēlie klasteri var
+		tikt būvēti no lētam, stadartām komponentēm.
+	\item Atrisināt lielākas problēmas. Daudzas problēmas it tik lielas un/vai sarežģītas, ka
+		nav lietderīgi vai nav iespējams atrisitnāt tās vienā datorā, īpaši, ja atmiņas apjoms
+		ir ierobežots. Piemēram:
+		\begin{dotlist}
+			\item ,,Grand Challange`` \cite{GrandChallange} problēmas prasa petaflops\footnote{flops, \inbold{fl}oating
+				point \inbold{o}perations \inbold{p}er \inbold{s}econd~-- operācijas ar peldējošo punktu sekundē;
+				petaflops~-- \(10^{15}\) flops} un petababaitus\footnote{\(10^{15}\) baiti} skaitļošanas resursu.
+			\item Meklēšanas tīmeklī dzīnēji un datu bāzes, kas apstrāda milionus tranzākciju sekundē.
+			\item Lielu grafu apstrāde un analīze.
+		\end{dotlist}
+	\item Laiksakritība. Viens skaitļošanas resurss var darīt tikai vienu lietu vienā laikā.
+		Vairāki skaitļošanas resursi var darīt daudzas lietas vienlaicīgi.
+	\item Nelokālu resursu izmantošana. Izmantot skaitļošanas resursus no teritoriālā tīkla
+		vai pat Interneta, ja lokālu skaitļošanas resursu nepietiek. Piemēram, projekts SETI@home,
+		kas nodarbojas ar datu no kosmosa apstrādi \cite{SETIatHome} izmanto vairāk par 289000
+		datoru ar kopējo jaudu 626 teraflops\footnote{\(10^{12}\) flops} (uz 2009. gada 21.
+		jūniju) \cite{SETIatHomeStats}.
+	\item Secīgas skaitļošanas robežas. Eksistē gan fiziski, gan praktiski cēloņi, kāpec nevar
+		vienkārši būvēt arvien ātrākus secīgos datorus:
+		\begin{dotlist}
+			\item Pārraides ātrumi~-- secīgā datora ātrums ir tieši atkarīģs no tā, cik ātri
+				dati var pārvietoties pa aparatūru. Absolūtie limiti ir gaismas ātrums (30 cm.
+				nanosekundē) un vara vada signāla pārraides limits (9 cm. nanosekundē).
+			\item Miniaturizācijas ierobežojumi~-- tranzistoru skaits, ko var ievietot viena čipā,
+				sasniegs savu maksimumu, proti, tranzistoru izmērs~-- savu minimumu (dažu atomu izmēru).
+			\item Ekonomiski ierobežojumi~-- ļoti dargi ir padarīt vienu procesoru ātrāku. Daudzu
+				lēnāku procesoru izmantošana ir ekonomiski izdevīgāka.
+		\end{dotlist}
+\end{dotlist}
+

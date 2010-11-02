@@ -1,0 +1,40 @@
+\subsection{Blakusvirsotņu saraksts, *.adjl}
+\begin{tabbing}
+\hspace{3cm}\=\kill
+Paplašinājums:\> *.adjl \\
+Tips:\> Binārais
+\end{tabbing}
+
+\subsubsection*{Apraksts}
+Šī vienkārša tipa datne tiek paredzēta grafa struktūras glabāšanai blakusvirsotņu saraksta
+veidā. Datne ļauj glabāt multigrafus un norādīt loku svarus (32 bitu \emph{integer} tipa
+skaitlis).
+
+\subsubsection*{Struktūra}
+\begin{tabbing}
+\hspace{3cm}\=\hspace{3cm}\=\kill
+\inbold{Nobīde, baiti}\> \inbold{Izmērs, baiti}\> \inbold{Paskaidrojums} \\
+\emph{Datnes galvene:} \\
+\(0\)\> 4\> Datnes paraksts: 0x34, 0x53, 0x23, 0x00 \\
+\(4\)\> 4\> Grafa virsotņu skaits (\(s\))\\
+\(8\)\> 4\(\cdot s\)\> Virsotņu apraksta nobīžu (4 baiti katrai nobīdei) masīvs \\
+
+\\\emph{Virsotņu apraksti (\(i\)~-- kārtējās virsotnes apraksta nobīde):} \\
+\(8+4\)\(\cdot s+i\)\> 4\> Izejošo loku skaits (\(n\))\\
+\(12+4\cdot s+i\)\> 4\> Virsotnes numurs, kur ieiet pirmais loks \\
+\(16+4\cdot s+i\)\> 4\> Pirmā loka svars \\
+\ldots\> \ldots\> \ldots \\
+\(12+4\cdot s+i+n-1\) \\
+	\> 4\> Virsotnes numurs, kurā ieiet pēdējais loks \\
+\(16+4\cdot s+i+n-1\) \\
+	\> 4\> Pēdējā loka svars \\
+\end{tabbing}
+
+%\begin{newtable}{-0.2}{Kvalitatīvas analīzes rezultāti}{kval:res}
+%	{8}{|p{0.5cm}|p{1.8cm}|p{1.8cm}|p{1.8cm}|p{1.8cm}|p{1.8cm}|p{1.8cm}|p{2.2cm}|}
+%	{V & $R^1_{LP}$ & $R^1_{VC}$ & $R^2$ & $R^{total}_{LP}$ & $R^{total}_{VC}$ & $N(i)_{LP}$ & $N(i)_{VC}$}
+%	15 & 6 & 15 & 3 & 7 & 14 & 0.25 & 0.0714286 \nextline
+%	\multicolumn{8}{|l|}{$D_{LP}$ = 0.359375} \nextline%
+%	\multicolumn{8}{|l|}{$D_{VC}$ = 0.0663265} \nextline
+%\end{newtable}
+

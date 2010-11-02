@@ -1,0 +1,41 @@
+\hyphenation{sis-tē-mās}
+
+\section{Programmatūras arhitektūra}
+Programmatūras sistēmas arhitektūra balstās uz divu mēzglu koncepciju, līdzīgi kā
+klient-servera arhitektūrās. Sauksīm vienu mēzglu par \emph{klientu} \engl{client},
+bet otru~-- par \emph{izpildītāju} \engl{executor}. Šādas sistēms
+konceptuālā struktūra tiek parādīta \reffig{prog-arch} attēlā. Kā ir redzams, tā
+sastāv no četrām komponentēm:
+\begin{numlist}
+	\item klienta,
+	\item grafu un uzdevumu,
+	\item izpildītāja un
+	\item rezultātu.
+\end{numlist}
+\numfig{Programmatūras sistēmas arhitektūra}{prog-arch}{1}{img/SW-Architecture}
+
+\emph{Klienta komponente} atbild par grafiskās saskarnes izveidošanu, kas ļautu sistēmas
+lietotājam
+\begin{dotlist}
+	\item izveidot un apskatīt grafus un uzdevumus un
+	\item saņemt un atspoguļot uzdevumu izpildīšanas rezultātus no izpildītāja.
+\end{dotlist}
+Šī komponente ir atsevišķa programma, kas tiek izstrādāta C++ programmēšanas valodā,
+izmantojot Qt bibliotēku (par izmantojamām programmēšanas valodām, bibliotēkām un
+rīkiem tiks detalizētāk stastīts \ref{section:program:tools} sadaļā). Tā darba vide
+ir klienta darba stacija ar jebkuru Qt atbalstītu operētājsistēmu, iekļaujot Microsoft
+Windows un Linux.
+
+\emph{Izpildītāja komponente} atbild par lietotāja izveidotu uzdevumu izpildi. Šī
+komponente ir atsevišķa programma, kas tiek palaista uz klastera, proti, tā realizē
+paralēlus uzdevumu risināšanas algoritmus. Programma tiek izstrādāta C99 standarta C valodā,
+pielietojot MPI bibliotēku paralelitātes funkcijām. Platformspecifisku lietu neizmantošana
+nodrošina šādas programmas labu parnēsajamību.
+
+\emph{Grafu un uzdevumu} un \emph{rezultātu komponentes} atbild par grafu, uzdevumu
+un rezultātu datu struktūru definēšanu, to glabāšanu, apstrādi un pārveidošanu.
+Šīs komponentes tiek realizētas bibliotēku veidā. Tos izmanto gan klienta, gan
+izpildītāja komponentēs. Abas bibliotēkas rakstā C99 standarta C valodā. Grafu
+komponentē ietilpst arī dažādas palīgprogrammas, piemēram, ārējo datu formātu
+importēšana vai noverģēšana sistēmas formātos.
+

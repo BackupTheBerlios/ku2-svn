@@ -1,0 +1,55 @@
+\hyphenation{iz-skait-ļo-ša-nas sis-tē-mā}
+
+\section{Amdāla likums}
+Kā jau bija teikts, divi galvenie iemesli realizēt paralēlu programmu ir
+sasniegt labāku veiktspēju un atrisināt lielākas problēmas.
+
+Pieņemsim, kā jebkuras problēmas atrisināšanas process sastāv no trīm daļām:
+inicializācijas, izskaitļošanas un finalizācijas. Tad, kopīgs programmas izpildes
+laiks uz viena skaitļošanas elementa ir šo daļu summa:
+\numeqn{seq_computing}{T_\mathit{kopīgs}(1) = T_\mathit{inicializācija} + T_\mathit{izskaitļošana} + T_\mathit{finalizācija}}
+
+Bet kas notiks, ja mēs izpildīsim doto programmu sistēmā ar vairākiem skaitļošanas
+elementiem? Uzskatīsim, kā inicializācijas un finalizācijas stādijas nevar būt
+izpildītas paralēli. Pati izskaitļošana, savukārt, var tikt sadalīta apakšuzdevumos, kuras
+katrs sistēmā esošs procesors (tas ir, neviens procesors netrādā tukšgaitā) var
+izpildīt pilnīgi neatkarīgi. Pie tam, summārais soļu skaits, kas ir nepieciešams,
+lai sasniegtu rezultātu, it tas pats, kas ir vajadzīgs vienam skaitļošanas
+elementam, lai tiktu ar šo uzdevumu galā. Tad, kopīgs programmas izpildes laiks
+uz \emph{P} procesoriem var tikt izteikts šādi:
+\numeqn{par_computing}{T_\mathit{kopīgs}(P) = T_\mathit{inicializācija} + \frac{T_\mathit{izskaitļošana}(1)}{P} + T_\mathit{finalizācija}}
+
+Protams, vienādojums \refeqn{par_computing} apraksta ļoti idializētu situāciju.
+Taču, koncepcija, ka jebkurā izskaitļošanas problēmā pastāv secīgas daļas
+(kam vairaku procesoru esamība ir bezjēdzīga) un paralelizējamas daļas (kam
+vairāku procesoru esamība samazina izpildes laiku) atbilst realitātei.
+
+Iegūtais absolūtais laiks būtībā neko neizsaka. Tā vietā paralēlās programmas
+aprakstam izmanto relatīvu paātrinājumu \emph{S}, kas parāda, cik reizēs ātrāk
+programma izpildās paralēlajā sistēmā nekā sistēmā ar vienu skaitļošanas elementu:
+\numeqn{speedup}{S(P) = \frac{T_\mathit{kopīgs}(1)}{T_\mathit{kopīgs}(P)}}
+
+Saistīts mērs ir efektivitāte \emph{E}, kas ir paātrinājums, ko dod katrs skaitļošanas
+elements, nevis sistēma kopumā:
+\numeqnarr{efficiency}{E(P) = \frac{S(P)}{P} = \frac{T_\mathit{kopīgs}(1)}{P \cdot T_\mathit{kopīgs}(P)}}
+
+Programmas vai algoritma daļas, kuras nav izpildamas paralēli, devē par secīgu
+daļu. Šo daļu apzīme ar $\gamma$ un izteic šādi:
+\numeqn{serial_fraction}{\gamma = \frac{T_\mathit{inicializācija} + T_\mathit{finalizācija}}{T_\mathit{kopīgs}(1)}}
+
+Secīgi, programmas izpildes laika daļa, ko tā paved paralēlajā režīmā ir
+$(1 - \gamma)$. Zinot to, mēs varam izvairīties no algoritma inicializācijas un
+finalizācijas koncepcijām un pārrakstīt vienādojumu \refeqn{par_computing}
+kā:
+\numeqn{par_computing_adv}
+	{T_\mathit{kopīgs}(P) = \gamma \cdot T_\mathit{kopīgs}(1) +
+	\frac{(1 - \gamma) \cdot T_\mathit{kopīgs}(1)}{P}}
+
+Tad, izmantojot formulu \refeqn{par_computing_adv} mēs paplašinam paātrinājuma
+izteiksmi \refeqn{speedup} un iegustam Amdāla\footnote{\inbold{AAAAAAAA}} likumu:
+\numeqn{amdahl}
+	{S(P) = \frac{T_\mathit{kopīgs}(1)}
+	             {(\gamma + \frac{1 - \gamma}{P}) \cdot T_\mathit{kopīgs}(1)}
+	      = \frac{1}{\gamma + \frac{1 - \gamma}{P}}}
+
+\section{Komunikācijas jautājums}
