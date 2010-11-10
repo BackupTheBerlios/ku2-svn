@@ -37,18 +37,18 @@ void ku_pstop_debug( const char *func, char *fmt, ... ) __THROW;
 #define pdebug( m, ... ) \
 ku_printf_debug(__FILE__, __FUNCTION__, __LINE__, m, ##__VA_ARGS__)
 
-#define ku_avoid( expr ) \
-if ( expr ) \
+#define ku_avoid( __expr ) \
+if ( __expr ) \
 { \
 	ku_pavoid_debug(__FILE__, __FUNCTION__, __LINE__); \
-	KU_ERRQ(KE_ASSERT); \
+	KU_ERRQ(KE_ASSERT, "Expression '" #__expr "` was not avoided"); \
 }
 
-#define ku_avoid_adv( expr, retval ) \
-if ( expr ) \
+#define ku_avoid_adv( __expr, __retval ) \
+if ( __expr ) \
 { \
 	ku_pavoid_debug(__FILE__, __FUNCTION__, __LINE__); \
-	KU_ERRQ_VALUE(KE_ASSERT, retval); \
+	KU_ERRQ_V(KE_ASSERT, "Expression '" #__expr "` was not avoided", __retval); \
 }
 
 #define func_debug_on ku_func_debug(1)

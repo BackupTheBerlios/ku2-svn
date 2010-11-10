@@ -12,7 +12,6 @@
 
 /*!
  * \file
- * \author J. Anton
  * \date Thu Aug 17 23:03:09 2006
  * \brief Error code related definitions.
  *
@@ -92,9 +91,21 @@ const char *ku_gerrtx( void ) __THROW;
  */
 kucode_t ku_gerrcode( void ) __THROW;
 
+void ku_push_error( void ) __THROW;
+void ku_pop_error( void ) __THROW;
+
 //! Return the last error code from the function.
 #define KU_ERRQ_PASS() \
 preturnp("passed error") ku_gerrcode()
+
+//! Set and return an error.
+/*!
+ * Sets the error code, and returns it from the function.
+ *
+ * \param __ecode Error code.
+ * \since 2.0.0
+ */
+#define KU_ERRQNT( __ecode ) KU_ERRQ(__ecode, NULL)
 
 //! Set the error code and error text, and return the error code from the function.
 #define KU_ERRQ( __ecode, __etext ) \
@@ -104,13 +115,39 @@ preturnp("passed error") ku_gerrcode()
 	preturnp("error: %d, '%s`", ecode, etext) ku_serror(ecode, etext); \
 }
 
+//! Set an error code and return a specified value.
+/*!
+ * Sets the error code, and returns the specified value from the function.
+ *
+ * \param __ecode Error code.
+ * \param __value Value to return from the function.
+ * \since 2.0.0
+ */
+#define KU_ERRQNT_V( __ecode, __value ) KU_ERRQ_V(__ecode, NULL, __value)
+
 //! Set the error code and error text, and return the value from the function.
-#define KU_ERRQ_V(__ecode, __etext, __value) \
+#define KU_ERRQ_V( __ecode, __etext, __value ) \
 { \
 	kucode_t ecode = (__ecode); \
 	const char *etext = (__etext); \
 	ku_serror(ecode, etext); \
 	preturnp("error: %d, '%s`", ecode, etext) (__value); \
+}
+
+//! Execute an expression, preserving the current error code.
+/*!
+ * Saves the current error state, executes an expression and restores the
+ * saved error state. That is, any ku-errors reported by the expression will
+ * be discarded.
+ *
+ * \param __expr Expression to execute.
+ * \since 2.0.0
+ */
+#define KU_IGNORE_ERRORS( __expr ) \
+{ \
+	ku_push_error(); \
+	__expr; \
+	ku_pop_error(); \
 }
 
 KU_END_DECLS

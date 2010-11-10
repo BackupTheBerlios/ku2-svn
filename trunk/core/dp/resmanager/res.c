@@ -22,7 +22,7 @@ static kucode_t res_uload( res_t *res )
 {
 	res->data = res->type->control(NULL, RES_ULOAD, res->data);
 	if ( res->data != NULL )
-		return KU_SET_ERROR(KE_EXTERNAL);
+		KU_ERRQNT(KE_EXTERNAL);
 	
 	return KE_NONE;
 }
@@ -66,27 +66,26 @@ static int res_type_freef( void *rtype )
 kucode_t res_init( void )
 {
 	pstart();
-	
-	if ( (reses = abtree_create(res_cmpf, 0)) == NULL )
+
+	if ( (reses = ku_abtree_create(res_cmpf, 0)) == NULL )
 		KU_ERRQ_PASS();
-	if ( (restypes = abtree_create(res_type_cmpf, 0)) == NULL )
-	{
-		KU_WITHOUT_ERROR(abtree_free(reses, NULL));
+	if ( (restypes = ku_abtree_create(res_type_cmpf, 0)) == NULL ) {
+		KU_IGNORE_ERRORS(ku_abtree_free(reses, NULL));
 		KU_ERRQ_PASS();
 	}
-	
+
 	preturn KE_NONE;
 }
 
 kucode_t res_halt( void )
 {
 	pstart();
-	
-	KU_WITHOUT_ERROR_START();
-		abtree_free(reses, res_freef);
-		abtree_free(restypes, res_type_freef);
-	KU_WITHOUT_ERROR_STOP();
-	
+
+	ku_push_error();
+	ku_abtree_free(reses, res_freef);
+	ku_abtree_free(restypes, res_type_freef);
+	ku_pop_error();
+
 	preturn KE_NONE;
 }
 
@@ -97,13 +96,13 @@ kucode_t res_assign( int type, ku_flag32_t flags, rescontrol_f control )
 	
 	rtype = dmalloc(sizeof(restype_t));
 	if ( rtype == NULL )
-		KU_ERRQ(KE_MEMORY);
+		KU_ERRQNT(KE_MEMORY);
 	
 	rtype->type = type;
 	rtype->flags = flags;
 	rtype->control = control;
 	
-	if ( abtree_ins(restypes, rtype) != KE_NONE )
+	if ( ku_abtree_ins(restypes, rtype) != KE_NONE )
 	{
 		dfree(rtype);
 		KU_ERRQ_PASS();
@@ -122,11 +121,11 @@ kucode_t res_add( const char *path, const char *name, int type, void *param,
 	searchtype.type = type;
 	rtype = ku_abtree_search(restypes, &searchtype);
 	if ( rtype == NULL )
-		KU_ERRQ(KE_INVALID);
+		KU_ERRQNT(KE_INVALID);
 	
 	res = dmalloc(sizeof(res_t)+strlen(name)+strlen(path)+2);
 	if ( res == NULL )
-		KU_ERRQ(KE_MEMORY);
+		KU_ERRQNT(KE_MEMORY);
 	
 	res->name = (char*)res+sizeof(res_t);
 	strcpy((char*)res->name, name);
@@ -138,7 +137,7 @@ kucode_t res_add( const char *path, const char *name, int type, void *param,
 	res->loadcnt = 0;
 	res->data = NULL;
 	
-	if ( abtree_ins(reses, res) != KE_NONE )
+	if ( ku_abtree_ins(reses, res) != KE_NONE )
 	{
 		dfree(res);
 		KU_ERRQ_PASS();
@@ -154,14 +153,14 @@ void *res_access( const char *name )
 	
 	res = res_search(name);
 	if ( res == NULL )
-		KU_ERRQ_VALUE(KE_NOTFOUND, NULL);
+		KU_ERRQNT_V(KE_NOTFOUND, NULL);
 	
 	if ( (res->loadcnt == 0) || (res->type->flags&RESTYPE_UNIQ) )
 	{
 		//	загрузка ресурса
 		res->data = res->type->control(res->path, RES_LOAD, res->param);
 		if ( res->data == NULL )
-			KU_ERRQ_VALUE(KE_EXTERNAL, NULL);
+			KU_ERRQNT_V(KE_EXTERNAL, NULL);
 		
 		res->loadcnt = 1;
 	}	else
@@ -179,14 +178,14 @@ void *res_access_adv( const char *name, void *param )
 	
 	res = res_search(name);
 	if ( res == NULL )
-		KU_ERRQ_VALUE(KE_NOTFOUND, NULL);
+		KU_ERRQNT_V(KE_NOTFOUND, NULL);
 	
 	if ( (res->loadcnt == 0) || (res->type->flags&RESTYPE_UNIQ) )
 	{
 		//	загрузка ресурса
 		res->data = res->type->control(res->path, RES_LOAD, param);
 		if ( res->data == NULL )
-			KU_ERRQ_VALUE(KE_EXTERNAL, NULL);
+			KU_ERRQNT_V(KE_EXTERNAL, NULL);
 		
 		res->loadcnt = 1;
 	}	else
@@ -204,10 +203,10 @@ kucode_t res_release( const char *name )
 	
 	res = res_search(name);
 	if ( res == NULL )
-		KU_ERRQ(KE_NOTFOUND);
+		KU_ERRQNT(KE_NOTFOUND);
 	
 	if ( res->type->flags&RESTYPE_UNIQ )
-		KU_ERRQ(KE_INVALID);
+		KU_ERRQNT(KE_INVALID);
 
 	ku_avoid( res->loadcnt == 0 );
 	if ( res->loadcnt == 1 )

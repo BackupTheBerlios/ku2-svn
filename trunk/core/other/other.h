@@ -70,7 +70,7 @@ KU_BEGIN_DECLS
 //! Convert the macros name to the constant string.
 #define _STR_( m ) #m
 
-//! Concatinate two constant strings.
+//! Concatenate two constant strings.
 #define CONCAT( m, n ) m ## n
 
 //! String length for qstr() and vstr().
@@ -79,14 +79,14 @@ KU_BEGIN_DECLS
 //! String count in internal use of qstr() and vstr().
 #define QSTR_STRCNT 16
 
-//! Concatinate two strings.
+//! Concatenate two strings.
 /*!
-	Concatinates two strings.
+	Concatenates two strings.
 	\param s1 First string.
 	\param s2 Second string.
-	\return Pointer to the concatinated string.
-	\note Concatinated string does not need to be freed.
-	\note Concatinated string should be shorter then \ref QSTR_STRSIZE.
+	\return Pointer to the concatenated string.
+	\note Concatenated string does not need to be freed.
+	\note Concatenated string should be shorter then \ref QSTR_STRSIZE.
 	\note Function is not thread-safe.
 	\warning Function does not perform any buffer overflow check. If \b DEBUG is
 	defined then the warning will be sent to the \e stdout.

@@ -100,6 +100,13 @@ extern "C" {
 #	endif
 #endif
 
+//! Make sure that the source/header is compiled by C++. \since 2.0.0
+#ifdef __cplusplus
+#	define KU_ENSURE_CPLUSPLUS
+#else
+#	define KU_ENSURE_CPLUSPLUS static void must_be_compiled_by_cplusplu[-1];
+#endif
+
 #ifdef __cplusplus
 }
 #endif

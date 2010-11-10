@@ -122,7 +122,6 @@ sources = Split("""
 	
 	ds/stack/stack.c
 	ds/arrseq/arrseq.c
-	ds/graph/adjacency_list.c
 	ds/graph/graph.c
 	ds/abtree/abtree.c
 	ds/list/dl_list.c

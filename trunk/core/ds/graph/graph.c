@@ -52,20 +52,22 @@ ku_graph_t *ku_graph_create( ku_comp_f func, ku_flag32_t flags )
 {
 	ku_graph_t *graph;
 	pstartp("compf: %p, flags: %u", func, flags);
-	
+
 	graph = (ku_graph_t*)dmalloc(sizeof(ku_graph_t));
 	if ( graph == NULL )
-		KU_ERRQ_VALUE(KE_MEMORY, NULL);
-	
-	graph->directed = ((flags&KUF_GRAPH_DIRECTED) == KUF_GRAPH_DIRECTED) ? 1 : 0;
+		KU_ERRQNT_V(KE_MEMORY, NULL);
+
+	graph->directed
+	                = ((flags & KUF_GRAPH_DIRECTED) == KUF_GRAPH_DIRECTED)
+	                                                                       ? 1
+	                                                                       : 0;
 	graph->cmpf = func;
 	graph->cur = NULL;
-	if ( (graph->vertexes = ku_abtree_create(vertex_comp_f, 0)) == NULL )
-	{
+	if ( (graph->vertexes = ku_abtree_create(vertex_comp_f, 0)) == NULL ) {
 		dfree(graph);
-		KU_ERRQ_PASS_VALUE(NULL);
+		return NULL;
 	}
-	
+
 	preturnp("graph: %p", graph) graph;
 }
 
@@ -109,13 +111,13 @@ uint ku_graph_ins( ku_graph_t *graph, const void *data )
 	// Поиск идентификатора:
 	vertex = ku_abtree_unused_index(graph->vertexes, vertex_interval_f, &pos);
 	if ( vertex == NULL )
-		KU_ERRQ_VALUE(KE_FULL, (uint)-1);
+		KU_ERRQNT_V(KE_FULL, (uint)-1);
 	id = vertex->id + (pos > 0 ? 1 : -1);
 	
 	// Выделение памяти и присоединение к графу:
 	vertex = (ku_graph_vertex_t*)dmalloc(sizeof(ku_graph_vertex_t));
 	if ( vertex == NULL )
-		KU_ERRQ_VALUE(KE_MEMORY, (uint)-1);
+		KU_ERRQNT_V(KE_MEMORY, (uint)-1);
 	
 	vertex->id = id;
 	vertex->data = (void*)data;
@@ -133,7 +135,7 @@ uint ku_graph_ins( ku_graph_t *graph, const void *data )
 	if ( ku_abtree_ins(graph->vertexes, vertex) != KE_NONE )
 	{
 		dfree(vertex);
-		KU_ERRQ_PASS_VALUE((uint)-1);
+		return (uint)-1;
 	}
 	
 	preturnp("id: %u", id) id;
@@ -160,7 +162,7 @@ kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 	// Поиск вершины:
 	vertex = ku_graph_get_vertex(graph, id);
 	if ( vertex == NULL )
-		KU_ERRQ(KE_NOTFOUND);
+		KU_ERRQNT(KE_NOTFOUND);
 	
 	// Перенос ссылок (дуг):
 	if ( (flags&KUF_GRAPH_TRANSP) == KUF_GRAPH_TRANSP )
@@ -169,7 +171,7 @@ kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 		if ( graph->directed )
 		{
 			#warning Not implemented yet (Directed graph transponation)
-			KU_ERRQ(KE_NOIMPLEM);
+			KU_ERRQNT(KE_NOIMPLEM);
 		}	else
 		{
 			// Подсчёт количества связей у соседей:
@@ -225,7 +227,7 @@ kucode_t ku_graph_rem( ku_graph_t *graph, uint id,
 						// Очистка временных переменных:
 						for ( i = 0; i < vertex->near_cnt; i++ )
 							vertex->near[i]->tmp = 0; 
-						KU_ERRQ(KE_MEMORY);
+						KU_ERRQNT(KE_MEMORY);
 					}
 					
 					// .. очищаем новые связки:
@@ -329,11 +331,11 @@ kucode_t ku_graph_link( ku_graph_t *graph,
 	
 	if ( ((start = ku_graph_get_vertex(graph, start_node)) == NULL) ||
 		 ((end = ku_graph_get_vertex(graph, end_node)) == NULL) )
-		KU_ERRQ(KE_NOTFOUND);
+		KU_ERRQNT(KE_NOTFOUND);
 	
 	// Создаём связку:
 	if ( __ku_graph_link(start, end, graph->directed) == -1 )
-		KU_ERRQ(KE_MEMORY);
+		KU_ERRQNT(KE_MEMORY);
 	
 	// Если необходимо, создаём связку в обратную сторону:
 	if ( graph->directed && ((flags&KUF_GRAPH_DBL_LINK) == KUF_GRAPH_DBL_LINK) )
@@ -341,7 +343,7 @@ kucode_t ku_graph_link( ku_graph_t *graph,
 		if ( __ku_graph_link(end, start, 1) == -1 )
 		{
 #warning Here should be restored status quo
-			KU_ERRQ(KE_MEMORY);
+			KU_ERRQNT(KE_MEMORY);
 		}
 	}
 	
@@ -353,55 +355,55 @@ kucode_t ku_graph_ulink( ku_graph_t *graph,
 {
 	pstartp("graph: %p, start: %u, end: %u, flags: %u",
 			graph, start_node, end_node, flags);
-	KU_ERRQ(KE_NOIMPLEM);
+	KU_ERRQNT(KE_NOIMPLEM);
 }
 
 kucode_t ku_graph_push( ku_graph_t *graph )
 {
 	pstartp("graph: %p", graph);
-	KU_ERRQ(KE_NOIMPLEM);
+	KU_ERRQNT(KE_NOIMPLEM);
 }
 
 kucode_t ku_graph_pop( ku_graph_t *graph )
 {
 	pstartp("graph: %p", graph);
-	KU_ERRQ(KE_NOIMPLEM);
+	KU_ERRQNT(KE_NOIMPLEM);
 }
 
 void *ku_graph_push_goto_next( ku_graph_t *graph, uint index )
 {
 	pstartp("graph: %p, index: %u", graph, index);
-	KU_ERRQ_VALUE(KE_NOIMPLEM, NULL);
+	KU_ERRQNT_V(KE_NOIMPLEM, NULL);
 }
 
 void *ku_graph_goto_next( ku_graph_t *graph, uint index )
 {
 	pstartp("graph: %p, index: %u", graph, index);
-	KU_ERRQ_VALUE(KE_NOIMPLEM, NULL);
+	KU_ERRQNT_V(KE_NOIMPLEM, NULL);
 }
 
 void *ku_graph_push_goto_prev( ku_graph_t *graph, uint index )
 {
 	pstartp("graph: %p, index: %u", graph, index);
-	KU_ERRQ_VALUE(KE_NOIMPLEM, NULL);
+	KU_ERRQNT_V(KE_NOIMPLEM, NULL);
 }
 
 void *ku_graph_goto_prev( ku_graph_t *graph, uint index )
 {
 	pstartp("graph: %p, index: %u", graph, index);
-	KU_ERRQ_VALUE(KE_NOIMPLEM, NULL);
+	KU_ERRQNT_V(KE_NOIMPLEM, NULL);
 }
 
 void *ku_graph_search( ku_graph_t *graph, uint id )
 {
 	pstartp("graph: %p, id: %u", graph, id);
-	KU_ERRQ_VALUE(KE_NOIMPLEM, NULL);
+	KU_ERRQNT_V(KE_NOIMPLEM, NULL);
 }
 
 void *ku_graph_search_by_data( ku_graph_t *graph, const void *data )
 {
 	pstartp("graph: %p, data: %p", graph, data);
-	KU_ERRQ_VALUE(KE_NOIMPLEM, NULL);
+	KU_ERRQNT_V(KE_NOIMPLEM, NULL);
 }
 
 ku_graph_vertex_t *ku_graph_get_vertex( ku_graph_t *graph, uint id )

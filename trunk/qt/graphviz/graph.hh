@@ -28,13 +28,63 @@ KU_ENSURE_CPLUSPLUS
 #include "context.hh"
 
 KU_BEGIN_DECLS
-
 namespace graphviz {
 
 class Graph
 {
+public:
+	//! Default DPI value used by "dot".
+	static const qreal defaultDpi;
+
+	//! Default node size of the graph.
+	static const qreal defaultNodeSize;
+
+public:
+	//! Construct a graphviz graph object.
+	/*!
+	 * Constructs an empty graphviz graph object with default parameters.
+	 *
+	 * \param name Name of the graph.
+	 */
+	Graph(const QString &name);
+
+	//! Destroy a graph object.
+	~Graph();
+
+	//! Initialise the graph.
+	void initialise();
+
+	//! Clear a graph.
+	void clear();
+
+public:
+	//! Add a graph node.
+	void addNode(const QString &name);
+
+	//! Add many graph nodes.
+	void addNodes(const QStringList &names);
+
+	//! Remove a graph node.
+	void removeNode(const QString &name);
+
+	//! Add an edge.
+	void addEdge(const QString &source, const QString &dest);
+
+	//! Remove an edge.
+	void removeEdge(const QString &source, const QString &dest);
+
 private:
+	void open();
+	QString meta(const QString &ket);
+	int setMeta(const QString &key, const QString &value);
+
+
+private:
+	//! Graph context.
 	Context m_context;
+
+	//! Graph representation.
+	Agraph_t *m_graph;
 };
 
 }

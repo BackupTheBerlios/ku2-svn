@@ -64,7 +64,8 @@ void *ku_malloc_debug( size_t size )
 		sizes += size;
 	}
 	#ifdef DEBUG_MEMORY
-	printf(ESC_BLUE("MALLOC : %p sized %ld (total %d)")"\n", ptr, size, mallocs);
+	printf(ESC_BLUE("MALLOC : %p sized %ld (total %d)")"\n", ptr,
+	       (long int)size, mallocs);
 	#endif
 	return ptr;
 }
@@ -83,7 +84,7 @@ void *ku_realloc_debug( void *__ptr, size_t size )
 	void *ptr = realloc(__ptr, size);
 	#ifdef DEBUG_MEMORY
 	printf(ESC_BLUE("REALLOC: %p changed to %p sized %ld (total %d)")"\n",
-		   __ptr, ptr, size, mallocs);
+	       __ptr, ptr, (long int)size, mallocs);
 	#endif
 	return ptr;
 }

@@ -132,7 +132,7 @@ var_t *var_define_v( const char *name, const char *val_types, va_list var_ap )
 				break;
 			}
 			default:
-				KU_ERRQ_VALUE(KE_INVALID, NULL);
+				KU_ERRQNT_V(KE_INVALID, NULL);
 		}
 	}
 	#ifdef VAR_ENABLE_BUFFERING
@@ -144,7 +144,7 @@ var_t *var_define_v( const char *name, const char *val_types, va_list var_ap )
 	// Выделение памяти под переменную и заполнение метаданными
 	var = dmalloc(size);
 	if ( var == NULL )
-		KU_ERRQ_VALUE(KE_MEMORY, NULL);
+		KU_ERRQNT_V(KE_MEMORY, NULL);
 	var->name = (char*)var+sizeof(var_t);
 	strcpy(var->name, name);
 	var->val_types = var->name+namelen+1;
@@ -222,12 +222,12 @@ var_t *var_define_l( const char *name, vlist_t *vlist )
 	pstart();
 	
 	if ( vlist->datasz == 0 )
-		KU_ERRQ_VALUE(KE_EMPTY, NULL);
+		KU_ERRQNT_V(KE_EMPTY, NULL);
 	
 	// Выделение памяти под переменную и заполнение метаданными
 	var = dmalloc(size);
 	if ( var == NULL )
-		KU_ERRQ_VALUE(KE_MEMORY, NULL);
+		KU_ERRQNT_V(KE_MEMORY, NULL);
 	var->name = (char*)(var+1);
 	strcpy(var->name, name);
 	var->val_types = var->name+namelen+1;
@@ -271,7 +271,7 @@ var_t *var_define_l( const char *name, vlist_t *vlist )
 			default:
 			{
 				dfree(var);
-				KU_ERRQ_VALUE(KE_INVALID, NULL);
+				KU_ERRQNT_V(KE_INVALID, NULL);
 			}
 		}
 	}
