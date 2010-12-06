@@ -21,10 +21,7 @@ vlist_t *vlist_define( void )
 	
 	vlist = (vlist_t*)dmalloc(sizeof(vlist_t));
 	if ( vlist == NULL )
-	{
-		KU_SET_ERROR(KE_MEMORY);
-		preturn NULL;
-	}
+		KU_ERRQNT_V(KE_MEMORY, NULL);
 	
 	vlist->vals = dl_list_create(NULL,0);
 	if ( vlist->vals == NULL )
@@ -81,17 +78,17 @@ kucode_t vlist_add( vlist_t *vlist, char val_type, void *data )
 			size = strlen(data)+1;
 			break;
 		default:
-			KU_ERRQ(KE_INVALID);
+			KU_ERRQNT(KE_INVALID);
 	}
 	
 	node = (vlist_node_t*)dmalloc(size+sizeof(vlist_node_t));
 	if ( node == NULL )
-		KU_ERRQ(KE_MEMORY);
+		KU_ERRQNT(KE_MEMORY);
 	
 	if ( dl_list_ins_last(vlist->vals, node) != KE_NONE )
 	{
 		dfree(node);
-		preturn KU_GET_ERROR();
+		KU_ERRQ_PASS();
 	}
 	
 	switch ( val_type )
@@ -110,7 +107,7 @@ kucode_t vlist_add( vlist_t *vlist, char val_type, void *data )
 			strcpy((char*)(node+1), (char*)data);
 			break;
 		default:
-			KU_ERRQ(KE_INVALID);
+			KU_ERRQNT(KE_INVALID);
 	}
 	node->val_type = val_type;
 	vlist->datasz += size;

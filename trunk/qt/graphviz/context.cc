@@ -13,30 +13,43 @@
 // Self-include:
 #include "context.hh"
 
+// Ku2 includes:
+#include "ku2/debug.h"
+
 // External includes:
 #include <QtCore>
 
 using namespace ku2::graphviz;
-Q_GLOBAL_STATIC(ContextHelper, context);
 
 class ContextHelper
 {
 public:
-	inline ContextHelper() {
-		m_gvc = gvContext();
-	}
-	inline ~ContextHelper() {
-		gvFreeContext(m_gvc);
-	}
+	ContextHelper();
+	~ContextHelper();
+public:
 	inline GVC_t *data() const { return m_gvc; }
 
 private:
 	GVC_t *m_gvc;
 };
+ContextHelper::ContextHelper()
+{
+	m_gvc = gvContext();
+}
+ContextHelper::~ContextHelper()
+{
+	gvFreeContext(m_gvc);
+}
+Q_GLOBAL_STATIC(ContextHelper, context);
+
+Context::Context():
+		m_gvc(0)
+{
+	pdebug("GV context created");
+}
 
 void Context::instantiate()
 {
 	m_gvc = context()->data();
+	pdebug("GV context instantiated as %p", m_gvc);
 }
-
-

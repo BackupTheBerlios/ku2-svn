@@ -32,6 +32,10 @@ namespace graphviz {
 class Context
 {
 public:
+	//! Constructor.
+	Context();
+
+public:
 	//! Create an instance of the GV context.
 	void instantiate();
 
@@ -40,10 +44,6 @@ public:
 
 	//! GV context's selection through pointer operator.
 	inline GVC_t *operator->() { return m_gvc; }
-
-private:
-	//! Constructor.
-	inline Context(): m_gvc(0) {};
 
 private:
 	//! GV context.

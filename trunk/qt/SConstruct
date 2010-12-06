@@ -1,0 +1,14 @@
+#
+#	SConstruct file for Kane Utilities 2 (Qt components)
+#		J. Anton, Copyright 2010
+#
+
+scenarios = []
+
+build = ARGUMENTS.get("build", "graphviz")
+notbuild = ARGUMENTS.get("notbuild", "")
+if "graphviz" in build and not "graphviz" in notbuild:
+	scenarios += ["graphviz/SConstruct"]
+
+print scenarios
+SConscript(scenarios)

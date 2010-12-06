@@ -5,7 +5,7 @@
 
 scenarios = []
 
-build = ARGUMENTS.get("build", "core")
+build = ARGUMENTS.get("build", "cores,qt")
 notbuild = ARGUMENTS.get("notbuild", "")
 if "core" in build and not "core" in notbuild:
 	scenarios += ["core/SConstruct"]
@@ -13,5 +13,7 @@ if "modules" in build and not "modules" in notbuild:
 	scenarios += ["modules/SConstruct"]
 if "tools" in build and not "tools" in notbuild:
 	scenarios += ["tools/SConstruct"]
+if "qt" in build and not "qt" in notbuild:
+	scenarios += ["qt/SConstruct"]
 
 SConscript(scenarios)

@@ -1,5 +1,5 @@
 /*
- *	ecode.h
+ *	core:ku2:ecode.h
  *
  * This file is the part of Kane Utilities 2.
  * See licensing agreement in a root directory for more details.

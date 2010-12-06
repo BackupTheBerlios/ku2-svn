@@ -27,7 +27,9 @@
 							</builder>
 							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.1324043231" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
 							<tool id="org.eclipse.cdt.build.core.settings.holder.1697917294" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
-								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.1719635302" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths"/>
+								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.1719635302" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/include/graphviz"/>
+								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1123983324" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
 							<tool id="org.eclipse.cdt.build.core.settings.holder.1538735354" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
@@ -37,6 +39,7 @@
 									<listOptionValue builtIn="false" value="/usr/include/QtCore"/>
 									<listOptionValue builtIn="false" value="/usr/include/QtGui"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ku2/core}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/include/graphviz"/>
 								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1770399134" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
@@ -44,6 +47,7 @@
 								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.883019551" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/include"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ku2/core}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/include/graphviz"/>
 									<listOptionValue builtIn="true" value="/usr/include"/>
 									<listOptionValue builtIn="true" value="/usr/include/QtCore"/>
 									<listOptionValue builtIn="true" value="/usr/include/QtGui"/>
@@ -52,7 +56,6 @@
 								</option>
 								<option id="org.eclipse.cdt.build.core.settings.holder.undef.incpaths.324537493" name="Undefined Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.undef.incpaths" valueType="undefIncludePath">
 									<listOptionValue builtIn="false" value="/usr/include/QtCore"/>
-									<listOptionValue builtIn="false" value="/usr/include/graphviz"/>
 									<listOptionValue builtIn="false" value="/usr/include/Qt"/>
 									<listOptionValue builtIn="false" value="/usr/include/QtGui"/>
 								</option>

@@ -27,10 +27,15 @@ KU_ENSURE_CPLUSPLUS
 // Internal includes:
 #include "context.hh"
 
+// External includes:
+#include <QtGlobal>
+#include <QStringList>
+#include <QMap>
+
 KU_BEGIN_DECLS
 namespace graphviz {
 
-class Graph
+class Q_DECL_EXPORT Graph
 {
 public:
 	//! Default DPI value used by "dot".
@@ -38,6 +43,12 @@ public:
 
 	//! Default node size of the graph.
 	static const qreal defaultNodeSize;
+
+	enum Type {
+		GRAPH_DIRECTED = 0x0001,
+		GRAPH_STRICT   = 0x0002
+	};
+	Q_DECLARE_FLAGS(Types, Type);
 
 public:
 	//! Construct a graphviz graph object.
@@ -74,19 +85,37 @@ public:
 	void removeEdge(const QString &source, const QString &dest);
 
 private:
-	void open();
-	QString meta(const QString &ket);
+	//! Wrapper for agopen(char*,int).
+	void open(const QString &name, Types type);
+
+	void close();
+
+	QString meta(const QString &key);
+	QString meta(const QString &key, const QString &defaultValue);
+
+	//! Wrapper for agset(void*,char*,char*).
 	int setMeta(const QString &key, const QString &value);
 
+	//!  and agnodeattr(void*,char*,char*)
+	Agsym_t *nodeAttr(const QString &key, const QString &value);
 
 private:
 	//! Graph context.
 	Context m_context;
 
+	//! Graph name.
+	QString m_name;
+
 	//! Graph representation.
 	Agraph_t *m_graph;
+
+	//! List of the nodes.
+	QMap<QString,Agnode_t*> m_nodes;
 };
 
 }
 KU_END_DECLS
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(ku2::graphviz::Graph::Types)
+
 #endif // KU_QT__GRAPHVIZ_GRAPH_HH__

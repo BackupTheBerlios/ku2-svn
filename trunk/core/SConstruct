@@ -133,7 +133,6 @@ sources = Split("""
 	
 	other/other.c
 	io/cfgreader/cfg.c
-	io/dialogue/dialogue.c
 	io/log/log.c
 	""")
 
@@ -157,7 +156,6 @@ includes = Split("""
 	dp/var/vspace.h
 	other/other.h
 	io/cfgreader/cfg.h
-	io/dialogue/dialogue.h
 	io/log/log.h
 	""")
 

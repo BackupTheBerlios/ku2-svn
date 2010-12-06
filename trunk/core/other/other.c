@@ -48,8 +48,8 @@ char *vstr( const char *fmt, ... )
 char *vstrts( const char *fmt, ... )
 {
 	va_list ap;
-	static THREAD(char _vstr_[QSTR_STRCNT][QSTR_STRSIZE]);
-	static THREAD(int i) = -1;
+	static KU_THREAD_LOCAL(char _vstr_[QSTR_STRCNT][QSTR_STRSIZE]);
+	static KU_THREAD_LOCAL(int i) = -1;
 	va_start(ap, fmt);
 	if ( (++i) >= QSTR_STRCNT ) i = 0;
 	vsprintf(_vstr_[i], fmt, ap);
@@ -76,8 +76,7 @@ void qdir( char *path )
 {
 	char *c = path;
 	while ( *c ) c++;
-	if ( c[-1] != '/' )
-	{
+	if ( c[-1] != '/' ) {
 		c[0] = '/';
 		c[1] = 0;
 	}
@@ -97,8 +96,8 @@ char *ku_ttime( void )
 	time(&t);
 	
 	tm = localtime(&t);
-	return vstr("%.2d.%.2d.%.4d %.2d:%.2d:%.2d", \
-		tm->tm_mday, tm->tm_mon+1, tm->tm_year+1900, \
+	return vstr("%.2d.%.2d.%.4d %.2d:%.2d:%.2d",
+		tm->tm_mday, tm->tm_mon+1, tm->tm_year+1900,
 		tm->tm_hour, tm->tm_min, tm->tm_sec);
 }
 
@@ -108,12 +107,14 @@ kucode_t ku_strtoint( const char *str, int *i )
 	char *ep;
 	long int res;
 	pstart();
-	
+
 	old_errno = errno;
 	errno = 0;
 	res = strtol(str, &ep, 10);
-	if ( errno || (*ep != 0) || (ep == str) || (res < INT_MIN) || (res > INT_MAX) )
-	    KU_ERRQ(KE_INVALID);
+	if ( errno || (*ep != 0) || (ep == str) || (res < INT_MIN) ||
+	     (res > INT_MAX) ) {
+		KU_ERRQNT(KE_INVALID);
+	}
 	*i = res;
 	errno = old_errno;
 
@@ -126,12 +127,12 @@ kucode_t ku_strtouint( const char *str, unsigned int *i )
 	char *ep;
 	unsigned long int res;
 	pstart();
-	
+
 	old_errno = errno;
 	errno = 0;
 	res = strtoul(str, &ep, 10);
 	if ( errno || (*ep != 0) || (ep == str) || (res > UINT_MAX) )
-	    KU_ERRQ(KE_INVALID);
+		KU_ERRQNT(KE_INVALID);
 	*i = res;
 	errno = old_errno;
 
@@ -144,12 +145,12 @@ kucode_t ku_strtolong( const char *str, long int *i )
 	char *ep;
 	long int res;
 	pstart();
-	
+
 	old_errno = errno;
 	errno = 0;
 	res = strtol(str, &ep, 10);
 	if ( errno || (*ep != 0) || (ep == str) )
-	    KU_ERRQ(KE_INVALID);
+		KU_ERRQNT(KE_INVALID);
 	*i = res;
 	errno = old_errno;
 
@@ -162,12 +163,12 @@ kucode_t ku_strtoulong( const char *str, unsigned long int *i )
 	char *ep;
 	unsigned long int res;
 	pstart();
-	
+
 	old_errno = errno;
 	errno = 0;
 	res = strtoul(str, &ep, 10);
 	if ( errno || (*ep != 0) || (ep == str) )
-	    KU_ERRQ(KE_INVALID);
+		KU_ERRQNT(KE_INVALID);
 	*i = res;
 	errno = old_errno;
 
@@ -180,12 +181,12 @@ kucode_t ku_strtodouble( const char *str, double *i )
 	char *ep;
 	double res;
 	pstart();
-	
+
 	old_errno = errno;
 	errno = 0;
 	res = strtod(str, &ep);
 	if ( errno || (*ep != 0) || (ep == str) )
-	    KU_ERRQ(KE_INVALID);
+		KU_ERRQNT(KE_INVALID);
 	*i = res;
 	errno = old_errno;
 
@@ -195,10 +196,11 @@ kucode_t ku_strtodouble( const char *str, double *i )
 kucode_t ku_strtobool( const char *str, int *i )
 {
 	if ( (strcmp(str, "yes") && strcmp(str, "true")) == 0 )
-		*i = 1; else
-			if ( (strcmp(str, "no") && strcmp(str, "false")) == 0 )
-				*i = 0; else
-					KU_ERRQ(KE_INVALID);
+		*i = 1;
+	else if ( (strcmp(str, "no") && strcmp(str, "false")) == 0 )
+		*i = 0;
+		else
+		KU_ERRQNT(KE_INVALID);
 	return KE_NONE;
 }
 

@@ -1,28 +1,26 @@
-/***************************************************************************
- *            debug.h
+/*
+ *	core:ku2:debug.h
  *
- *  Thu Aug 17 23:15:55 2006
- *  Copyright  2006  J. Anton
- *  kane@mail.berlios.de
- ****************************************************************************/
+ * This file is the part of Kane Utilities 2.
+ * See licensing agreement in a root directory for more details.
+ * http://developer.berlios.de/projects/ku2/
+ *
+ * Copyright, 2006+
+ *	J. Anton (Jeļkins Antons) aka Kane
+ *	kane@mail.berlios.de
+ */
 
 /*!
-	\file
-	\brief Debug functions and definitions.
-	
-	This file contains the functions and definitions for debugging.
-	\author J. Anton
-	\date Thu Aug 17 23:17:34 2006
-	\version 1.2.0
-*/
+ * \file
+ * \brief Debug functions and definitions.
+ *
+ * This file contains the functions and definitions for debugging.
+ */
 
 #ifndef KU__DEBUG_H__
 #define KU__DEBUG_H__
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "ku2/host.h"
+KU_BEGIN_DECLS
 
 #ifdef DEBUG
 
@@ -40,15 +38,21 @@ ku_printf_debug(__FILE__, __FUNCTION__, __LINE__, m, ##__VA_ARGS__)
 #define ku_avoid( __expr ) \
 if ( __expr ) \
 { \
-	ku_pavoid_debug(__FILE__, __FUNCTION__, __LINE__); \
+	ku_pavoid_debug(__FILE__, __PRETTY_FUNCTION__, __LINE__); \
 	KU_ERRQ(KE_ASSERT, "Expression '" #__expr "` was not avoided"); \
 }
 
 #define ku_avoid_adv( __expr, __retval ) \
 if ( __expr ) \
 { \
-	ku_pavoid_debug(__FILE__, __FUNCTION__, __LINE__); \
+	ku_pavoid_debug(__FILE__, __PRETTY_FUNCTION__, __LINE__); \
 	KU_ERRQ_V(KE_ASSERT, "Expression '" #__expr "` was not avoided", __retval); \
+}
+
+#define ku_avoid_thr( __expr ) \
+if ( __expr ) {\
+	ku_pavoid_debug(__FILE__, __PRETTY_FUNCTION__, __LINE__); \
+	throw std::exception; \
 }
 
 #define func_debug_on ku_func_debug(1)
@@ -72,7 +76,7 @@ if ( __expr ) \
 
 //! Assess the expression.
 /*!
-	Checks the expression. If it is true, then logs a message and returnes
+	Checks the expression. If it is true, then logs a message and returns
 	\a KE_ASSERT.
 	\param expr Expression.
 	\sa ku_avoid_adv().
@@ -81,13 +85,23 @@ if ( __expr ) \
 
 //! Assess the expression (advanced).
 /*!
-	Checks the expression. If it is true, then logs a message and returnes
+	Checks the expression. If it is true, then logs a message and returns
 	an error value.
 	\param expr Expression.
 	\param retval Value to be returned.
 	\sa ku_avoid().
 */
 #define ku_avoid_adv( expr, retval )
+
+//! Asses the expression.
+/*!
+ * \param expr Boolean expression.
+ * \sa ku_avoid().
+ * \since 2.0.0
+ * Checks the expression. If it is true, then logs a message and throws an
+ * exception.
+ */
+#define ku_avoid_thr( expr )
 
 //! Turn on function debug wath.
 #define func_debug_on
@@ -132,7 +146,5 @@ if ( __expr ) \
 //! Print a CHECK POINT message if DEBUG is defined.
 #define __ pdebug("CHECK POINT\n");
 
-#ifdef __cplusplus
-}
-#endif
+KU_END_DECLS
 #endif
