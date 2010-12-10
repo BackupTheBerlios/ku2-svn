@@ -1,5 +1,5 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{rtu-thesis}[2008/08/28 RTU thesis and course work class]
+\ProvidesClass{rtu-thesis}[2010/12/10 RTU thesis and course work class]
 
 % Required packages:
 \RequirePackage{ifthen}
@@ -14,12 +14,13 @@
 \RequirePackage{relsize}
 \RequirePackage{xtab}
 %\RequirePackage{hyphenat}
+\RequirePackage{algpseudocode}
 
 % Font functions:
 \input{size12.clo}
 \defaultfontfeatures{Mapping=tex-text}
 \setmainfont{Times New Roman}
-%\setmonofont{Times New Roman}
+\setmonofont{Courier New}
 %\setsansfont{Times New Roman}
 %\setmathfont{Times New Roman}
 %\setmathrm{Times New Roman}
@@ -294,6 +295,14 @@
 \newenvironment{figure}
                {\@float{figure}}
                {\end@float}
+\newcommand\listoffigures
+{
+	\section{\listfigurename}
+	\@mkboth{\MakeUppercase\listfigurename}
+	        {\MakeUppercase\listfigurename}
+	\@starttoc{lof}
+}
+\newcommand*\l@figure{\@dottedtocline{1}{1.5em}{2.3em}}
 
 \long\def\@makecaption#1#2{
     \centering \emph{#1: #2}\par
@@ -398,6 +407,55 @@
 \newcommand{\reftable}[1]{\ref{tab:#1}}
 \newcommand{\seetable}[1]{(sk. \reftable{#1} tabulu)}
 
+% Algorithms:
+\newcounter{algorithm}[section]
+\renewcommand{\thealgorithm}{\thesection\arabic{algorithm}.}
+\def\fps@algorithm{hbtp}
+\def\ftype@algorithm{1}
+\def\ext@algorithm{loa}
+\def\fnum@algorithm{\thealgorithm\nobreakspace\MakeLowercase\algorithmname}
+\newenvironment{algorithm}
+               {\@float{algorithm}}
+               {\end@float}
+\newcommand{\listofalgorithms}
+{
+	\section{\listalgorithmname}
+	\@mkboth{\MakeUppercase\listalgorithmname}
+	        {\MakeUppercase\listalgorithmname}
+	\@starttoc{loa}
+}
+\newcommand*\l@algorithm{\@dottedtocline{1}{1.5em}{2.3em}}
+
+% Custom commands used in algorithms:
+\newcommand{\Assign}[2]{\State #1 $\gets$ #2}
+\newcommand{\NotEqual}[2]{#1 $\not=$ #2}
+
+% 1 - algorithm caption,
+% 2 - algorithm label (it will be set to alg:label),
+% 3 - algorithm in 'algpseudocode` format.
+\newcommand{\numalg}[3]
+{
+	\stepcounter{algorithm}
+	\begin{algorithm}
+		\renewcommand{\baselinestretch}{1.0} % restore the line-spacing
+		% put the caption:
+		\noindent\emph{\fnum@algorithm: #1}\label{alg:#2}\par
+		% put the horizontal line before the algorithm:
+		\rule[5pt]{\textwidth}{1pt}\vspace{-10pt}
+		\texttt % use a monospace font for an algorithm
+		{
+			\begin{algorithmic}[1]
+				#3
+			\end{algorithmic}
+		}
+		% put the horizontal line after the algorithm:
+		\rule[10pt]{\textwidth}{1pt}\vspace{-10pt}
+	\end{algorithm}
+}
+
+\newcommand{\refalg}[1]{\ref{alg:#1}}
+\newcommand{\seealg}[1]{(sk. \refalg{#1} algoritmu)}
+
 % Verbatim environments:
 \DefineVerbatimEnvironment
 	{SQL}
@@ -452,9 +510,11 @@
 \newcommand\contentsname{Saturs}
 \newcommand\listfigurename{Attēlu saraksts}
 \newcommand\listtablename{Tabulu saraksts}
+\newcommand\listalgorithmname{Algoritmu saraksts}
 \newcommand\bibname{Bibliogrāfiskais saraksts}
 \newcommand\indexname{Index}
 \newcommand\figurename{Attēls}
+\newcommand\algorithmname{Algoritms}
 \newcommand\tablename{Tabula}
 \newcommand\appendixname{Pielikums}
 \newcommand\abstractname{Anotācija}
@@ -744,13 +804,6 @@
 \newcommand*\l@subsubsection{\@dottedtocline{3}{3.8em}{3.2em}}
 \newcommand*\l@paragraph{\@dottedtocline{4}{7.0em}{4.1em}}
 \newcommand*\l@subparagraph{\@dottedtocline{5}{10em}{5em}}
-\newcommand\listoffigures{%
-    \section{\listfigurename}%
-      \@mkboth{\MakeUppercase\listfigurename}%
-              {\MakeUppercase\listfigurename}%
-    \@starttoc{lof}%
-    }
-\newcommand*\l@figure{\@dottedtocline{1}{1.5em}{2.3em}}
 \newcommand\listoftables{%
     \section{\listtablename}%
       \@mkboth{%

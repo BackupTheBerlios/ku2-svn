@@ -15,14 +15,16 @@ daļas stāvokli uz 2005. gada janvāra mēnesi.
 \numfig{Interneta fragmenta karte}{internet}{1}{img/Internet_map_1024}
 
 \subsection{Grafu algoritmi}
-Par grafu algoritmiem es saukšu tādus algoritmus, kas ieejā saņem grafu un noteiktā veidā
-to analizē un apstrādā. Grafu algoritmu triviāli, bet joprojam, fundamentāli piemēri
-ir pārmeklēšanas dziļumā un plašumā. Tieši uz šiem diviem algoritmiem es akcentēšos
-savā darbā. Tie ir pietiekami vienkārši, lai tos aprakstītu un analizētu, bet tajā
-pat laikā tie mums demonstrē pilnu klāstu bāzes darbību un īpašību, kas piemīt grafiem.
-Tas nozīme, šo algoritmu analīze, paralelizēšana un pielietošana daudzprocesoru
-sistēmās ar izkliedētu atmiņu atklās visus tos izaicinājumus un jautājumus, kas ir
-vispārīgi raksturīgas grafu paralēlajai apstrādei.
+Par grafu algoritmiem es saukšu tādus algoritmus, kas ieejā saņem grafu un noteiktā
+veidā to analizē un apstrādā. Analizējot grafu, bieži tiešām vai netiešām ir
+nepieciešams apskatīt \emph{katru} grafa loku \inbold{ATSAUCE}. Eksistē divas metodes, kā to var
+sasniegt, kas ir grafu algoritmu triviāli, bet joprojam, fundamentāli piemēri:
+pārmeklēšanas \emph{dziļumā} un \emph{plašumā}. Tieši uz šiem diviem algoritmiem es
+akcentēšos savā darbā. Tie ir pietiekami vienkārši, lai tos aprakstītu un analizētu,
+bet tajā pat laikā tie mums demonstrē pilnu klāstu bāzes darbību un īpašību, kas
+piemīt grafiem. Tas nozīme, šo algoritmu analīze, paralelizēšana un pielietošana
+daudzprocesoru sistēmās ar izkliedētu atmiņu atklās visus tos izaicinājumus un
+jautājumus, kas ir vispārīgi raksturīgas grafu paralēlajai apstrādei.
 
 Citi grafu algoritmu piemēri ir Deikstras un Flojda algoritmi īsākā ceļa meklēšanai,
 Forda-Falkersona algoritms maksimālās plūsmas noteikšanai, algoritmi, kas noteic,
@@ -42,20 +44,160 @@ tikai vienu reizi.
 Līdz ar to, algoritmu darbības ātrums var būt pietiekami zems, lai tos varētu
 efektīvi pielietot lieliem grafiem. Situāciju saasina fakts, ka vairāku algoritmu
 darbības laiks nav lineāri atkarīgs no grafa virsotņu
-skaita, turpretim, sliktākajā gadījumā šo algoritmu sarežģītība var sasniegt O(n!). Piemēram,
-lai atrisinātu ceļojošā pārdevēja uzdevumu 20 virsotnēm, izmantojot pilnās pārmeklēšanas metodi,
-ir vajadzīgas 2432902008176640000 iterācijas (jo eksistē 20! iespējamas virsotņu kombinācijas,
-no kurām ir jāatrod viena ar mazāko kopējo ceļu) jeb 38.6 gadus izmantojot vienu procesoru
-un pieņemot ka procesors izpilda 2 miljardu iterāciju sekundē. Taču, ja izskaitļošanā piedalās
-200 šādu procesoru, tad problēma ir atrisināma 200 reizes ātrāk jeb 70.4 dienu laikā, ja
-uzskatīt, ka paātrinājums ir lineāri atkarīgs no procesoru skaita.
+skaita, turpretim, sliktākajā gadījumā šo algoritmu sarežģītība var sasniegt O(n!).
+Piemēram, lai atrisinātu ceļojošā pārdevēja uzdevumu 20 virsotnēm, izmantojot pilnās
+pārmeklēšanas metodi, ir vajadzīgas 2432902008176640000 iterācijas (jo eksistē 20!
+iespējamas virsotņu kombinācijas, no kurām ir jāatrod viena ar mazāko kopējo ceļu)
+jeb 38.6 gadus izmantojot vienu procesoru un pieņemot ka procesors izpilda 2 miljardu
+iterāciju sekundē. Taču, ja izskaitļošanā piedalās 200 šādu procesoru, tad problēma
+ir atrisināma 200 reizes ātrāk jeb 70.4 dienu laikā, ja uzskatīt, ka paātrinājums
+ir lineāri atkarīgs no procesoru skaita.
 
 Paralelitātes pielietojuma ieguvums šajā situācijā ir acīmredzams. Bet neskatoties
 uz to, grafu paralēlā apstrāde nav plaši izpētīta. Specializēta literatūra par šo
 tēmu, ja tā eksistē, ir gruti pieejama. Galvenie spēlētāju šajā jomā
 ir Google ar savu Map-Reduce tehnoloģiju, kas nodarbojas ar ar tīmekļa pārmeklēšanas
-un analīzes problēmasm, un KĀDŠ ĪRIJAS INSTITŪTS, kas pielieto grafus un paralēlo
+un analīzes problēmasm, un \inbold{KĀDŠ ĪRIJAS INSTITŪTS}, kas pielieto grafus un paralēlo
 skaitļošanu molekulu analīzē.
 
-\subsection{Pārmeklēšana dziļumā}
 \subsection{Pārmeklēšana plašumā}
+Pārmeklēšana plašumā \engl{Breadth-First Search, BFS} ir grafa pārmeklēšanas
+algoritms, kas sāc savu darbību kādā no brīvi izvēlētajām grafa virsotnēm, ko sauc
+par pārmeklēšanas sākumvirsotni jeb saknes virsotni, kur atrod visas šai virsotnei
+blakus esošās virsotnes. Kādas virsotnes blakusvirsotņu identificēšanas procesu
+sauc par šīs virsotnes \emph{izsvēršanu}. Tad, nakāmajā solī katra no atrastajām
+virsotnēm tiek izsvērta. Tā tas atkārtojas, kāmēr algoritms neatrod mērķa virsotni.
+
+\numalg{Pārmeklēšana plašumā}{BSF}{
+\Procedure{BFS}{$Graph, source$}
+	\State izveidot rindu $OPEN$ \Comment tā ir FIFO rinda
+	\State izveidot kopu $CLOSED$
+	\State \Call{enqueue}{$OPEN, source$} \Comment pievienojam sākumvirsotni rindai
+	\State \Call{add}{$CLOSED, source$} \Comment apzīmējam sākumvirsotnei kā apskatītu
+	\While{\NotEqual{$OPEN$}{tukšs}}
+		\Assign{$v$}{\Call{dequeue}{$OPEN$}}
+		    \Comment ņemam pirmo virsotni no rindas
+		\ForAll{$w$ $\in$ \Call{incident}{$v$}}
+			\Statex \Comment iterējam pa katru blakusvirsotni $w$
+			\If{$w$ $\not\in$ $CLOSED$}
+			    \Comment ignorējam jau apskatītas virsotnes
+				\State \Call{enqueue}{$OPEN, w$}
+				\State \Call{add}{$CLOSED, w$}
+			\EndIf
+		\EndFor
+	\EndWhile
+\EndProcedure
+}
+
+No algoritma redzes viedokļa, visi virsotnes pēcteči pēc tās izsvēršanas tiek
+pievienoti FIFO \engl{First In, First Out} rindai. Tipiskajā realizācijā \seealg{BSF}
+virsotnes, kas vēl nav apskatītas tiek ievietotas konteinerī (piemēram, sarakstā)
+ar nosaukumu \emph{OPEN}, bet virsotnes, kas tika jau izsvērtas, nonāk konteinerī
+\emph{CLOSED}.
+
+In general, the edge examination process can be represented by a search tree T, with each vertex in the tree representing a vertex of the graph G, to be analysed. An initial vertex, say v, of G is chosen at random if there is no better choice suspected. It represents the initial vertex in T, representing the initial, zero level of T. Each of its incident edges are examined in turn and are represented by edges incident with v in T. The new vertices incident with these edges represent the first level of T. Each of the unexamined edges, incident with vertices adjacent to v are examined if this is meaningful. In this way a series of walks are identified in G, each represented by a path in T, starting at v. Search paths in T are terminated when either : (i) there are no further incident edges to be examined, or (ii) further examination would be unuseful. A BSF tree along with its graph is shown in Figure 13.3, given on next page.
+
+\subsection{Pārmeklēšana dziļumā}
+Depth-first Search. The DFS approach is used in the algorithms for identifying : planarity spanning trees, isomorphism, fundamental cycles and in many other facts. A search tree T, can once again be used to represent the edge examination process. In BFS, each edge incident with a selected vertex v, is examined before selecting a new adjacent vertex. In contrast to it, in DFS a new adjacent vertex is selected, which is incident with the first edge incident with v, i.e., in BFS we stay at v as long as possible, examining all of its incident edges before selecting, examining only one of its incident edges and replacing v by a new vertex, which is adjacent to v. This may leave edges incident with v which are unexamined. These edges may have to be examined later, if the analysis is not resolved in the meantime, or if it is necessary to examine every edge, what ever be the case.
+
+Add a note hereWe now describe a DFS algorithm for the examination of every edge of a connected graph G = (V, E), with n vertices. During the DFS process let
+
+   1.
+
+      Add a note hereN(v) = i imply that vertex v (∈ V) was the ith vertex to be visited.
+   2.
+
+      Add a note hereP, F be a partition of E (to be constructed). (P stands for palm and F for frond)
+
+Add a note hereIf G has n vertices, then DFS terminates having labelled the vertices with
+
+    *
+
+      Add a note here{N (v1), N (v2),…‥ , N(vn)} = {1, 2,…‥ , n},
+
+Add a note herein a one-to-one manner. Every edge of E is given an orientation and thus G is transformed into an oriented graph, say digraph D = (V, A). The set P, when edge orientation is taken into account, constitutes a spanning arborescence, called a palm tree. F comprises the edges of E which are not in P. If uv ∈ A then N(u) > N(v).
+
+Add a note hereThe contribution of DFS is to provide a scientific vertex labeling and a spanning arborescence in addition to any particular property.
+
+Add a note here DFS Algorithm Statement. Let G = (V, E) be a connected graph, v0 be a vertex of V at which the process is to begin, and v be the current one being examined.
+
+Add a note here STEPS
+
+   1.
+
+      Add a note hereSet v to become v0,
+
+      Add a note hereP
+      	
+
+      Add a note here φ
+
+      Add a note hereF
+      	
+
+      Add a note here φ, and
+
+      Add a note here i
+      	
+
+      Add a note here0.
+   2.
+
+      Add a note hereSet i to become i + 1, and
+
+      Add a note hereN
+      	
+
+      Add a note here vi.
+   3.
+
+      Add a note here Attempt to identify unexamined edge of E incident with v.
+         1.
+
+            Add a note hereIf no such edge exists go to step (5), otherwise
+         2.
+
+            Add a note hereChoose any such edge, say vu and examine it. Orient this edge as the arc (v, u). Go to step (4).
+   4.
+
+      Add a note here check whether N(u) is defined.
+         1.
+
+            Add a note hereIf N(u) is undefined,
+                *
+
+                  Add a note hereset P to become P ≈ {(v, u)}, and
+                *
+
+                  Add a note here v to become u.
+                *
+
+                  Add a note hereGo to step (2).
+         2.
+
+            Add a note hereIf N(u) is defined,
+                *
+
+                  Add a note hereset F to become F ≈ {(v, u)}.
+                *
+
+                  Add a note hereGo to step (3).
+   5.
+
+      Add a note hereCheck whether there exists an examined arc, say (y, v) ∈ P.
+         1.
+
+            Add a note hereIf such an arc (t, v), exists,
+                *
+
+                  Add a note hereset v to become t
+                *
+
+                  Add a note hereGo to step (2).
+         2.
+
+            Add a note hereIf such an arc does not exist, terminate.
+
+Add a note hereThe vertex numbering assigned to the vertices of a graph by the DFS algorithm is the opposite of logical numbering.
+
+Add a note hereThe oriented graph is shown in Figure 13.4(a) given a head with the palm tree shown with solid lines and the fronds shown in broken lines. The DFS tree is shown in Figure 13.4(b) ahead.
