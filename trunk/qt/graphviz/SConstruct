@@ -12,6 +12,8 @@ env.ParseConfig("pkg-config libgvc --cflags --libs")
 sources = Split("""
 	context.cc
 	graph.cc
+	node.cc
+	edge.cc
 	""")
 
 ku2graphviz = env.SharedLibrary("ku2graphviz", sources)

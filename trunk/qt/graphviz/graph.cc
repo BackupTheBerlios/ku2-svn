@@ -6,8 +6,10 @@
 
 using namespace ku2::graphviz;
 
-Graph::Graph(const QString &name):
-		m_name(name)
+const qreal Graph::dotDefaultDpi = 72.0;
+
+Graph::Graph( const QString &name ) :
+	m_name(name)
 {
 	m_context.instantiate();
 
@@ -23,10 +25,10 @@ Graph::Graph(const QString &name):
 	nodeAttr("label", "");
 	nodeAttr("regular", "true");
 
-//	//Divide the wanted width by the DPI to get the value in points:
-//	QString nodePtsWidth("%1").arg(node_size/_agget(_graph, "dpi", "96,0").toDouble());
-//	//GV uses , instead of . for the separator in floats
-//	_agnodeattr(_graph, "width", nodePtsWidth.replace('.', ","));
+	//	//Divide the wanted width by the DPI to get the value in points:
+	//	QString nodePtsWidth("%1").arg(node_size/_agget(_graph, "dpi", "96,0").toDouble());
+	//	//GV uses , instead of . for the separator in floats
+	//	_agnodeattr(_graph, "width", nodePtsWidth.replace('.', ","));
 
 }
 
@@ -36,12 +38,12 @@ void Graph::initialise()
 }
 
 /******************************************************************************
- * Manipulating nodes.                                                        *
+ * Manipulating nodes and edges.                                              *
  ******************************************************************************/
 
 #define _qPrintable(__t) const_cast<char*>(qPrintable(__t))
 
-void Graph::addNode(const QString &name)
+void Graph::addNode( const QString &name )
 {
 	if ( m_nodes.contains(name) )
 		removeNode(name);
@@ -49,12 +51,83 @@ void Graph::addNode(const QString &name)
 	ku_avoid_thr(node == NULL);
 }
 
+void Graph::addNodes( const QStringList &names )
+{
+	foreach ( const QString &name, names )
+		{
+			addNode(name);
+		}
+}
+
+void Graph::addEdge( const QString &source, const QString &dest )
+{
+	if ( m_nodes.contains(source) && m_nodes.contains(dest) ) {
+		QPair<QString, QString> edge(source, dest);
+		if ( !m_edges.contains(edge) ) {
+			m_edges.insert(edge, agedge(m_graph,
+			                            m_nodes.value(source),
+			                            m_nodes.value(dest)));
+		}
+	}
+}
+
+/******************************************************************************
+ * Layouts.                                                                   *
+ ******************************************************************************/
+
+void Graph::applyLayout( Layout layout )
+{
+	gvFreeLayout(m_context, m_graph);
+	switch ( layout ) {
+	case LAYOUT_DOT:
+		applyDotLayout();
+		break;
+	}
+}
+
+void Graph::applyDotLayout()
+{
+	gvLayout(m_context, m_graph, "dot");
+}
+
+QRectF Graph::boundingRect() const
+{
+	qreal dpi = meta("dpi", "96,0").toDouble();
+	return QRectF(m_graph->u.bb.LL.x * (dpi / dotDefaultDpi),
+	              m_graph->u.bb.LL.y * (dpi / dotDefaultDpi),
+	              m_graph->u.bb.UR.x * (dpi / dotDefaultDpi),
+	              m_graph->u.bb.UR.y * (dpi / dotDefaultDpi));
+}
+
+
+/******************************************************************************
+ * Getting nodes and edges.                                                   *
+ ******************************************************************************/
+
+QList<Node> Graph::nodes() const
+{
+	QList<Node> list;
+	qreal dpi = meta("dpi", "96,0").toDouble();
+
+	foreach ( Agnode_t *agNode, m_nodes ) {
+		qreal x = agNode->u.coord.x * (dpi / dotDefaultDpi);
+		qreal y = (m_graph->u.bb.UR.y - agNode->u.coord.y) *
+		          (dpi / dotDefaultDpi);
+
+		Node node(QString(agNode->name), QPoint(x, y),
+		          agNode->u.width * dpi, agNode->u.height * dpi);
+		list.append(node);
+	}
+
+	return list;
+}
+
 
 /******************************************************************************
  * Internal libgraph wrappers.                                                *
  ******************************************************************************/
 
-void Graph::open(const QString &name, Types type)
+void Graph::open( const QString &name, Types type )
 {
 	// Close the previously opened graph:
 	if ( m_graph != NULL )
@@ -70,7 +143,7 @@ void Graph::open(const QString &name, Types type)
 	}
 
 	// Open a graph:
-	m_graph = agopen(const_cast<char*>(qPrintable(name)), flags);
+	m_graph = agopen(const_cast<char*> (qPrintable(name)), flags);
 	Q_ASSERT(m_graph != NULL);
 }
 
@@ -80,26 +153,26 @@ void Graph::close()
 	m_graph = NULL;
 }
 
-QString Graph::meta(const QString &key)
+QString Graph::meta( const QString &key ) const
 {
-	return agget(m_graph, const_cast<char*>(qPrintable(key)));
+	return agget(m_graph, const_cast<char*> (qPrintable(key)));
 }
 
-QString Graph::meta(const QString &key, const QString &defaultValue)
+QString Graph::meta( const QString &key, const QString &defaultValue ) const
 {
 	QString mta = meta(key);
 	return mta.isEmpty() ? defaultValue : mta;
 }
 
-int Graph::setMeta(const QString &key, const QString &value)
+int Graph::setMeta( const QString &key, const QString &value )
 {
-	return agsafeset(m_graph, const_cast<char*>(qPrintable(key)),
-	                 const_cast<char*>(qPrintable(value)),
-	                 const_cast<char*>(qPrintable(value)));
+	return agsafeset(m_graph, const_cast<char*> (qPrintable(key)),
+	                 const_cast<char*> (qPrintable(value)),
+	                 const_cast<char*> (qPrintable(value)));
 }
 
-Agsym_t *Graph::nodeAttr(const QString &key, const QString &value)
+Agsym_t *Graph::nodeAttr( const QString &key, const QString &value )
 {
-	return agnodeattr(m_graph, const_cast<char*>(qPrintable(key)),
-	                  const_cast<char*>(qPrintable(value)));
+	return agnodeattr(m_graph, const_cast<char*> (qPrintable(key)),
+	                  const_cast<char*> (qPrintable(value)));
 }

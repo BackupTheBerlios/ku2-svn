@@ -1,1 +1,42 @@
+\hyphenation{iz-skait-ļo-ša-nas pa-ra-dig-mu}
+
 \section{Laiksakritības atrašana (turp.)}
+\subsection{Uzdevumu dekompozīcija}
+
+\inbold{Atrisināmais jautājums}\\
+Kā problēma var būt sadalīta uzdevumos, ko var izpildīt laiksakritīgi?
+
+\noindent\inbold{Konteksts}\\
+Katrs paralēla algoritma projektējums sākas ar vienu un to pašu, ar risināmas
+problēmas detalizētu saprašanu. Programmētājam ir jāsaprot, kur ir tādas problēmas
+daļas, kas ir visintensīvāki izskaitļošanas ziņā, kādas ir bāzes datu struktūras
+un kā šie dati tiek izmantoti problēmas atrisināšanas gaitā.
+
+Nākamajā solī ir jāidentificē uzdevumi, no kuriem sastāv problēma, un datu
+sadalījums starp tām. Fundamentāli, katrs paralēls algoritms satur uzdevumus,
+kurus var izpildīt vienlaicīgi. Šajā situācijā galvenais izaicinājums ir atrast
+šos uzdevumus un izveidot algoritmu, kas tos realizētu.
+
+Dažos gadījumos apskatamā problēma bez grūtībām var tikt sadalīta neatkarīgos
+(vai gandrīz neatkarīgos) uzdevumos. Tad, vienkāršāk ir jāsāk ar \emph{uz uzdevumiem
+saknētu dekompozīciju}. Citos gadījumos neatkarīgi uzdevumi nav vienkārši
+identificējami, un tāpēc \emph{uz datiem saknēta dekompozīcija} varētu būt labāka
+izvēle.
+
+Taču, ne vienmēr ir uzreiz skaidrs, kāda pieeja ir labāka, līdz ar ko,
+projektētājam bieži ir jāņēm vērā abus variantus. Bet neatkarīgi no tā, kura no tām
+tiek izvēlēta par sākumpunktu, uz uzdevumiem saknēta dokompozīcija būs obligāti
+jāpielieto, jo paralēls algoritms pēc savas būtības prasa vairākus vienlaicīgi
+izpildamus uzdevumus.
+
+\noindent\inbold{Ierobežojošie faktori}
+\begin{dotlist}
+	\item \inbold{Fleksibilitāte.} Projektējuma fleksibilitāte jeb elastīgums
+		nosaka, kādā mērā un ar kādu grutības pakāpi tas varētu būt
+		adaptēts dažādām realizācijas prasībām un īpašībām. Piemēram,
+		elastīgs projektējums nav ierobežots ar kādu vienu datorsistēmu
+		tipu vai noteiktu programmēšanas paradigmu.
+	\item \inbold{Efektivitāte.}
+	\item \inbold{Vienkaršība.}
+\end{dotlist}
+

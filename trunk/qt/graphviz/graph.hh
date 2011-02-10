@@ -10,15 +10,6 @@
  *	kane@mail.berlios.de
  */
 
-/*!
- * \file
- * \author J. Anton
- * \brief Host computer system specific parameters.
- *
- * Host computer system specific parameters. OS definitions, compiler
- * definitions, etc.
- */
-
 #ifndef KU_QT__GRAPHVIZ_GRAPH_HH__
 #define KU_QT__GRAPHVIZ_GRAPH_HH__
 #include <ku2/host.h>
@@ -26,20 +17,26 @@ KU_ENSURE_CPLUSPLUS
 
 // Internal includes:
 #include "context.hh"
+#include "node.hh"
+#include "edge.hh"
 
 // External includes:
 #include <QtGlobal>
 #include <QStringList>
 #include <QMap>
+#include <QPair>
+#include <QRectF>
 
 KU_BEGIN_DECLS
 namespace graphviz {
 
 class Q_DECL_EXPORT Graph
 {
+	Q_DISABLE_COPY(Graph)
+
 public:
 	//! Default DPI value used by "dot".
-	static const qreal defaultDpi;
+	static const qreal dotDefaultDpi;
 
 	//! Default node size of the graph.
 	static const qreal defaultNodeSize;
@@ -50,6 +47,10 @@ public:
 	};
 	Q_DECLARE_FLAGS(Types, Type);
 
+	enum Layout {
+		LAYOUT_DOT,
+	};
+
 public:
 	//! Construct a graphviz graph object.
 	/*!
@@ -57,7 +58,7 @@ public:
 	 *
 	 * \param name Name of the graph.
 	 */
-	Graph(const QString &name);
+	Graph( const QString &name );
 
 	//! Destroy a graph object.
 	~Graph();
@@ -70,34 +71,52 @@ public:
 
 public:
 	//! Add a graph node.
-	void addNode(const QString &name);
+	void addNode( const QString &name );
 
 	//! Add many graph nodes.
-	void addNodes(const QStringList &names);
+	void addNodes( const QStringList &names );
 
 	//! Remove a graph node.
-	void removeNode(const QString &name);
+	void removeNode( const QString &name );
 
 	//! Add an edge.
-	void addEdge(const QString &source, const QString &dest);
+	void addEdge( const QString &source, const QString &dest );
 
 	//! Remove an edge.
-	void removeEdge(const QString &source, const QString &dest);
+	void removeEdge( const QString &source, const QString &dest );
+
+public:
+	//! Apply a graph layout.
+	/*!
+	 * Applies a new graph layout. Layout is a graph visualisation algorithm.
+	 *
+	 * \param layout New layout.
+	 */
+	void applyLayout( Layout layout );
+
+	QRectF boundingRect() const;
+
+private:
+	// Apply a "dot" graph layout.
+	void applyDotLayout();
+
+public:
+	QList<Node> nodes() const;
 
 private:
 	//! Wrapper for agopen(char*,int).
-	void open(const QString &name, Types type);
+	void open( const QString &name, Types type );
 
 	void close();
 
-	QString meta(const QString &key);
-	QString meta(const QString &key, const QString &defaultValue);
+	QString meta( const QString &key ) const;
+	QString meta( const QString &key, const QString &defaultValue ) const;
 
 	//! Wrapper for agset(void*,char*,char*).
-	int setMeta(const QString &key, const QString &value);
+	int setMeta( const QString &key, const QString &value );
 
 	//!  and agnodeattr(void*,char*,char*)
-	Agsym_t *nodeAttr(const QString &key, const QString &value);
+	Agsym_t *nodeAttr( const QString &key, const QString &value );
 
 private:
 	//! Graph context.
@@ -111,11 +130,13 @@ private:
 
 	//! List of the nodes.
 	QMap<QString,Agnode_t*> m_nodes;
+
+	//! List of the edges.
+	QMap<QPair<QString,QString>,Agedge_t*> m_edges;
 };
 
 }
 KU_END_DECLS
-
 Q_DECLARE_OPERATORS_FOR_FLAGS(ku2::graphviz::Graph::Types)
 
 #endif // KU_QT__GRAPHVIZ_GRAPH_HH__
