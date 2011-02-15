@@ -3,6 +3,8 @@
 #		J. Anton, Copyright 2006+
 #
 
+import os
+
 env = Environment(tools = ["default", "qt4"], CPPPATH = ["../../core"])
 env.EnableQt4Modules([
 	"QtCore",
@@ -18,3 +20,7 @@ sources = Split("""
 
 ku2graphviz = env.SharedLibrary("ku2graphviz", sources)
 Default(ku2graphviz)
+
+Import("ku2")
+ku2["graphviz"] = { "libs": [str(ku2graphviz[0])],
+                    "libpath": [os.getcwd()] }

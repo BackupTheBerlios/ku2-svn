@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>ui/graph-new.png</file>
+        <file>ui/document-save.png</file>
+        <file>ui/document-open.png</file>
+        <file>ui/application-exit.png</file>
+    </qresource>
+</RCC>

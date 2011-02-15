@@ -5,10 +5,12 @@
 
 scenarios = []
 
-build = ARGUMENTS.get("build", "graphviz")
+build = ARGUMENTS.get("build", "graphviz,paragraph")
 notbuild = ARGUMENTS.get("notbuild", "")
 if "graphviz" in build and not "graphviz" in notbuild:
 	scenarios += ["graphviz/SConstruct"]
+if "paragraph" in build and not "paragraph" in notbuild:
+	scenarios += ["paragraph/SConstruct"]
 
-print scenarios
-SConscript(scenarios)
+Import("ku2")
+SConscript(scenarios, "ku2")

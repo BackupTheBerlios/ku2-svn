@@ -16,4 +16,5 @@ if "tools" in build and not "tools" in notbuild:
 if "qt" in build and not "qt" in notbuild:
 	scenarios += ["qt/SConstruct"]
 
-SConscript(scenarios)
+ku2 = {}
+SConscript(scenarios, "ku2")

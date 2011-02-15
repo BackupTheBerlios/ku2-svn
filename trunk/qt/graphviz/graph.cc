@@ -9,7 +9,8 @@ using namespace ku2::graphviz;
 const qreal Graph::dotDefaultDpi = 72.0;
 
 Graph::Graph( const QString &name ) :
-	m_name(name)
+	m_name(name),
+	m_graph(NULL)
 {
 	m_context.instantiate();
 
@@ -45,18 +46,18 @@ void Graph::initialise()
 
 void Graph::addNode( const QString &name )
 {
-	if ( m_nodes.contains(name) )
-		removeNode(name);
+//	if ( m_nodes.contains(name) )
+//		removeNode(name);
 	Agnode_t *node = agnode(m_graph, _qPrintable(name));
 	ku_avoid_thr(node == NULL);
+	m_nodes.insert(name, node);
 }
 
 void Graph::addNodes( const QStringList &names )
 {
-	foreach ( const QString &name, names )
-		{
-			addNode(name);
-		}
+	foreach ( const QString &name, names ) {
+		addNode(name);
+	}
 }
 
 void Graph::addEdge( const QString &source, const QString &dest )
@@ -143,7 +144,7 @@ void Graph::open( const QString &name, Types type )
 	}
 
 	// Open a graph:
-	m_graph = agopen(const_cast<char*> (qPrintable(name)), flags);
+	m_graph = agopen(_qPrintable(name), flags);
 	Q_ASSERT(m_graph != NULL);
 }
 

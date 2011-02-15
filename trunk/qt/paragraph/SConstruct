@@ -1,0 +1,45 @@
+#
+#	SConstruct file for Kane Utilities 2 (qt:paragraph)
+#		J. Anton, Copyright 2006+
+#
+
+Import("ku2")
+
+env = Environment(tools = ["default", "qt4"], CPPPATH = ["../../core", "src"])
+env.EnableQt4Modules([
+	"QtCore",
+	"QtGui"])
+env["QT4_LUPDATE"] = "lupdate-qt4"
+env["QT4_LRELEASE"] = "lrelease-qt4 -idbased"
+
+# Add dependancy to ku2graphviz wrapper:
+env.Append(LIBS = ku2["graphviz"]["libs"],
+           LIBPATH = ku2["graphviz"]["libpath"])
+
+sources = Split("""
+	src/main.cc
+	src/misc/Settings.cc
+	src/ui/MainWindow.cc
+	src/ui/WorkingArea.cc
+	""")
+
+qrcs = Split("""
+	img/img
+	translations/translations
+	""")
+resources = []
+for qrc in qrcs:
+	resources += env.Qrc4(qrc)
+
+tss = Split("""
+	translations/paragraph_en
+	translations/paragraph_ru
+	translations/paragraph_lv
+	""")
+translations_tss = env.Ts4(tss, sources)
+translations = []
+for ts in tss:
+	translations += env.Qm4(ts)
+
+ku2paragraph = env.Program("ku2paragraph", sources + resources)
+Default(translations, ku2paragraph)
