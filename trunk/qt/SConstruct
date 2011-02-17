@@ -1,16 +1,50 @@
 #
 #	SConstruct file for Kane Utilities 2 (Qt components)
-#		J. Anton, Copyright 2010
+#		J. Anton, Copyright 2010+
 #
 
-scenarios = []
+Import("ku2")
 
-build = ARGUMENTS.get("build", "graphviz,paragraph")
-notbuild = ARGUMENTS.get("notbuild", "")
-if "graphviz" in build and not "graphviz" in notbuild:
+# Preparing the Qt environment:
+ku2qt = ku2.Fork()
+ku2qt.Tool("qt4")
+ku2qt.EnableQt4Modules(["QtCore"])
+ku2qt["QT4_LUPDATE"] = "lupdate-qt4"
+ku2qt["QT4_LRELEASE"] = "lrelease-qt4 -idbased"
+
+def fork_ku2qt(self):
+	self.resources = []
+	self.translations = []
+	return self.Fork()
+ku2qt.AttachMethod("QtFork", fork_ku2qt)
+
+# Handling Qt resources:
+ku2qt.resources = []
+def add_resources(self, resources):
+	for resource in resources:
+		self.resources.append(self.Qrc4(resource))
+ku2qt.AttachMethod("AddResources", add_resources)
+
+# Handling Qt translations:
+ku2qt.translations = []
+def add_translations(self, translations, sources = None):
+	if sources == None:
+		sources = self.sources
+	self.Ts4(translations, sources)
+	for translation in translations:
+		self.translations.append(self.Qm4(translation))
+ku2qt.AttachMethod("AddTranslations", add_translations)
+
+# Building applications:
+def QtProgram(self, name):
+	return self.Program(name, self.sources + self.resources)
+
+# Running sub-scenarios:
+scenarios = []
+ku2qt.AddDefaultScenarios(["graphviz", "paragraph"])
+if ku2qt.ScenarioMustBeBuilt("graphviz"):
 	scenarios += ["graphviz/SConstruct"]
-if "paragraph" in build and not "paragraph" in notbuild:
+if ku2qt.ScenarioMustBeBuilt("paragraph"):
 	scenarios += ["paragraph/SConstruct"]
 
-Import("ku2")
-SConscript(scenarios, "ku2")
+SConscript(scenarios, ["QtProgram", "ku2", "ku2qt"])

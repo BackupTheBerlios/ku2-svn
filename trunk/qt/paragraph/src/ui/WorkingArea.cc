@@ -13,12 +13,23 @@
 // Self-include:
 #include "WorkingArea.hh"
 
+#include <QStringList>
+#include "graphviz/graph.hh"
+
 using namespace ku2::paragraph::ui;
 
 WorkingArea::WorkingArea()
 {
 	setObjectName("WorkingArea");
 	createDummyTab();
+
+	ku2::graphviz::Graph graph("Unnamed");
+	graph.initialise();
+	graph.addNodes(QStringList() << "1" << "2" << "3" << "4" << "5");
+	graph.addEdge("1", "2");
+	graph.addEdge("2", "3");
+	graph.addEdge("2", "4");
+	graph.addEdge("3", "5");
 }
 
 void WorkingArea::createDummyTab()

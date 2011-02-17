@@ -3,18 +3,187 @@
 #		J. Anton, Copyright 2007+
 #
 
-scenarios = []
+import os
+import types
 
-build = ARGUMENTS.get("build", "cores,qt")
-notbuild = ARGUMENTS.get("notbuild", "")
-if "core" in build and not "core" in notbuild:
+class Ku2Environment(Environment):
+	def __init__(self):
+		Environment.__init__(self)
+		
+		# OS and compiler tool-chain:
+		self.system = ARGUMENTS.get("system", "auto")
+		self.build_mode = ARGUMENTS.get("mode", "debug")
+		self.debug_ccflags = []
+		self.release_ccflags = []
+		self.release_linkflags = []
+		
+		# Dynamic features:
+		self.features = {}
+		self.default_features = ["thread_safe"]
+		self.enabled_features = ARGUMENTS.get("enable", "").split(",")
+		self.disabled_features = ARGUMENTS.get("disable", "").split(",")
+		
+		# Selection of building scenarios:
+		self.build = ARGUMENTS.get("build", "").split(",")
+		self.notbuild = ARGUMENTS.get("notbuild", "").split(",")
+		
+		# Header checking:
+		self.headers = []
+		
+		# Install stuff:
+		self.install_root = ARGUMENTS.get("root", "/")
+		self.install_prefix = ARGUMENTS.get("prefix", "/usr/")
+		
+		# List of internal libraries:
+		self.libraries = {}
+		
+		# Building helpers:
+		self.sources = []
+		self.includes = []
+
+	def Fork(self):
+		self.sources = []
+		self.includes = []
+		return self.Clone()
+
+	def PrintSystems(self):
+		print "auto, vc, mingw"
+
+	def PrintPlatforms(self):
+		print "win32, posix"
+
+	def PrintBuildModes(self):
+		print "debug, release"
+
+	def SetupPlatform(self):
+		if self["PLATFORM"] == "win32" and (self.system == "vc" or self.system == "auto"):
+			self.Append(CCFLAGS = ["/W3", "/MD", "/Wp64"], \
+			            CPPDEFINES = ["_CRT_SECURE_NO_DEPRECATE", "KU_OS_WIN32", "KU_TOOL_VCPP"])
+			            #LINKFLAGS = ["/SUBSYSTEM:WINDOWS"])
+			self.debug_ccflags = ["/ZI"]
+			self.release_ccflags = ["/O2"]
+		elif self["PLATFORM"] == "win32" and self.system == "mingw":
+			self.Tool("mingw")
+			self.Append(CCFLAGS = ["-Wall", "-Wextra", "-Werror-implicit-function-declaration"],
+			            CPPDEFINES = ["POSIX", "_GNU_SOURCE", "KU_OS_WIN32"])
+			self.debug_ccflags = ["-g3", "-ggdb3", "-pg", "-dm"]
+			self.release_ccflags = ["-O2"]
+			self.release_linkflags = ["-s"]
+		elif self["PLATFORM"] == "posix" and self.system == "auto":
+			self.Append(CCFLAGS = ["-Wall", "-Wextra", "-Werror-implicit-function-declaration"],
+			            CPPDEFINES = ["POSIX", "_GNU_SOURCE", "KU_OS_POSIX"])
+			self.debug_ccflags = ["-g3", "-ggdb3", "-pg"]
+			self.release_ccflags = ["-O2"]
+			self.release_linkflags = ["-s"]
+		else:
+			print "Unsupported platform: " + self["PLATFORM"] + " (" + self.system + ")"
+			Exit()
+
+	def SetupBuildMode(self):
+		if self.build_mode == "debug":
+			self.Append(CCFLAGS = self.debug_ccflags, CPPDEFINES = ["KU2_DEBUG"])
+		elif self.build_mode == "release":
+			self.Append(CCFLAGS = release_ccflags, LINKFLAGS = release_linkflags)
+		else:
+			print "Invalid mode ( debug|release )"
+			Exit()
+
+	def ApplyFeatures(self):
+		for feature in self.features.keys():
+			if (feature in self.default_features or feature in self.enabled_features) \
+			    and not feature in self.disabled_features:
+				self.Append(CPPDEFINES = self.features[feature]["defines"])
+		
+
+	def DefineFeature(self, feature, defines):
+		self.features[feature] = {"defines": defines}
+
+	def AddDefaultScenarios(self, scenarios):
+		self.build.extend(scenarios)
+		
+	def ScenarioMustBeBuilt(self, scenario):
+		return scenario in self.build and not scenario in self.notbuild
+
+	def CheckHeaders(self):
+		conf = Configure(self)
+		# Special cases:
+		if not conf.CheckCHeader("stdint.h"):
+			env.Append(CPPDEFINES = ["NO_STDINT_H"])
+			if not conf.CheckCHeader("inttypes.h"):
+				env.Append(CPPDEFINES = ["NO_INTTYPES_H"])
+		# Default cases:
+		for header in self.headers:
+			if not conf.CheckCHeader(header[1]):
+				if header[2] == None:
+					Exit()
+				else:
+					self.Append(CPPDEFINES = [header[2]])
+		self = conf.Finish()
+
+	def AddCHeader(self, header, negation_define = None):
+		self.headers.append(("C", header, negation_define))
+
+	def RegisterLibrary(self, name, libs = None, libpath = None,
+	                    includes = None, config = None, deps = None):
+		self.libraries[name] = {"libs": libs,
+		                        "libpath": libpath,
+		                        "includes": includes,
+		                        "config": config,
+		                        "deps": deps}
+
+	def ApplyLibrary(self, name):
+		library = self.libraries[name]
+		self.Append(LIBS = library["libs"],
+		            LIBPATH = library["libpath"],
+		            CPPPATH = library["includes"])
+		if library["config"] != None:
+			for config in library["config"]:
+				self.ParseConfig(config)
+		if library["deps"] != None:
+			for dep in library["deps"]:
+				self.ApplyLibrary(dep)
+
+	def AddSources(self, sources):
+		self.sources.extend(sources)
+
+	def AddIncludes(self, includes):
+		self.includes.extend(includes)
+
+	def Ku2Library(self, name):
+		return self.Library(name, self.sources)
+
+	def Ku2SharedLibrary(self, name):
+		return self.SharedLibrary(name, self.sources)
+
+	def Ku2Program(self, name):
+		return self.Program(name, self.sources)
+
+	def AttachMethod(self, name, function):
+		f = types.MethodType(function, self, Ku2Environment)
+		setattr(self, name, f)
+
+
+ku2 = Ku2Environment()
+
+ku2.SetupPlatform()
+ku2.SetupBuildMode()
+
+ku2.DefineFeature("gettext", ["USE_GETTEXT"])
+ku2.DefineFeature("thread_safe", ["THREAD_SAFE", "_REENTRANT"])
+ku2.ApplyFeatures()
+
+ku2.AddDefaultScenarios(["core", "qt"])
+
+scenarios = []
+if ku2.ScenarioMustBeBuilt("core"):
 	scenarios += ["core/SConstruct"]
-if "modules" in build and not "modules" in notbuild:
+if ku2.ScenarioMustBeBuilt("modules"):
 	scenarios += ["modules/SConstruct"]
-if "tools" in build and not "tools" in notbuild:
+if ku2.ScenarioMustBeBuilt("tools"):
 	scenarios += ["tools/SConstruct"]
-if "qt" in build and not "qt" in notbuild:
+if ku2.ScenarioMustBeBuilt("qt"):
 	scenarios += ["qt/SConstruct"]
 
-ku2 = {}
 SConscript(scenarios, "ku2")
+
+ku2.CheckHeaders()

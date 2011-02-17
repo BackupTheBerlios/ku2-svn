@@ -13,6 +13,16 @@ Graph::Graph( const QString &name ) :
 	m_graph(NULL)
 {
 	m_context.instantiate();
+}
+
+Graph::~Graph()
+{
+
+}
+
+void Graph::initialise()
+{
+	open(m_name, GRAPH_DIRECTED);
 
 	// Default graph attributes:
 	setMeta("overlap", "prism");
@@ -30,12 +40,6 @@ Graph::Graph( const QString &name ) :
 	//	QString nodePtsWidth("%1").arg(node_size/_agget(_graph, "dpi", "96,0").toDouble());
 	//	//GV uses , instead of . for the separator in floats
 	//	_agnodeattr(_graph, "width", nodePtsWidth.replace('.', ","));
-
-}
-
-void Graph::initialise()
-{
-	open(m_name, GRAPH_DIRECTED);
 }
 
 /******************************************************************************
@@ -107,6 +111,7 @@ QRectF Graph::boundingRect() const
 
 QList<Node> Graph::nodes() const
 {
+	pstart();
 	QList<Node> list;
 	qreal dpi = meta("dpi", "96,0").toDouble();
 
@@ -120,6 +125,7 @@ QList<Node> Graph::nodes() const
 		list.append(node);
 	}
 
+	pstop();
 	return list;
 }
 
@@ -167,9 +173,8 @@ QString Graph::meta( const QString &key, const QString &defaultValue ) const
 
 int Graph::setMeta( const QString &key, const QString &value )
 {
-	return agsafeset(m_graph, const_cast<char*> (qPrintable(key)),
-	                 const_cast<char*> (qPrintable(value)),
-	                 const_cast<char*> (qPrintable(value)));
+	return agsafeset(m_graph, _qPrintable(key),
+	                 _qPrintable(value), _qPrintable(value));
 }
 
 Agsym_t *Graph::nodeAttr( const QString &key, const QString &value )
