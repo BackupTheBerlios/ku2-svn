@@ -64,6 +64,11 @@ void Graph::addNodes( const QStringList &names )
 	}
 }
 
+void Graph::setRootNode( const QString &name )
+{
+	setMeta("root", name);
+}
+
 void Graph::addEdge( const QString &source, const QString &dest )
 {
 	if ( m_nodes.contains(source) && m_nodes.contains(dest) ) {
@@ -92,12 +97,12 @@ void Graph::applyLayout( Layout layout )
 
 void Graph::applyDotLayout()
 {
-	gvLayout(m_context, m_graph, "dot");
+	gvLayout(m_context, m_graph, "twopi");//"dot");
 }
 
 QRectF Graph::boundingRect() const
 {
-	qreal dpi = meta("dpi", "96,0").toDouble();
+	qreal dpi = toRealHelper(meta("dpi", "96,0"));
 	return QRectF(m_graph->u.bb.LL.x * (dpi / dotDefaultDpi),
 	              m_graph->u.bb.LL.y * (dpi / dotDefaultDpi),
 	              m_graph->u.bb.UR.x * (dpi / dotDefaultDpi),
@@ -113,16 +118,63 @@ QList<Node> Graph::nodes() const
 {
 	pstart();
 	QList<Node> list;
-	qreal dpi = meta("dpi", "96,0").toDouble();
+	const qreal dpi = metaDpi();
+	const qreal adjustedDpi = adjustDpi(dpi);
 
 	foreach ( Agnode_t *agNode, m_nodes ) {
-		qreal x = agNode->u.coord.x * (dpi / dotDefaultDpi);
-		qreal y = (m_graph->u.bb.UR.y - agNode->u.coord.y) *
-		          (dpi / dotDefaultDpi);
+		qreal x = agNode->u.coord.x * adjustedDpi;
+		qreal y = (m_graph->u.bb.UR.y - agNode->u.coord.y) * adjustedDpi;
+
+		printf("NODE %s [%f,%f] [%f,%f]\n", agNode->name, x, y,
+		       agNode->u.coord.x, agNode->u.coord.y);
 
 		Node node(QString(agNode->name), QPoint(x, y),
 		          agNode->u.width * dpi, agNode->u.height * dpi);
 		list.append(node);
+	}
+
+	pstop();
+	return list;
+}
+
+QList<Edge> Graph::edges() const
+{
+	pstart();
+	QList<Edge> list;
+	const qreal adjustedDpi = adjustDpi(metaDpi());
+	const double height = m_graph->u.bb.UR.y;
+
+	foreach ( Agedge_t *agEdge, m_edges ) {
+		QPainterPath path;
+
+		bezier *bz = agEdge->u.spl->list;
+		if ( bz && (bz->size % 3) ) {
+			if ( bz->sflag ) {
+				path.moveTo(bz->sp.x * adjustedDpi,
+				            (height - bz->sp.y) * adjustedDpi);
+				path.lineTo(bz->list[0].x * adjustedDpi,
+				            (height - bz->list[0].y) * adjustedDpi);
+			} else {
+				path.moveTo(bz->list[0].x * adjustedDpi,
+				            (height - bz->list[0].y) * adjustedDpi);
+			}
+
+			for ( int i = 1; i < bz->size; i += 3 ) {
+				path.cubicTo(bz->list[i].x * adjustedDpi,
+				             (height - bz->list[i].y) * adjustedDpi,
+				             bz->list[i+1].x * adjustedDpi,
+				             (height - bz->list[i+1].y) * adjustedDpi,
+				             bz->list[i+2].x * adjustedDpi,
+				             (height - bz->list[i+2].y) * adjustedDpi);
+			}
+
+			if ( bz->eflag ) {
+				path.lineTo(bz->ep.x * adjustedDpi,
+				            (height - bz->ep.y) * adjustedDpi);
+			}
+		}
+
+		list << Edge(agEdge->tail->name, agEdge->head->name, path);
 	}
 
 	pstop();
@@ -162,13 +214,27 @@ void Graph::close()
 
 QString Graph::meta( const QString &key ) const
 {
+#ifdef KU2_DEBUG
+	QString ret = agget(m_graph, _qPrintable(key));
+	printf("META %s = %s\n", qPrintable(key), qPrintable(ret));
+	return ret;
+#else
 	return agget(m_graph, const_cast<char*> (qPrintable(key)));
+#endif
 }
 
 QString Graph::meta( const QString &key, const QString &defaultValue ) const
 {
 	QString mta = meta(key);
 	return mta.isEmpty() ? defaultValue : mta;
+}
+
+qreal Graph::toRealHelper( QString value ) const
+{
+	bool ok;
+	qreal ret = value.replace(',', '.').toDouble(&ok);
+	ku_avoid_thr(!ok)
+	return ret;
 }
 
 int Graph::setMeta( const QString &key, const QString &value )

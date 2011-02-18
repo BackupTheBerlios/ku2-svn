@@ -79,6 +79,9 @@ public:
 	//! Remove a graph node.
 	void removeNode( const QString &name );
 
+	//! Set the root node.
+	void setRootNode( const QString &name );
+
 	//! Add an edge.
 	void addEdge( const QString &source, const QString &dest );
 
@@ -102,6 +105,7 @@ private:
 
 public:
 	QList<Node> nodes() const;
+	QList<Edge> edges() const;
 
 private:
 	//! Wrapper for agopen(char*,int).
@@ -111,12 +115,21 @@ private:
 
 	QString meta( const QString &key ) const;
 	QString meta( const QString &key, const QString &defaultValue ) const;
+	qreal toRealHelper( QString value ) const;
 
 	//! Wrapper for agset(void*,char*,char*).
 	int setMeta( const QString &key, const QString &value );
 
 	//!  and agnodeattr(void*,char*,char*)
 	Agsym_t *nodeAttr( const QString &key, const QString &value );
+
+private:
+	inline qreal metaDpi() const {
+		return toRealHelper(meta("dpi", "96,0"));
+	}
+	inline qreal adjustDpi( qreal dpi ) const {
+		return dpi / dotDefaultDpi;
+	}
 
 private:
 	//! Graph context.
