@@ -12,11 +12,5 @@
 #		  kane@mail.berlios.de
 #
 
-Import("env")
-env = env.Clone()
-
-#	gtest library/framework
-gtest = {}
-gtest["core"] = env.StaticLibrary("gtest", ["gtest-all.cc", "gmock-all.cc"])
-gtest["main"] = env.StaticLibrary("gtest-main", "gmock-main.cc")
-Return("gtest")
+Import("ku2")
+SConscript(["gtest/SConscript", "minIni/SConscript"], "ku2")

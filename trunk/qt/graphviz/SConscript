@@ -19,7 +19,7 @@ env.AddSources(Split("""
 	"""))
 
 ku2graphviz = env.Ku2SharedLibrary("ku2graphviz")
-Default(ku2graphviz)
+ku2.RegisterComponent("graphviz", ku2graphviz, deps = ["core"])
 
 ku2.RegisterLibrary("libgvc-includes", config = ["pkg-config libgvc --cflags"])
 ku2.RegisterLibrary("graphviz",

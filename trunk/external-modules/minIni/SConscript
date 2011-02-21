@@ -12,16 +12,22 @@
 #		  kane@mail.berlios.de
 #
 
-Import("env", "mode")
-env = env.Clone()
+import os
+Import("ku2")
+env = ku2.Fork()
 
 #	Disable debugging on release:
-if mode == "release":
+if env.build_mode == "release":
 	env.Append(CPPDEFINES = ["NDEBUG"])
 
 #	We are only reading INI files:
-env.Append(CPPDEFINED = ["INI_READONLY"])
+env.Append(CPPDEFINES = ["INI_READONLY"])
 
 #	minIni library
 minIni = env.StaticLibrary("minIni", "minIni.c")
-Return("minIni")
+ku2.RegisterComponent("minIni", minIni)
+
+ku2.RegisterLibrary("minIni",
+                    libs = [str(minIni[0])],
+                    libpath = [os.getcwd()],
+                    includes = [os.getcwd() + "/.."])

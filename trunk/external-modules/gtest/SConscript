@@ -1,0 +1,33 @@
+# coding: utf-8
+#
+#		SConstruct
+#		Sat Nov  7 20:24:42 2009
+#
+#	This file is the part of the Master Thesis.
+#	Academia: RTU, DITF (Latvia, Riga)
+#
+#	Authorship, 2009
+#		Antons Jeļkins
+#		  antons.jelkins@rtu.lv
+#		  kane@mail.berlios.de
+#
+
+import os
+Import("ku2")
+
+#	gtest library/framework
+gcore = ku2.StaticLibrary("gtest", ["gtest-all.cc", "gmock-all.cc"])
+gmain = ku2.StaticLibrary("gtest-main", "gmock-main.cc")
+Default(gcore, gmain)
+
+ku2.RegisterComponent("gtest", gmain, deps = ["gtest-core"])
+ku2.RegisterComponent("gtest-core", gcore, stealth = True)
+
+ku2.RegisterLibrary("gtest-core",
+                    libs = [str(gcore[0])],
+                    libpath = [os.getcwd()],
+                    includes = [os.getcwd() + "/.."])
+
+ku2.RegisterLibrary("gtest-main",
+                    libs = [str(gmain[0])],
+                    deps = ["gtest-core"])

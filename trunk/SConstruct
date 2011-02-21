@@ -34,7 +34,8 @@ class Ku2Environment(Environment):
 		self.install_root = ARGUMENTS.get("root", "/")
 		self.install_prefix = ARGUMENTS.get("prefix", "/usr/")
 		
-		# List of internal libraries:
+		# List of internal components and libraries:
+		self.components = {}
 		self.libraries = {}
 		
 		# Building helpers:
@@ -54,6 +55,13 @@ class Ku2Environment(Environment):
 
 	def PrintBuildModes(self):
 		print "debug, release"
+
+	def PrintComponents(self):
+		real_components = []
+		for name in self.components.keys():
+			if not self.components[name]["stealth"]:
+				real_components.append(name)
+		print "Registered components: " + str(real_components)
 
 	def SetupPlatform(self):
 		if self["PLATFORM"] == "win32" and (self.system == "vc" or self.system == "auto"):
@@ -98,12 +106,6 @@ class Ku2Environment(Environment):
 	def DefineFeature(self, feature, defines):
 		self.features[feature] = {"defines": defines}
 
-	def AddDefaultScenarios(self, scenarios):
-		self.build.extend(scenarios)
-		
-	def ScenarioMustBeBuilt(self, scenario):
-		return scenario in self.build and not scenario in self.notbuild
-
 	def CheckHeaders(self):
 		conf = Configure(self)
 		# Special cases:
@@ -123,8 +125,36 @@ class Ku2Environment(Environment):
 	def AddCHeader(self, header, negation_define = None):
 		self.headers.append(("C", header, negation_define))
 
+	def RegisterComponent(self, name, component = None, deps = None, stealth = False):
+		self.components[name] = {"component": component,
+		                         "deps": deps,
+		                         "stealth": stealth}
+
+	def AddDefaultComponents(self, names):
+		self.build.extend(names)
+
+	def _BuildComponents(self, name, rec_level = 1):
+		component = self.components[name]
+		deps = component["deps"]
+		if deps != None:
+			for dep in deps:
+				print ("   " * rec_level) + "dependency will follow: " + dep
+				self._BuildComponents(dep, rec_level + 1)
+		obj = component["component"]
+		if obj != None:
+			Default(obj)
+
+	def BuildComponents(self):
+		for name in self.components.keys():
+			if self.components[name]["stealth"]:
+				continue
+			if name in self.build and not name in self.notbuild:
+				print "Component " + name + " will be built"
+				self._BuildComponents(name)
+
 	def RegisterLibrary(self, name, libs = None, libpath = None,
 	                    includes = None, config = None, deps = None):
+		print "Registering library " + name
 		self.libraries[name] = {"libs": libs,
 		                        "libpath": libpath,
 		                        "includes": includes,
@@ -172,18 +202,14 @@ ku2.DefineFeature("gettext", ["USE_GETTEXT"])
 ku2.DefineFeature("thread_safe", ["THREAD_SAFE", "_REENTRANT"])
 ku2.ApplyFeatures()
 
-ku2.AddDefaultScenarios(["core", "qt"])
-
-scenarios = []
-if ku2.ScenarioMustBeBuilt("core"):
-	scenarios += ["core/SConstruct"]
-if ku2.ScenarioMustBeBuilt("modules"):
-	scenarios += ["modules/SConstruct"]
-if ku2.ScenarioMustBeBuilt("tools"):
-	scenarios += ["tools/SConstruct"]
-if ku2.ScenarioMustBeBuilt("qt"):
-	scenarios += ["qt/SConstruct"]
-
+scenarios = Split("""
+	core/SConscript
+	external-modules/SConscript
+	qt/SConscript
+	""")
 SConscript(scenarios, "ku2")
 
 ku2.CheckHeaders()
+ku2.AddDefaultComponents(["core", "qt"])
+ku2.PrintComponents()
+ku2.BuildComponents()

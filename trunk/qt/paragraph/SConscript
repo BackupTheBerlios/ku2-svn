@@ -3,7 +3,7 @@
 #		J. Anton, Copyright 2010+
 #
 
-Import("QtProgram ku2qt")
+Import("QtProgram ku2 ku2qt")
 env = ku2qt.QtFork()
 env.EnableQt4Modules(["QtGui"])
 env.ApplyLibrary("graphviz")
@@ -28,4 +28,6 @@ env.AddTranslations(Split("""
 	"""))
 
 ku2paragraph = QtProgram(env, "ku2paragraph")
-Default(env.translations, ku2paragraph)
+ku2.RegisterComponent("paragraph", ku2paragraph,
+                      deps = ["graphviz", "paragraph-translations"])
+ku2.RegisterComponent("paragraph-translations", env.translations, stealth = True)

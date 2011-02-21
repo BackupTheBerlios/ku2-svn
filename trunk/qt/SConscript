@@ -40,11 +40,9 @@ def QtProgram(self, name):
 	return self.Program(name, self.sources + self.resources)
 
 # Running sub-scenarios:
-scenarios = []
-ku2qt.AddDefaultScenarios(["graphviz", "paragraph"])
-if ku2qt.ScenarioMustBeBuilt("graphviz"):
-	scenarios += ["graphviz/SConstruct"]
-if ku2qt.ScenarioMustBeBuilt("paragraph"):
-	scenarios += ["paragraph/SConstruct"]
-
+ku2.RegisterComponent("qt", deps = ["graphviz", "paragraph"])
+scenarios = Split("""
+	graphviz/SConscript
+	paragraph/SConscript
+	""")
 SConscript(scenarios, ["QtProgram", "ku2", "ku2qt"])

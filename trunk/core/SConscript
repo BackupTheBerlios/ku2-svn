@@ -59,6 +59,8 @@ env.AddIncludes(Split("""
 ku2lib = env.Ku2Library("ku2")
 Default(ku2lib)
 
+ku2.RegisterComponent("ku2core", ku2lib, stealth = True)
+ku2.RegisterComponent("core", deps = ["ku2core"])
 ku2.RegisterLibrary("ku2core",
                     libs = [str(ku2lib[0])],
                     libpath = [os.getcwd()],
