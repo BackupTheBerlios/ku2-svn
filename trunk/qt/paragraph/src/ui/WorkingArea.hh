@@ -29,6 +29,9 @@ public:
 
 private:
 	void createDummyTab();
+
+private:
+	QWidget *m_dummyWidget;
 };
 
 }}

@@ -15,12 +15,15 @@
 
 // Internal includes:
 #include "misc/Settings.hh"
-#include "WorkingArea.hh"
+#include "ui/WorkingArea.hh"
+#include "Context.hh"
 
 // External includes:
 #include <QAction>
 #include <QToolBar>
+#include <QApplication>
 
+using namespace ku2::paragraph;
 using namespace ku2::paragraph::ui;
 
 MainWindow::MainWindow():
@@ -43,6 +46,10 @@ void MainWindow::createActions()
 	        << new QAction(QIcon(":/ui/application-exit.png"), "exit-app", this);
 	foreach ( QAction *action, actions )
 		m_actions.insert(action->text(), action);
+
+	connect(m_actions.value("new-graph"), SIGNAL(triggered()),
+	        this, SLOT(onNewGraphAction()));
+	connect(m_actions.value("exit-app"), SIGNAL(triggered()), qApp, SLOT(quit()));
 }
 
 void MainWindow::createMenus()
@@ -77,4 +84,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
 	saveWindow();
 	QMainWindow::closeEvent(event);
+}
+
+void MainWindow::onNewGraphAction()
+{
+	Context *context = Context::instance();
+	if ( !context->newGraph() ) {
+		context->showLastError();
+	}
 }

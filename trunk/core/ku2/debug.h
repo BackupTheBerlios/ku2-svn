@@ -22,38 +22,38 @@
 #include "ku2/host.h"
 KU_BEGIN_DECLS
 
-#ifdef DEBUG
+#ifdef KU_DEBUG
 
 #include <stdlib.h>
 
-void ku_printf_debug( const char *file, const char *func, int line, char *fmt, ... ) __THROW;
+void ku_printf_debug( const char *file, const char *func, int line, const char *fmt, ... ) __THROW;
 void ku_pavoid_debug( const char *file, const char *func, int line ) __THROW;
 void ku_func_debug( int status ) __THROW;
-void ku_pstart_debug( const char *func, char *fmt, ... ) __THROW;
-void ku_pstop_debug( const char *func, char *fmt, ... ) __THROW;
+void ku_pstart_debug( const char *func, const char *fmt, ... ) __THROW;
+void ku_pstop_debug( const char *func, const char *fmt, ... ) __THROW;
 
 #define pdebug( m, ... ) \
 ku_printf_debug(__FILE__, __FUNCTION__, __LINE__, m, ##__VA_ARGS__)
 
 #define ku_avoid( __expr ) \
-if ( __expr ) \
+do { if ( __expr ) \
 { \
 	ku_pavoid_debug(__FILE__, __PRETTY_FUNCTION__, __LINE__); \
 	KU_ERRQ(KE_ASSERT, "Expression '" #__expr "` was not avoided"); \
-}
+}} while ( 0 )
 
 #define ku_avoid_adv( __expr, __retval ) \
-if ( __expr ) \
+do { if ( __expr ) \
 { \
 	ku_pavoid_debug(__FILE__, __PRETTY_FUNCTION__, __LINE__); \
 	KU_ERRQ_V(KE_ASSERT, "Expression '" #__expr "` was not avoided", __retval); \
-}
+}} while ( 0 )
 
 #define ku_avoid_thr( __expr ) \
-if ( __expr ) {\
+do { if ( __expr ) {\
 	ku_pavoid_debug(__FILE__, __PRETTY_FUNCTION__, __LINE__); \
-	throw std::exception; \
-}
+	throw std::exception(); \
+}} while ( 0 )
 
 #define func_debug_on ku_func_debug(1)
 #define func_debug_off ku_func_debug(0)
@@ -65,7 +65,7 @@ if ( __expr ) {\
 #define preturn return ku_pstop_debug(__FUNCTION__, NULL),
 #define preturnp( m, ... ) return ku_pstop_debug(__FUNCTION__, m, ##__VA_ARGS__),
 
-#else	//	DEBUG
+#else // KU_DEBUG
 
 //! Print the debug message.
 /*!

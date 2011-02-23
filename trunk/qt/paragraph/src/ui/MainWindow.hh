@@ -21,7 +21,7 @@ KU_ENSURE_CPLUSPLUS
 
 class QAction;
 
-KU_BEGIN_DECLS
+namespace ku2 {
 namespace paragraph {
 namespace ui {
 
@@ -29,6 +29,8 @@ class WorkingArea;
 
 class MainWindow: public QMainWindow
 {
+	Q_OBJECT
+
 public:
 	MainWindow();
 
@@ -47,6 +49,9 @@ protected:
 	 */
 	void closeEvent(QCloseEvent *event);
 
+private slots:
+	void onNewGraphAction();
+
 private:
 	//! List of actions.
 	QMap<QString,QAction*> m_actions;
@@ -55,8 +60,7 @@ private:
 	WorkingArea *m_workingArea;
 };
 
-}}
-KU_END_DECLS
+}}}
 //Q_DECLARE_OPERATORS_FOR_FLAGS(ku2::graphviz::Graph::Types)
 
 #endif // KU_QT__PARAGRAPH_UI_MAIN_WINDOW_HH__

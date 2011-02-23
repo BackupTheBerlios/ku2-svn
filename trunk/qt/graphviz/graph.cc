@@ -233,7 +233,7 @@ qreal Graph::toRealHelper( QString value ) const
 {
 	bool ok;
 	qreal ret = value.replace(',', '.').toDouble(&ok);
-	ku_avoid_thr(!ok)
+	ku_avoid_thr(!ok);
 	return ret;
 }
 

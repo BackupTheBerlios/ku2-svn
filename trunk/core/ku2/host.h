@@ -36,7 +36,9 @@ extern "C" {
 
 #ifdef __cplusplus
 #	define KU_BEGIN_DECLS __BEGIN_DECLS namespace ku2 {
+#	define KU_BEGIN_CPPDECLS namespace ku2 {
 #	define KU_END_DECLS } __END_DECLS
+#	define KU_END_CPPDECLS }
 #else
 //! Declare the begin of the Ku2 header file.
 #	define KU_BEGIN_DECLS __BEGIN_DECLS
@@ -104,7 +106,7 @@ extern "C" {
 #ifdef __cplusplus
 #	define KU_ENSURE_CPLUSPLUS
 #else
-#	define KU_ENSURE_CPLUSPLUS static void must_be_compiled_by_cplusplu[-1];
+#	define KU_ENSURE_CPLUSPLUS static void must_be_compiled_by_cplusplus[-1];
 #endif
 
 #ifdef __cplusplus

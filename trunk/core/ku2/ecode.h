@@ -22,9 +22,9 @@
 #ifndef KU__ECODE_H__
 #define KU__ECODE_H__
 #include "host.h"
-KU_BEGIN_DECLS
-
 #include "ku2/debug.h"
+
+KU_BEGIN_DECLS
 
 //! Valid error codes.
 /*!
@@ -50,6 +50,7 @@ enum
 	KE_UNDERFLOW,          //!< Underflow detected. \since 2.0.0
 	KE_OVERFLOW,           //!< Overflow detected. \since 2.0.0
 	KE_RANGE,              //!< Out of range. \since 2.0.0
+	_KE_LAST_ENUM          //!< Last enumeration value. \since 2.0.0
 }	kucode_t;
 
 //! Set an error.
@@ -72,22 +73,32 @@ kucode_t ku_serror( kucode_t ecode, const char *etext ) __THROW;
 */
 void ku_rerror( void ) __THROW;
 
+//! Get the textual representation of the error code.
+/*!
+ * Gets the textual representation of the last set error code.
+ * \return Enumeration value's textual representation.
+ * \note Returned text should not be altered or freed.
+ * \sa ku_serror(), ku_rerror(), ku_gerrtx() and ku_gerrcode().
+ * \since 2.0.0
+ */
+const char *ku_gerrname( void ) __THROW;
+
 //! Get a last error text.
 /*!
-	Gets text of the last error.
-	\return Error text.
-	\note Returned text should neither be freed nor realloced.
-	\sa ku_serror(), ku_rerror() and ku_gerrcode().
-	\since 2.0.0
+ * Gets text of the last error.
+ * \return Error text.
+ * \note Returned text should neither be freed nor realloced.
+ * \sa ku_serror(), ku_rerror() and ku_gerrcode().
+ * \since 2.0.0
  */
 const char *ku_gerrtx( void ) __THROW;
 
 //! Get a last error code.
 /*!
-	Gets error code of the last error.
-	\return Error code (\ref kucode_t).
-	\sa ku_serror(), ku_rerror() and ku_gerrtx().
-	\since 2.0.0
+ * Gets error code of the last error.
+ * \return Error code (\ref kucode_t).
+ * \sa ku_serror(), ku_rerror() and ku_gerrtx().
+ * \since 2.0.0
  */
 kucode_t ku_gerrcode( void ) __THROW;
 
@@ -127,12 +138,12 @@ preturnp("passed error") ku_gerrcode()
 
 //! Set the error code and error text, and return the value from the function.
 #define KU_ERRQ_V( __ecode, __etext, __value ) \
-{ \
+do { \
 	kucode_t ecode = (__ecode); \
 	const char *etext = (__etext); \
 	ku_serror(ecode, etext); \
-	preturnp("error: %d, '%s`", ecode, etext) (__value); \
-}
+	preturnp("error: %s, '%s`", ku_gerrname(), etext) (__value); \
+} while ( 0 )
 
 //! Execute an expression, preserving the current error code.
 /*!

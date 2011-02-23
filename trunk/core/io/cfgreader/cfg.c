@@ -326,7 +326,7 @@ static inline int cfg_parse_parameters( int has_rule, const char *c,
 		// то - ошибка
 		if ( *c == 0 ) {
 			if ( has_rule && (i < st->q->comp) )
-				KU_ERRQNT_V(KE_SYNTAX, 0)
+				KU_ERRQNT_V(KE_SYNTAX, 0);
 			else
 				break;
 		}

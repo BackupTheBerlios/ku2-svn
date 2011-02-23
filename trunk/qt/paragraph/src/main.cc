@@ -13,15 +13,35 @@
 // Internal includes:
 #include "ui/MainWindow.hh"
 
+// Ku2 includes:
+#include <ku2/memory.h>
+#include <ku2/debug.h>
+
 // External includes:
 #include <QApplication>
 #include <QTranslator>
 #include <QLocale>
+#include <exception>
+#include <new>
 
 using namespace ku2::paragraph;
 
+void *operator new( size_t size )
+{
+	void *ptr = ku2::dmalloc(size);
+	if ( ptr == NULL )
+		throw std::bad_alloc();
+	return ptr;
+}
+
+void operator delete( void *ptr )
+{
+	ku2::dfree(ptr);
+}
+
 int main( int argc, char *argv[] )
 {
+	ku2::func_debug_on;
 	QApplication app(argc, argv);
 	QTranslator translator;
 	translator.load(":/translations/paragraph_" + QLocale::system().name());

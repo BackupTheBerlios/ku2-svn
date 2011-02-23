@@ -26,7 +26,7 @@ KU_BEGIN_DECLS
 
 #include <stdlib.h>
 
-#ifdef DEBUG
+#ifdef KU_DEBUG
 // Debug malloc:
 void *ku_malloc_debug( size_t size );
 #define dmalloc( size ) \

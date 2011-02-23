@@ -56,7 +56,7 @@ env.AddIncludes(Split("""
 ###
 #	Building and Installing
 ###
-ku2lib = env.Ku2Library("ku2")
+ku2lib = env.Ku2SharedLibrary("ku2")
 Default(ku2lib)
 
 ku2.RegisterComponent("ku2core", ku2lib, stealth = True)

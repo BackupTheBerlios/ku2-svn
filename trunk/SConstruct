@@ -89,7 +89,7 @@ class Ku2Environment(Environment):
 
 	def SetupBuildMode(self):
 		if self.build_mode == "debug":
-			self.Append(CCFLAGS = self.debug_ccflags, CPPDEFINES = ["KU2_DEBUG"])
+			self.Append(CCFLAGS = self.debug_ccflags, CPPDEFINES = ["KU_DEBUG"])
 		elif self.build_mode == "release":
 			self.Append(CCFLAGS = release_ccflags, LINKFLAGS = release_linkflags)
 		else:

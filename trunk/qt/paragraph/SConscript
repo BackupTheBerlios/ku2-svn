@@ -7,13 +7,16 @@ Import("QtProgram ku2 ku2qt")
 env = ku2qt.QtFork()
 env.EnableQt4Modules(["QtGui"])
 env.ApplyLibrary("graphviz")
+env.ApplyLibrary("ku2core")
 env.Append(CPPPATH = ["src"])
 
 env.AddSources(Split("""
 	src/main.cc
+	src/Context.cc
 	src/misc/Settings.cc
 	src/ui/MainWindow.cc
 	src/ui/WorkingArea.cc
+	src/graph/graph_GraphModel.cc
 	"""))
 
 env.AddResources(Split("""
