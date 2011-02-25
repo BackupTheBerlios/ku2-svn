@@ -23,6 +23,10 @@
 #ifndef KU__ABTREE_H__
 #define KU__ABTREE_H__
 #include "ku2/host.h"
+
+#include "ku2/ecode.h"
+#include "ku2/types.h"
+
 KU_BEGIN_DECLS
 
 /*
@@ -41,9 +45,6 @@ KU_BEGIN_DECLS
 #	define abtree_goto_next		ku_abtree_goto_next
 #	define abtree_unused_index	ku_abtree_unused_index
 #endif
-
-#include "ku2/ecode.h"
-#include "ku2/types.h"
 
 //! Tree node.
 typedef

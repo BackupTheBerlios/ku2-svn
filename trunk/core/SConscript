@@ -17,8 +17,10 @@ env.AddSources(Split("""
 	ds/stack/stack.c
 	ds/arrseq/arrseq.c
 	ds/graph/graph.c
+	ds/graph/adjmatrix.c
 	ds/abtree/abtree.c
 	ds/list/dl_list.c
+	ds/matrix/int_matrix.c
 	
 	dp/resmanager/res.c
 	dp/var/var.c
@@ -39,11 +41,14 @@ env.AddIncludes(Split("""
 	ku2/directives.h
 	ku2/ecode.h
 	ku2/types.h
+	
 	ds/stack/stack.h
 	ds/arrseq/arrseq.h
 	ds/graph/graph.h
 	ds/abtree/abtree.h
 	ds/list/list.h
+	ds/matrix/matrix.h
+	
 	dp/resmanager/res.h
 	dp/var/vlist.h
 	dp/var/var.h

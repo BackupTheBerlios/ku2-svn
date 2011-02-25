@@ -1,15 +1,14 @@
 /*
-		graph.h
-		Mon Apr 16 14:32:11 2007
-
-	This file is the part of Kane Utilities 2.
-	See licencing agreement in a root direcory for more details.
-	http://developer.berlios.de/projects/ku2/
-
-	Copyright, 2007
-		J. Anton (Jeļkins Antons) aka Kane
-		kane@mail.berlios.de
-*/
+ *	core:ds:graph:graph.c
+ *
+ * This file is the part of Kane Utilities 2.
+ * See licensing agreement in a root directory for more details.
+ * http://developer.berlios.de/projects/ku2/
+ *
+ * Copyright, 2007+
+ *	J. Anton (Jeļkins Antons) aka Kane
+ *	kane@mail.berlios.de
+ */
 
 /*!
 	\file
@@ -22,10 +21,11 @@
 #ifndef KU__GRAPH_H__
 #define KU__GRAPH_H__
 #include "ku2/host.h"
-KU_BEGIN_DECLS
 
 #include "ku2/types.h"
 #include "ds/abtree/abtree.h"
+
+KU_BEGIN_DECLS
 
 //! Identifier of the graph node.
 typedef

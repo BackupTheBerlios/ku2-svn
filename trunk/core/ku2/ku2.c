@@ -125,7 +125,6 @@ static ku_memorydesc_t *ku_find_alloced_ptr( void *ptr, ku_memorydesc_t **prev )
 		desc = desc->next;
 	} while ( desc && (desc->ptr != ptr) );
 
-	printf("head: %p prev: %p desc: %p\n", ku_debugdesc.memory_head, prev_desc, desc);
 	*prev = prev_desc;
 	return desc;
 }

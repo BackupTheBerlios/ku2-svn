@@ -16,6 +16,7 @@ env.AddSources(Split("""
 	src/misc/Settings.cc
 	src/ui/MainWindow.cc
 	src/ui/WorkingArea.cc
+	src/graph/graph_Graph.cc
 	src/graph/graph_GraphModel.cc
 	"""))
 

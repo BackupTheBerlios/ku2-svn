@@ -120,11 +120,11 @@ preturnp("passed error") ku_gerrcode()
 
 //! Set the error code and error text, and return the error code from the function.
 #define KU_ERRQ( __ecode, __etext ) \
-{ \
+do { \
 	kucode_t ecode = (__ecode); \
 	const char *etext = (__etext); \
 	preturnp("error: %d, '%s`", ecode, etext) ku_serror(ecode, etext); \
-}
+} while ( 0 )
 
 //! Set an error code and return a specified value.
 /*!
@@ -155,11 +155,11 @@ do { \
  * \since 2.0.0
  */
 #define KU_IGNORE_ERRORS( __expr ) \
-{ \
+do { \
 	ku_push_error(); \
 	__expr; \
 	ku_pop_error(); \
-}
+} while ( 0 )
 
 KU_END_DECLS
 #endif
