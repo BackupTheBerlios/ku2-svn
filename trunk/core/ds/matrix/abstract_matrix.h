@@ -1,5 +1,5 @@
 /*
- *	core:ds:matrix:matrix.h
+ *	core:ds:matrix:abstract_matrix.h
  *
  * This file is the part of Kane Utilities 2.
  * See licensing agreement in a root directory for more details.
@@ -10,11 +10,8 @@
  *	kane@mail.berlios.de
  */
 
-#ifndef KU__DS_MATRIX_H__
-#define KU__DS_MATRIX_H__
-#include "ku2/host.h"
-
 // Internal includes:
+#include "ku2/host.h"
 #include "ku2/types.h"
 
 KU_BEGIN_DECLS
@@ -23,10 +20,10 @@ KU_BEGIN_DECLS
  * This define must exist and contain a real type name. This type will be
  * used for matrix data type.
  */
-//#ifndef KU_MATRIX_TYPE
-//#	error No matrix type defined!
-//#endif
-#define KU_MATRIX_TYPE int
+#ifndef KU_MATRIX_TYPE
+#	error No matrix type defined!
+#endif
+
 /*
  * Function name creator in a form:
  *    ku_TYPE_matrix_FUNCTION
@@ -64,4 +61,3 @@ static inline KU_MATRIX_TYPE *KU_MATRIX_F(data)( KU_MATRIX_T *matrix, uint row, 
 }
 
 KU_END_DECLS
-#endif // KU__DS_MATRIX_H__

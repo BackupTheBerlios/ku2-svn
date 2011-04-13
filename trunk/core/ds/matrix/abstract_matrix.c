@@ -1,5 +1,5 @@
 /*
- *	core:ds:matrix:matrix.c
+ *	core:ds:matrix:abstract_matrix.c
  *
  * This file is the part of Kane Utilities 2.
  * See licensing agreement in a root directory for more details.
@@ -11,7 +11,7 @@
  */
 
 // Self-include:
-#include "matrix.h"
+#include "abstract_matrix.h"
 
 // Internal includes:
 #include "ku2/debug.h"
