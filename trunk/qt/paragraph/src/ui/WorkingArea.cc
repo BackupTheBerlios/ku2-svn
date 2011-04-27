@@ -13,6 +13,13 @@
 // Self-include:
 #include "WorkingArea.hh"
 
+// Internal includes:
+#include "Context.hh"
+#include "graph/graph_GraphModel.hh"
+
+// External includes:
+#include <QTableView>
+
 using namespace ku2::paragraph::ui;
 
 WorkingArea::WorkingArea():
@@ -29,4 +36,33 @@ void WorkingArea::createDummyTab()
 	//% "(no tabs are currently open)"
 	//: This is the name of the dummy tab, when no other tabs are open.
 	addTab(m_dummyWidget, qtTrId("qtn_no_tabs_open"));
+}
+
+void WorkingArea::closeDummyTab()
+{
+	if ( m_dummyWidget ) {
+		clear();
+		delete m_dummyWidget;
+	}
+}
+
+void WorkingArea::createGraphViewTab()
+{
+	m_graphView = new QTableView(this);
+	m_graphView->setModel(Context::instance()->graphModel());
+	m_graphView->resizeColumnsToContents();
+
+	//% "Adjacency matrix"
+	//: This is a name of the adjacency matrix tab.
+	addTab(m_graphView, qtTrId("qtn_adj_matrix"));
+}
+
+void WorkingArea::onGraphOpened( bool opened )
+{
+	if ( opened ) {
+		closeDummyTab();
+		createGraphViewTab();
+	} else {
+		createDummyTab();
+	}
 }

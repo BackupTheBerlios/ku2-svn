@@ -10,13 +10,13 @@
  *	kane@mail.berlios.de
  */
 
-#ifndef KU_QT__PARAGRAPH_GRAPH_GRAPH_MODEL_HH__
-#define KU_QT__PARAGRAPH_GRAPH_GRAPH_MODEL_HH__
+#ifndef KU_QT__PARAGRAPH_GRAPH_GRAPH_HH__
+#define KU_QT__PARAGRAPH_GRAPH_GRAPH_HH__
 #include <ku2/host.h>
 KU_ENSURE_CPLUSPLUS
 
 // Ku2 includes:
-#include <ds/graph/graph.h>
+#include <ds/graph/adjmatrix.h>
 
 namespace ku2 {
 namespace paragraph {
@@ -24,7 +24,22 @@ namespace graph {
 
 class Graph
 {
+public:
+	Graph( uint vertices = 10 );
+	~Graph();
 
+public:
+	inline uint vertices() const {
+		return m_graph->matrix->rows;
+	}
+
+	inline int at( uint from, uint to ) const {
+		return ku_graph_am_get_link(m_graph, from, to);
+	}
+
+private:
+	ku_graph_am_t *m_graph;
 };
 
 }}}
+#endif // KU_QT__PARAGRAPH_GRAPH_GRAPH_HH__

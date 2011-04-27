@@ -17,11 +17,17 @@
 #include "misc/Settings.hh"
 #include "ui/WorkingArea.hh"
 #include "Context.hh"
+#include "ui/ui_Actions.hh"
+
+// Ku2 includes:
+#include <ku2/debug.h>
 
 // External includes:
 #include <QAction>
 #include <QToolBar>
 #include <QApplication>
+#include <QMenu>
+#include <QMenuBar>
 
 using namespace ku2::paragraph;
 using namespace ku2::paragraph::ui;
@@ -34,36 +40,40 @@ MainWindow::MainWindow():
 	createMenus();
 	createToolBars();
 
+	Context *context = Context::instance();
+	connect(context, SIGNAL(notifyOpened(bool)),
+	        m_workingArea, SLOT(onGraphOpened(bool)));
+
 	setCentralWidget(m_workingArea);
 }
 
 void MainWindow::createActions()
 {
-	QList<QAction*> actions;
-	actions << new QAction(QIcon(":/ui/graph-new.png"), "new-graph", this)
-	        << new QAction(QIcon(":/ui/document-save.png"), "save-document", this)
-	        << new QAction(QIcon(":/ui/document-open.png"), "open-document", this)
-	        << new QAction(QIcon(":/ui/application-exit.png"), "exit-app", this);
-	foreach ( QAction *action, actions )
-		m_actions.insert(action->text(), action);
-
-	connect(m_actions.value("new-graph"), SIGNAL(triggered()),
+	connect(action(ACT_NEW_GRAPH), SIGNAL(triggered()),
 	        this, SLOT(onNewGraphAction()));
-	connect(m_actions.value("exit-app"), SIGNAL(triggered()), qApp, SLOT(quit()));
+	connect(action(ACT_VISUALISE_GRAPH), SIGNAL(triggered()),
+	        this, SLOT(onVisualiseGraphAction()));
+	connect(action(ACT_EXIT_APP), SIGNAL(triggered()), qApp, SLOT(quit()));
 }
 
 void MainWindow::createMenus()
 {
+	QMenuBar *bar = menuBar();
+
+	//% "Graph"
+	//: Graph related top-level menu item.
+	QMenu *graphMenu = bar->addMenu(qtTrId("qtn_graph_menu"));
+	graphMenu->addAction(action(ACT_VISUALISE_GRAPH));
 }
 
 void MainWindow::createToolBars()
 {
 	QToolBar *mainToolBar = addToolBar("Main");
-	mainToolBar->addAction(m_actions.value("new-graph"));
-	mainToolBar->addAction(m_actions.value("open-document"));
-	mainToolBar->addAction(m_actions.value("save-document"));
+	mainToolBar->addAction(action(ACT_NEW_GRAPH));
+	mainToolBar->addAction(action(ACT_OPEN_DOCUMENT));
+	mainToolBar->addAction(action(ACT_SAVE_DOCUMENT));
 	mainToolBar->addSeparator();
-	mainToolBar->addAction(m_actions.value("exit-app"));
+	mainToolBar->addAction(action(ACT_EXIT_APP));
 }
 
 void MainWindow::saveWindow()
@@ -88,8 +98,18 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::onNewGraphAction()
 {
-	Context *context = Context::instance();
-	if ( !context->newGraph() ) {
+	pstart();
+	Context *const context = Context::instance();
+	if ( !context->newGraph() )
 		context->showLastError();
-	}
+	pstop();
+}
+
+void MainWindow::onVisualiseGraphAction()
+{
+	pstart();
+	Context *const context = Context::instance();
+	if ( !context->visualiseGraph() )
+		context->showLastError();
+	pstop();
 }

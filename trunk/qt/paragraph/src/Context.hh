@@ -42,11 +42,15 @@ public:
 public:
 	bool isGraphOpen() const;
 	bool newGraph();
+	bool visualiseGraph();
 
 public:
 	void setChanged( bool changed = true );
 
 signals:
+	//! Notification that a graph is open.
+	void notifyOpened( bool newOpened = true );
+
 	//! Notification that "changed" status has changed.
 	void notifyChanged( bool newChanged );
 

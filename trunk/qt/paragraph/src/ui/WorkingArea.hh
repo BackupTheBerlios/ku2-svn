@@ -18,23 +18,33 @@ KU_ENSURE_CPLUSPLUS
 // External includes:
 #include <QTabWidget>
 
-KU_BEGIN_DECLS
+class QTableView;
+
+namespace ku2 {
 namespace paragraph {
 namespace ui {
 
 class WorkingArea: public QTabWidget
 {
+	Q_OBJECT
+
 public:
 	WorkingArea();
 
 private:
 	void createDummyTab();
+	void closeDummyTab();
+
+	void createGraphViewTab();
+
+private slots:
+	void onGraphOpened( bool opened );
 
 private:
 	QWidget *m_dummyWidget;
+	QTableView *m_graphView;
 };
 
-}}
-KU_END_DECLS
+}}}
 
 #endif // KU_QT__PARAGRAPH_UI_WORKING_AREA_HH__

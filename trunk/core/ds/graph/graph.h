@@ -79,6 +79,11 @@ struct STRUCT_GRAPH
 //! \name Graph flags.
 //! \{
 /*!
+ * Assume default graph behaviour.
+ */
+#define KUF_GRAPH_DEFAULT      0
+
+/*!
 	Graph should be directed. \n
 	Used in ku_graph_create().
 */

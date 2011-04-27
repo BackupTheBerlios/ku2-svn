@@ -21,16 +21,20 @@ KU_ENSURE_CPLUSPLUS
 KU_BEGIN_DECLS
 namespace paragraph {
 namespace graph {
+class Graph;
 
 class GraphModel: public QAbstractTableModel
 {
 public:
-	GraphModel( QObject *parent = NULL );
+	GraphModel( Graph *graph, QObject *parent = NULL );
 
 public:
 	int rowCount( const QModelIndex &parent = QModelIndex() ) const;
 	int columnCount( const QModelIndex &parent = QModelIndex() ) const;
 	QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const;
+
+private:
+	Graph *m_graph;
 };
 
 }}

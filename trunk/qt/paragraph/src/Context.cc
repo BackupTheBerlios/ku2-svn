@@ -13,6 +13,10 @@
 // Self-include:
 #include "Context.hh"
 
+// Internal includes:
+#include "graph/graph_Graph.hh"
+#include "graph/graph_GraphModel.hh"
+
 // Ku2 includes:
 #include <ku2/ecode.h>
 
@@ -47,6 +51,10 @@ Context::Context():
 
 Context::~Context()
 {
+	if ( m_graph )
+		delete m_graph;
+	if ( m_model )
+		delete m_model;
 }
 
 Context *Context::instance()
@@ -78,11 +86,25 @@ bool Context::newGraph()
 	pstart();
 
 	// Do not allow to create the second graph:
-	if ( m_graph == NULL ) {
+	if ( m_graph != NULL )
 		KU_ERRQNT_V(KE_DOUBLE, false);
-	}
 
-	KU_ERRQNT_V(KE_NOIMPLEM, false);
+	m_graph = new Graph();
+	m_model = new GraphModel(m_graph);
+
+	emit notifyOpened();
+	setChanged(true);
+	preturn true;
+}
+
+bool Context::visualiseGraph()
+{
+	pstart();
+
+	if ( m_graph == NULL )
+		KU_ERRQNT_V(KE_EMPTY, false);
+
+	preturn true;
 }
 
 void Context::setChanged( bool changed )

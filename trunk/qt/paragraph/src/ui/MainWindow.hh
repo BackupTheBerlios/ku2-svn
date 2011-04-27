@@ -51,11 +51,9 @@ protected:
 
 private slots:
 	void onNewGraphAction();
+	void onVisualiseGraphAction();
 
 private:
-	//! List of actions.
-	QMap<QString,QAction*> m_actions;
-
 	//! Working area (central widget).
 	WorkingArea *m_workingArea;
 };

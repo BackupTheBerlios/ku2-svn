@@ -20,11 +20,14 @@
 #ifndef KU__DEBUG_H__
 #define KU__DEBUG_H__
 #include "ku2/host.h"
+
+#ifdef KU_DEBUG
+#	include <stdlib.h>
+#endif
+
 KU_BEGIN_DECLS
 
 #ifdef KU_DEBUG
-
-#include <stdlib.h>
 
 void ku_printf_debug( const char *file, const char *func, int line, const char *fmt, ... ) __THROW;
 void ku_pavoid_debug( const char *file, const char *func, int line ) __THROW;
