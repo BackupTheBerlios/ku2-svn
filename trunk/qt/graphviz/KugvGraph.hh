@@ -16,9 +16,9 @@
 KU_ENSURE_CPLUSPLUS
 
 // Internal includes:
-#include "context.hh"
-#include "node.hh"
-#include "edge.hh"
+#include "KugvContext.hh"
+#include "KugvVertex.hh"
+#include "KugvEdge.hh"
 
 // External includes:
 #include <QtGlobal>
@@ -71,16 +71,16 @@ public:
 
 public:
 	//! Add a graph node.
-	void addNode( const QString &name );
+	void addVertex( const QString &name );
 
 	//! Add many graph nodes.
-	void addNodes( const QStringList &names );
+	void addVertices( const QStringList &names );
 
 	//! Remove a graph node.
-	void removeNode( const QString &name );
+	void removeVertex( const QString &name );
 
 	//! Set the root node.
-	void setRootNode( const QString &name );
+	void setRootVertex( const QString &name );
 
 	//! Add an edge.
 	void addEdge( const QString &source, const QString &dest );
@@ -104,7 +104,7 @@ private:
 	void applyDotLayout();
 
 public:
-	QList<Node> nodes() const;
+	QList<Vertex> nodes() const;
 	QList<Edge> edges() const;
 
 private:

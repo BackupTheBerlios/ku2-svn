@@ -103,6 +103,7 @@ bool Context::visualiseGraph()
 
 	if ( m_graph == NULL )
 		KU_ERRQNT_V(KE_EMPTY, false);
+	emit doVisualise();
 
 	preturn true;
 }

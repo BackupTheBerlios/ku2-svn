@@ -13,6 +13,10 @@
 // Self-include:
 #include "graph_Graph.hh"
 
+// External includes:
+#include <KugvGraph.hh>
+
+using namespace ku2;
 using namespace ku2::paragraph::graph;
 
 Graph::Graph( uint vertices ):
@@ -29,4 +33,17 @@ Graph::~Graph()
 		ku_graph_am_free(m_graph);
 	}
 	pstop();
+}
+
+bool Graph::visualise( QGraphicsScene *scene ) const
+{
+	pstart();
+
+	graphviz::Graph *graph = new graphviz::Graph("unnamed graph");
+	for ( int i = 0; i < cntVertices(); i++ ) {
+		graph->addVertex(QString::number(i));
+	}
+
+
+	preturn true;
 }

@@ -29,13 +29,16 @@ public:
 	~Graph();
 
 public:
-	inline uint vertices() const {
+	inline uint cntVertices() const {
 		return m_graph->matrix->rows;
 	}
 
 	inline int at( uint from, uint to ) const {
 		return ku_graph_am_get_link(m_graph, from, to);
 	}
+
+	//! Visualise the graph on the provided scene.
+	bool visualise( QGraphicsScene *scene ) const;
 
 private:
 	ku_graph_am_t *m_graph;

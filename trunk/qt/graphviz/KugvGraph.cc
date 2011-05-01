@@ -1,8 +1,20 @@
+/*
+ *	qt:graphviz:graph.cc
+ *
+ * This file is the part of Kane Utilities 2.
+ * See licensing agreement in a root directory for more details.
+ * http://developer.berlios.de/projects/ku2/
+ *
+ * Copyright, 2011
+ *	J. Anton (Jeļkins Antons) aka Kane
+ *	kane@mail.berlios.de
+ */
+
 // Self-include:
-#include "graph.hh"
+#include "KugvGraph.hh"
 
 // Ku2 includes:
-#include "ku2/debug.h"
+#include <ku2/debug.h>
 
 using namespace ku2::graphviz;
 
@@ -48,7 +60,7 @@ void Graph::initialise()
 
 #define _qPrintable(__t) const_cast<char*>(qPrintable(__t))
 
-void Graph::addNode( const QString &name )
+void Graph::addVertex( const QString &name )
 {
 //	if ( m_nodes.contains(name) )
 //		removeNode(name);
@@ -57,14 +69,14 @@ void Graph::addNode( const QString &name )
 	m_nodes.insert(name, node);
 }
 
-void Graph::addNodes( const QStringList &names )
+void Graph::addVertices( const QStringList &names )
 {
 	foreach ( const QString &name, names ) {
-		addNode(name);
+		addVertex(name);
 	}
 }
 
-void Graph::setRootNode( const QString &name )
+void Graph::setRootVertex( const QString &name )
 {
 	setMeta("root", name);
 }
@@ -114,10 +126,10 @@ QRectF Graph::boundingRect() const
  * Getting nodes and edges.                                                   *
  ******************************************************************************/
 
-QList<Node> Graph::nodes() const
+QList<Vertex> Graph::nodes() const
 {
 	pstart();
-	QList<Node> list;
+	QList<Vertex> list;
 	const qreal dpi = metaDpi();
 	const qreal adjustedDpi = adjustDpi(dpi);
 
@@ -128,8 +140,8 @@ QList<Node> Graph::nodes() const
 		printf("NODE %s [%f,%f] [%f,%f]\n", agNode->name, x, y,
 		       agNode->u.coord.x, agNode->u.coord.y);
 
-		Node node(QString(agNode->name), QPoint(x, y),
-		          agNode->u.width * dpi, agNode->u.height * dpi);
+		Vertex node(QString(agNode->name), QPoint(x, y),
+		            agNode->u.width * dpi, agNode->u.height * dpi);
 		list.append(node);
 	}
 

@@ -1,5 +1,5 @@
 /*
- *	qt:graphviz:node.hh
+ *	qt:graphviz:vertex.hh
  *
  * This file is the part of Kane Utilities 2.
  * See licensing agreement in a root directory for more details.
@@ -24,16 +24,16 @@ KU_ENSURE_CPLUSPLUS
 
 KU_BEGIN_DECLS
 namespace graphviz {
-class Q_DECL_EXPORT Node;
+class Q_DECL_EXPORT Vertex;
 
-class NodePrivate: public QSharedData
+class VertexPrivate: public QSharedData
 {
-	friend class ku2::graphviz::Node;
+	friend class ku2::graphviz::Vertex;
 
 private:
-	NodePrivate( const QString &name,
-	             const QPoint &centre,
-	             qreal width, qreal height );
+	VertexPrivate( const QString &name,
+	               const QPoint &centre,
+	               qreal width, qreal height );
 
 public:
 	inline QString name() const { return m_name; }
@@ -48,11 +48,11 @@ private:
 	qreal m_height;
 };
 
-class Node
+class Vertex
 {
 public:
-	Node( const QString &name, const QPoint &centre,
-	      qreal width, qreal height );
+	Vertex( const QString &name, const QPoint &centre,
+	       qreal width, qreal height );
 
 public:
 	inline QString name() const { return d_ptr->name(); }
@@ -61,7 +61,7 @@ public:
 	inline qreal height() const { return d_ptr->height(); }
 
 private:
-	QSharedDataPointer<NodePrivate> d_ptr;
+	QSharedDataPointer<VertexPrivate> d_ptr;
 };
 
 }

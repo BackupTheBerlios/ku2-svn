@@ -4,15 +4,20 @@
 <context>
     <name></name>
     <message id="qtn_no_tabs_open">
-        <location filename="../src/ui/WorkingArea.cc" line="38"/>
+        <location filename="../src/ui/WorkingArea.cc" line="44"/>
         <source>(no tabs are currently open)</source>
         <extracomment>This is the name of the dummy tab, when no other tabs are open.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message id="qtn_adj_matrix">
-        <location filename="../src/ui/WorkingArea.cc" line="57"/>
+        <location filename="../src/ui/WorkingArea.cc" line="63"/>
         <source>Adjacency matrix</source>
         <extracomment>This is a name of the adjacency matrix tab.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message id="qtn_graph_visual">
+        <location filename="../src/ui/WorkingArea.cc" line="77"/>
+        <source>Visualisation (%1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message id="qtn_error_message_title">
@@ -30,7 +35,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message id="qtn_graph_menu">
-        <location filename="../src/ui/MainWindow.cc" line="65"/>
+        <location filename="../src/ui/MainWindow.cc" line="67"/>
         <source>Graph</source>
         <extracomment>Graph related top-level menu item.</extracomment>
         <translation type="unfinished"></translation>

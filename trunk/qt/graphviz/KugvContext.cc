@@ -11,10 +11,10 @@
  */
 
 // Self-include:
-#include "context.hh"
+#include "KugvContext.hh"
 
 // Ku2 includes:
-#include "ku2/debug.h"
+#include <ku2/debug.h>
 
 // External includes:
 #include <QtCore>

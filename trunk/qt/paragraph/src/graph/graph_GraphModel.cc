@@ -30,12 +30,12 @@ GraphModel::GraphModel( Graph *graph, QObject *parent ):
 
 int GraphModel::rowCount( KU_UNUSED(const QModelIndex &parent) ) const
 {
-	return m_graph->vertices();
+	return m_graph->cntVertices();
 }
 
 int GraphModel::columnCount( KU_UNUSED(const QModelIndex &parent) ) const
 {
-	return m_graph->vertices();
+	return m_graph->cntVertices();
 }
 
 QVariant GraphModel::data( const QModelIndex &index, int role ) const

@@ -11,7 +11,7 @@
  */
 
 // Self-include:
-#include "edge.hh"
+#include "KugvEdge.hh"
 
 using namespace ku2::graphviz;
 

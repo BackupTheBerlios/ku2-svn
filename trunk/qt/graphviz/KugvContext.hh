@@ -15,11 +15,12 @@
 #ifndef KU_QT__GRAPHVIZ_CONTEXT_HH__
 #define KU_QT__GRAPHVIZ_CONTEXT_HH__
 #include <ku2/host.h>
-//KU_ENSURE_CPLUSPLUS
+KU_ENSURE_CPLUSPLUS
 
+// External includes:
 #include <gvc.h>
 
-KU_BEGIN_DECLS
+namespace ku2 {
 namespace graphviz {
 
 //! GraphViz context representation.
@@ -50,6 +51,5 @@ private:
 	GVC_t* m_gvc;
 };
 
-}
-KU_END_DECLS
+}}
 #endif // KU_QT__GRAPHVIZ_CONTEXT_HH__

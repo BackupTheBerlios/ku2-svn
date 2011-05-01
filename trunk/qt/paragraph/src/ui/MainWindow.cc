@@ -43,6 +43,8 @@ MainWindow::MainWindow():
 	Context *context = Context::instance();
 	connect(context, SIGNAL(notifyOpened(bool)),
 	        m_workingArea, SLOT(onGraphOpened(bool)));
+	connect(context, SIGNAL(doVisualise()),
+	        m_workingArea, SLOT(onVisualise()));
 
 	setCentralWidget(m_workingArea);
 }

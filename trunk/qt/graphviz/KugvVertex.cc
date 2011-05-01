@@ -1,5 +1,5 @@
 /*
- *	qt:graphviz:node.cc
+ *	qt:graphviz:vertex.cc
  *
  * This file is the part of Kane Utilities 2.
  * See licensing agreement in a root directory for more details.
@@ -11,18 +11,18 @@
  */
 
 // Self-include:
-#include "node.hh"
+#include "KugvVertex.hh"
 
 using namespace ku2::graphviz;
 
-NodePrivate::NodePrivate( const QString &name, const QPoint &centre,
+VertexPrivate::VertexPrivate( const QString &name, const QPoint &centre,
                           qreal width, qreal height ):
 		m_name(name), m_centre(centre), m_width(width), m_height(height)
 {
 }
 
-Node::Node( const QString &name, const QPoint &centre,
+Vertex::Vertex( const QString &name, const QPoint &centre,
             qreal width, qreal height ):
-		d_ptr(new NodePrivate(name, centre, width, height))
+		d_ptr(new VertexPrivate(name, centre, width, height))
 {
 }

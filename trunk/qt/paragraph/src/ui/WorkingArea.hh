@@ -36,9 +36,11 @@ private:
 	void closeDummyTab();
 
 	void createGraphViewTab();
+	void createGraphVisualTab();
 
 private slots:
 	void onGraphOpened( bool opened );
+	void onVisualise();
 
 private:
 	QWidget *m_dummyWidget;

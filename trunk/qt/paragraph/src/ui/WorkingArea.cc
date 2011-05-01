@@ -13,12 +13,18 @@
 // Self-include:
 #include "WorkingArea.hh"
 
+// Ku2 includes:
+#include <ku2/debug.h>
+
 // Internal includes:
 #include "Context.hh"
 #include "graph/graph_GraphModel.hh"
 
 // External includes:
 #include <QTableView>
+#include <KugvGraph.hh>
+#include <QGraphicsView>
+#include <QDateTime>
 
 using namespace ku2::paragraph::ui;
 
@@ -57,6 +63,22 @@ void WorkingArea::createGraphViewTab()
 	addTab(m_graphView, qtTrId("qtn_adj_matrix"));
 }
 
+void WorkingArea::createGraphVisualTab()
+{
+	pstart();
+
+	QGraphicsView *view = new QGraphicsView(this);
+	QGraphicsScene *scene = new QGraphicsScene(view);
+
+	scene->addLine(0, 0, 100, 250);
+	view->setScene(scene);
+
+	//% "Visualisation (%1)"
+	addTab(view, qtTrId("qtn_graph_visual")
+	             .arg(QDateTime::currentDateTime().toString()));
+	pstop();
+}
+
 void WorkingArea::onGraphOpened( bool opened )
 {
 	if ( opened ) {
@@ -65,4 +87,9 @@ void WorkingArea::onGraphOpened( bool opened )
 	} else {
 		createDummyTab();
 	}
+}
+
+void WorkingArea::onVisualise()
+{
+	createGraphVisualTab();
 }

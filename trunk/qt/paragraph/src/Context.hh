@@ -51,6 +51,9 @@ signals:
 	//! Notification that a graph is open.
 	void notifyOpened( bool newOpened = true );
 
+	//! Command do visualise a graph.
+	void doVisualise();
+
 	//! Notification that "changed" status has changed.
 	void notifyChanged( bool newChanged );
 

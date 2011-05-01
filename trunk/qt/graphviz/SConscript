@@ -12,10 +12,10 @@ env.ParseConfig("pkg-config libgvc --cflags --libs")
 env.ApplyLibrary("ku2core")
 
 env.AddSources(Split("""
-	context.cc
-	graph.cc
-	node.cc
-	edge.cc
+	KugvContext.cc
+	KugvGraph.cc
+	KugvVertex.cc
+	KugvEdge.cc
 	"""))
 
 ku2graphviz = env.Ku2SharedLibrary("ku2graphviz")
@@ -25,5 +25,5 @@ ku2.RegisterLibrary("libgvc-includes", config = ["pkg-config libgvc --cflags"])
 ku2.RegisterLibrary("graphviz",
                     libs = [str(ku2graphviz[0])],
                     libpath = [os.getcwd()],
-                    includes = [os.getcwd() + "/.."],
+                    includes = [os.getcwd()],
                     deps = ["ku2core-includes", "libgvc-includes"])
